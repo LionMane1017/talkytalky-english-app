@@ -1,260 +1,300 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, TrendingUp, Target, Award, Mic, Grid3x3, BookOpen } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line } from "recharts";
+import { 
+  TrendingUp, 
+  Mic, 
+  Grid3x3, 
+  Trophy, 
+  Calendar,
+  X,
+  Moon,
+  Sun
+} from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Dashboard() {
-  // Mock data - will be replaced with real data from backend
-  const ieltsReadyScore = 72;
-  
-  const criteriaScores = [
-    { criteria: "Pronunciation", score: 75, maxScore: 100 },
-    { criteria: "Fluency", score: 68, maxScore: 100 },
-    { criteria: "Vocabulary", score: 80, maxScore: 100 },
-    { criteria: "Grammar", score: 65, maxScore: 100 },
-  ];
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [useSimulatedData, setUseSimulatedData] = useState(true);
+  const { theme, toggleTheme } = useTheme();
 
-  const radarData = [
-    { subject: "Pronunciation", score: 75, fullMark: 100 },
-    { subject: "Fluency", score: 68, fullMark: 100 },
-    { subject: "Vocabulary", score: 80, fullMark: 100 },
-    { subject: "Grammar", score: 65, fullMark: 100 },
-  ];
-
-  const progressData = [
-    { week: "Week 1", score: 45 },
-    { week: "Week 2", score: 52 },
-    { week: "Week 3", score: 58 },
-    { week: "Week 4", score: 65 },
-    { week: "Week 5", score: 72 },
-  ];
-
-  const activityData = [
-    { activity: "Speaking", sessions: 24, icon: Mic },
-    { activity: "Matching", sessions: 18, icon: Grid3x3 },
-    { activity: "IELTS", sessions: 12, icon: BookOpen },
-  ];
-
-  const milestones = [
-    { title: "First Practice", completed: true, date: "Oct 15, 2024" },
-    { title: "10 Sessions Complete", completed: true, date: "Oct 22, 2024" },
-    { title: "50% Ready Score", completed: true, date: "Nov 1, 2024" },
-    { title: "25 Sessions Complete", completed: true, date: "Nov 8, 2024" },
-    { title: "70% Ready Score", completed: true, date: "Nov 14, 2024" },
-    { title: "50 Sessions Complete", completed: false, date: "In progress" },
-    { title: "IELTS Ready (85%)", completed: false, date: "Target: Dec 2024" },
-  ];
-
-  const getReadyScoreColor = (score: number) => {
-    if (score >= 85) return "text-green-600";
-    if (score >= 70) return "text-blue-600";
-    if (score >= 50) return "text-yellow-600";
-    return "text-red-600";
+  // Simulated stats
+  const simulatedStats = {
+    ieltsReadyScore: 82,
+    ieltsReadyBand: 7,
+    totalPracticeSessions: 45,
+    totalWords: 156,
+    averageScore: 78,
+    weeklyProgress: [65, 70, 72, 68, 75, 78, 80],
+    skillScores: {
+      pronunciation: 82,
+      fluency: 75,
+      vocabulary: 80,
+      grammar: 76
+    },
+    recentActivity: [
+      { date: "Today", activity: "Pronunciation Practice", score: 85, words: 12 },
+      { date: "Yesterday", activity: "Match Cards", score: 90, words: 20 },
+      { date: "2 days ago", activity: "IELTS Mock Test", score: 75, words: 15 }
+    ],
+    monthlyProgress: [
+      { month: "Jan", score: 20 },
+      { month: "Feb", score: 35 },
+      { month: "Mar", score: 45 },
+      { month: "Apr", score: 60 },
+      { month: "May", score: 78 }
+    ]
   };
 
-  const getReadyScoreLabel = (score: number) => {
-    if (score >= 85) return "IELTS Ready";
-    if (score >= 70) return "Almost Ready";
-    if (score >= 50) return "Good Progress";
-    return "Keep Practicing";
+  const handleClearData = () => {
+    setUseSimulatedData(false);
+    setShowDisclaimer(false);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container py-6 max-w-6xl">
-        <h1 className="text-3xl font-bold mb-6 text-foreground">Your Progress</h1>
-
-        {/* IELTS Ready Meter */}
-        <Card className="mb-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-6 w-6 text-primary" />
-                  IELTS Ready Meter
-                </CardTitle>
-                <CardDescription>Your overall readiness for IELTS Speaking test</CardDescription>
-              </div>
-              <Badge variant="secondary" className="text-lg px-4 py-2">
-                {getReadyScoreLabel(ieltsReadyScore)}
-              </Badge>
+    <div className="min-h-screen pb-20">
+      {/* Header with theme toggle */}
+      <div className="border-b bg-card">
+        <div className="container py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Track your English learning progress</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center mb-4">
-              <p className={`text-6xl font-bold ${getReadyScoreColor(ieltsReadyScore)}`}>
-                {ieltsReadyScore}%
-              </p>
-            </div>
-            <Progress value={ieltsReadyScore} className="h-4 mb-4" />
-            <p className="text-sm text-center text-muted-foreground">
-              {ieltsReadyScore >= 85 
-                ? "You're ready to take the IELTS Speaking test!" 
-                : ieltsReadyScore >= 70
-                ? "Keep practicing! You're almost ready."
-                : ieltsReadyScore >= 50
-                ? "Good progress! Continue practicing regularly."
-                : "Focus on all four criteria to improve your score."}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Criteria Breakdown */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Score by Criteria</CardTitle>
-              <CardDescription>Your performance across IELTS criteria</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {criteriaScores.map((item) => (
-                  <div key={item.criteria}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-foreground">{item.criteria}</span>
-                      <span className="text-sm font-bold text-primary">{item.score}%</span>
-                    </div>
-                    <Progress value={item.score} />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills Radar</CardTitle>
-              <CardDescription>Visual breakdown of your abilities</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <ChartContainer
-                config={{
-                  score: {
-                    label: "Score",
-                    color: "hsl(var(--primary))",
-                  },
-                }}
-                className="h-[250px] w-full"
-              >
-                <RadarChart data={radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
-                    fillOpacity={0.6}
-                  />
-                </RadarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
+      </div>
 
-        {/* Progress Over Time */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Progress Over Time
-            </CardTitle>
-            <CardDescription>Your IELTS Ready Score improvement</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                score: {
-                  label: "Ready Score",
-                  color: "hsl(var(--primary))",
-                },
-              }}
-              className="h-[200px] w-full"
-            >
-              <LineChart data={progressData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" />
-                <YAxis domain={[0, 100]} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ fill: "hsl(var(--primary))" }}
-                />
-              </LineChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Activity Summary */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Practice Activity</CardTitle>
-            <CardDescription>Your practice sessions by type</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                sessions: {
-                  label: "Sessions",
-                  color: "hsl(var(--primary))",
-                },
-              }}
-              className="h-[200px] w-full"
-            >
-              <BarChart data={activityData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="activity" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="sessions" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Milestones */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" />
-              Milestones & Achievements
-            </CardTitle>
-            <CardDescription>Track your learning journey</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {milestones.map((milestone, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-border"
+      <div className="container py-6 max-w-7xl">
+        {/* Disclaimer Banner */}
+        {showDisclaimer && useSimulatedData && (
+          <Alert className="mb-6 bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900">
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-sm">
+                ⚠️ These stats are simulated and do not reflect actual data.
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleClearData}
+                  className="text-xs"
                 >
-                  <div className="mt-1">
-                    {milestone.completed ? (
-                      <Award className="h-5 w-5 text-primary" />
-                    ) : (
-                      <div className="h-5 w-5 rounded-full border-2 border-muted-foreground" />
-                    )}
+                  Clear & Start Tracking
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setShowDisclaimer(false)}
+                  className="h-6 w-6"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {useSimulatedData ? (
+          <>
+            {/* Top Stats Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
+              {/* IELTS Ready Meter */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    IELTS Ready Meter
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-20 w-20">
+                      <svg className="h-20 w-20 -rotate-90">
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="32"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          fill="none"
+                          className="text-muted"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="32"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 32}`}
+                          strokeDashoffset={`${2 * Math.PI * 32 * (1 - simulatedStats.ieltsReadyScore / 100)}`}
+                          className="text-primary transition-all"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xl font-bold">{simulatedStats.ieltsReadyScore}%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">BAND {simulatedStats.ieltsReadyBand}</div>
+                      <div className="text-2xl font-bold">{simulatedStats.ieltsReadyScore}%</div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className={`font-medium ${milestone.completed ? "text-foreground" : "text-muted-foreground"}`}>
-                      {milestone.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{milestone.date}</p>
-                  </div>
-                  {milestone.completed && (
-                    <Badge variant="secondary">Completed</Badge>
-                  )}
-                </div>
-              ))}
+                </CardContent>
+              </Card>
+
+              {/* Practice Sessions */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Mic className="h-4 w-4" />
+                    Practice Sessions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{simulatedStats.totalPracticeSessions}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <TrendingUp className="h-3 w-3 inline mr-1" />
+                    +12% from last week
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Words Practiced */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Grid3x3 className="h-4 w-4" />
+                    Words Practiced
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{simulatedStats.totalWords}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Across all difficulty levels
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Average Score */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Trophy className="h-4 w-4" />
+                    Average Score
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{simulatedStats.averageScore}%</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Last 7 days
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Charts Section */}
+            <div className="grid gap-6 md:grid-cols-2 mb-6">
+              {/* Weekly Progress */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Weekly Progress</CardTitle>
+                  <CardDescription>Your pronunciation scores over the past week</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-end justify-between gap-2">
+                    {simulatedStats.weeklyProgress.map((score, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full bg-muted rounded-t-lg relative" style={{ height: '200px' }}>
+                          <div 
+                            className="absolute bottom-0 w-full bg-primary rounded-t-lg transition-all"
+                            style={{ height: `${(score / 100) * 200}px` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Skill Breakdown */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Skill Breakdown</CardTitle>
+                  <CardDescription>IELTS Speaking criteria scores</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {Object.entries(simulatedStats.skillScores).map(([skill, score]) => (
+                    <div key={skill}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium capitalize">{skill}</span>
+                        <span className="text-sm text-muted-foreground">{score}%</span>
+                      </div>
+                      <Progress value={score} className="h-2" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Recent Activity
+                </CardTitle>
+                <CardDescription>Your latest practice sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {simulatedStats.recentActivity.map((activity, i) => (
+                    <div key={i} className="flex items-center justify-between pb-4 border-b last:border-0 last:pb-0">
+                      <div>
+                        <p className="font-medium">{activity.activity}</p>
+                        <p className="text-sm text-muted-foreground">{activity.date}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">{activity.score}%</p>
+                        <p className="text-xs text-muted-foreground">{activity.words} words</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-bold mb-2">Start Your Learning Journey</h3>
+              <p className="text-muted-foreground mb-6">
+                Begin practicing to see your progress and statistics here
+              </p>
+              <Button onClick={() => window.location.href = '/practice'}>
+                Start Practicing
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

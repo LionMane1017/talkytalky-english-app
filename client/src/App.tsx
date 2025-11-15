@@ -25,7 +25,8 @@ function Router() {
     <>
       <div className="pb-16">
         <Switch>
-          <Route path={"/"} component={Home} />
+          <Route path={"/"} component={Dashboard} />
+      <Route path={"/home"} component={Home} />
           <Route path={"/practice"} component={Practice} />
           <Route path={"/match"} component={MatchCards} />
           <Route path={"/dashboard"} component={Dashboard} />
@@ -51,7 +52,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
+        switchable
       >
         <TooltipProvider>
           <Toaster />
