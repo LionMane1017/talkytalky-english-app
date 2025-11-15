@@ -7,6 +7,8 @@ import SpeechRecorder from "@/components/SpeechRecorder";
 import { getRandomWords, type VocabularyWord } from "@/data/vocabulary";
 import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Practice() {
   const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
@@ -15,6 +17,15 @@ export default function Practice() {
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
   const { speak, isSpeaking } = useTextToSpeech();
+  const saveSessionMutation = trpc.practice.saveSession.useMutation({
+    onSuccess: () => {
+      toast.success("Practice session saved!");
+    },
+    onError: (error) => {
+      console.error("Failed to save session:", error);
+      toast.error("Failed to save session. Please try again.");
+    },
+  });
 
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
     setDifficulty(level);
@@ -29,6 +40,17 @@ export default function Practice() {
     setScore(pronunciationScore);
     setSessionScore(prev => [...prev, pronunciationScore]);
     setAttempts(prev => prev + 1);
+    
+    // Save session to backend
+    if (difficulty && currentWord) {
+      saveSessionMutation.mutate({
+        type: "pronunciation",
+        difficulty,
+        score: pronunciationScore,
+        wordsCompleted: 1,
+        accuracy: pronunciationScore,
+      });
+    }
   };
 
   const nextWord = () => {

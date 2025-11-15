@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { getRandomWords, type VocabularyWord } from "@/data/vocabulary";
 import { Trophy, RotateCcw, Clock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 interface MatchCard {
   id: string;
@@ -24,6 +26,15 @@ export default function MatchCards() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  
+  const saveSessionMutation = trpc.practice.saveSession.useMutation({
+    onSuccess: () => {
+      toast.success("Match session saved!");
+    },
+    onError: (error) => {
+      console.error("Failed to save session:", error);
+    },
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -95,6 +106,19 @@ export default function MatchCards() {
           if (matches + 1 === totalPairs) {
             setGameComplete(true);
             setIsPlaying(false);
+            
+            // Save session to backend
+            const finalAccuracy = Math.round(((matches + 1) / attempts) * 100);
+            if (difficulty) {
+              saveSessionMutation.mutate({
+                type: "matching",
+                difficulty,
+                score: finalAccuracy,
+                wordsCompleted: totalPairs,
+                accuracy: finalAccuracy,
+                duration: timeElapsed,
+              });
+            }
           }
         }, 500);
       } else {

@@ -123,3 +123,23 @@
 - [x] Add pronunciation reference playback buttons
 - [x] Expand IELTS vocabulary with more categories
 - [x] Add sample sentences for vocabulary words
+
+## Phase 12: Connect Frontend to Backend APIs
+- [x] Connect Practice page to save pronunciation sessions
+- [x] Connect Match Cards to save vocabulary progress
+- [ ] Connect IELTS Practice to save test scores
+- [ ] Update Dashboard to show real data from saved sessions
+
+## Phase 13: Achievement System
+- [x] Design achievement badges (First 10 Words, Week Streak, etc.)
+- [x] Create achievements database table
+- [x] Implement achievement unlock logic
+- [x] Display achievements on Dashboard
+- [x] Add achievement notifications/toasts
+
+## Phase 14: Spaced Repetition
+- [x] Track word difficulty based on user performance
+- [x] Implement spaced repetition algorithm
+- [x] Create review queue for difficult words
+- [ ] Add "Review Difficult Words" practice mode
+- [x] Update vocabulary progress tracking

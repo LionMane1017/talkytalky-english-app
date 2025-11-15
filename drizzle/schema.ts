@@ -72,7 +72,25 @@ export const vocabularyProgress = mysqlTable("vocabularyProgress", {
   successCount: int("successCount").default(0).notNull(),
   lastScore: int("lastScore"), // 0-100
   lastPracticed: timestamp("lastPracticed").defaultNow().notNull(),
+  // Spaced repetition fields
+  nextReview: timestamp("nextReview"),
+  reviewInterval: int("reviewInterval").default(1), // days
+  easeFactor: int("easeFactor").default(250), // stored as int (2.5 * 100)
+  repetitions: int("repetitions").default(0),
 });
 
 export type VocabularyProgress = typeof vocabularyProgress.$inferSelect;
 export type InsertVocabularyProgress = typeof vocabularyProgress.$inferInsert;
+
+/**
+ * User achievements table - tracks unlocked badges and milestones
+ */
+export const userAchievements = mysqlTable("userAchievements", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  achievementId: varchar("achievementId", { length: 64 }).notNull(),
+  unlockedAt: timestamp("unlockedAt").defaultNow().notNull(),
+});
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;

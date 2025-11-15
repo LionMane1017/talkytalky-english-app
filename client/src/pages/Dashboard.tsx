@@ -15,14 +15,21 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
+import { achievements } from "@shared/achievements";
+import { useAchievementChecker } from "@/hooks/useAchievementChecker";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const { theme, toggleTheme } = useTheme();
   
+  // Check for new achievements
+  useAchievementChecker();
+  
   // Fetch real user progress data
   const { data: userProgress, isLoading: progressLoading } = trpc.progress.getStats.useQuery();
   const { data: recentSessions, isLoading: sessionsLoading } = trpc.practice.getSessions.useQuery({ limit: 10 });
+  const { data: userAchievements } = trpc.achievements.getUserAchievements.useQuery();
   
   const hasRealData = userProgress && userProgress.totalSessions > 0;
 
@@ -258,6 +265,39 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Achievements */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Achievements
+                </CardTitle>
+                <CardDescription>Your unlocked badges and milestones</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {userAchievements && userAchievements.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {userAchievements.map(ua => {
+                      const achievement = achievements.find(a => a.id === ua.achievementId);
+                      if (!achievement) return null;
+                      return (
+                        <div key={ua.id} className="flex flex-col items-center gap-2 p-4 rounded-lg bg-primary/10 border border-primary/20">
+                          <div className="text-4xl">{achievement.icon}</div>
+                          <div className="text-sm font-medium text-center">{achievement.title}</div>
+                          <div className="text-xs text-muted-foreground text-center">{achievement.description}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Trophy className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>Complete practice sessions to unlock achievements!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Recent Activity */}
             <Card>

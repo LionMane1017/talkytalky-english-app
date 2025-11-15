@@ -15,6 +15,20 @@
       "when": 1763181323033,
       "tag": "0001_panoramic_star_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763197118590,
+      "tag": "0002_naive_vertigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1763197291984,
+      "tag": "0003_vengeful_loa",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import * as db from "./db";
 import { z } from "zod";
+import { achievements } from "@shared/achievements";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -67,13 +68,54 @@ export const appRouter = router({
         const attempts = (existing?.attempts || 0) + 1;
         const successCount = (existing?.successCount || 0) + (input.correct ? 1 : 0);
         
+        const { calculateNextReview } = await import("@shared/spacedRepetition");
+        
+        // Calculate spaced repetition schedule
+        const currentSchedule = existing && existing.nextReview ? {
+          nextReviewDate: existing.nextReview,
+          interval: existing.reviewInterval || 1,
+          easeFactor: (existing.easeFactor || 250) / 100,
+          repetitions: existing.repetitions || 0,
+        } : null;
+        
+        const newSchedule = calculateNextReview(input.score || 0, currentSchedule);
+        
         return await db.upsertVocabularyProgress({
           userId: ctx.user.id,
           wordId: input.wordId,
           attempts,
           successCount,
           lastScore: input.score,
+          nextReview: newSchedule.nextReviewDate,
+          reviewInterval: newSchedule.interval,
+          easeFactor: Math.round(newSchedule.easeFactor * 100),
+          repetitions: newSchedule.repetitions,
         });
+      }),
+
+    getWordsNeedingReview: protectedProcedure
+      .query(async ({ ctx }) => {
+        return await db.getWordsNeedingReview(ctx.user.id);
+      }),
+  }),
+
+  achievements: router({
+    getAll: publicProcedure
+      .query(() => {
+        return achievements;
+      }),
+
+    getUserAchievements: protectedProcedure
+      .query(async ({ ctx }) => {
+        return await db.getUserAchievements(ctx.user.id);
+      }),
+
+    checkAndUnlock: protectedProcedure
+      .input(z.object({
+        achievementId: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.unlockAchievement(ctx.user.id, input.achievementId);
       }),
   }),
 });

@@ -1,6 +1,6 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, practiceSessions, InsertPracticeSession, userProgress, InsertUserProgress, vocabularyProgress, InsertVocabularyProgress } from "../drizzle/schema";
+import { InsertUser, users, practiceSessions, InsertPracticeSession, userProgress, InsertUserProgress, vocabularyProgress, InsertVocabularyProgress, userAchievements, InsertUserAchievement } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -174,6 +174,10 @@ export async function upsertVocabularyProgress(vocabProgress: InsertVocabularyPr
         successCount: vocabProgress.successCount,
         lastScore: vocabProgress.lastScore,
         lastPracticed: new Date(),
+        nextReview: vocabProgress.nextReview,
+        reviewInterval: vocabProgress.reviewInterval,
+        easeFactor: vocabProgress.easeFactor,
+        repetitions: vocabProgress.repetitions,
       },
     });
 }
@@ -205,4 +209,63 @@ export async function getVocabularyProgressByWord(userId: number, wordId: string
     .limit(1);
 
   return result.length > 0 ? result[0] : null;
+}
+
+// Achievements
+export async function unlockAchievement(userId: number, achievementId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Check if already unlocked
+  const existing = await db
+    .select()
+    .from(userAchievements)
+    .where(
+      and(
+        eq(userAchievements.userId, userId),
+        eq(userAchievements.achievementId, achievementId)
+      )
+    )
+    .limit(1);
+
+  if (existing.length > 0) {
+    return null; // Already unlocked
+  }
+
+  await db.insert(userAchievements).values({
+    userId,
+    achievementId,
+  });
+
+  return achievementId;
+}
+
+export async function getUserAchievements(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db
+    .select()
+    .from(userAchievements)
+    .where(eq(userAchievements.userId, userId))
+    .orderBy(desc(userAchievements.unlockedAt));
+}
+
+// Get words that need review (spaced repetition)
+export async function getWordsNeedingReview(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  
+  return await db
+    .select()
+    .from(vocabularyProgress)
+    .where(
+      and(
+        eq(vocabularyProgress.userId, userId),
+        sql`(${vocabularyProgress.nextReview} IS NULL OR ${vocabularyProgress.nextReview} <= ${now})`
+      )
+    )
+    .orderBy(vocabularyProgress.lastPracticed);
 }
