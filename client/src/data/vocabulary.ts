@@ -193,6 +193,192 @@ export const vocabularyData: VocabularyWord[] = [
     example: "She is meticulous in her work.",
     difficulty: "advanced",
     category: "Adjectives"
+  },
+  
+  // Additional Beginner Words
+  {
+    id: "21",
+    word: "Happy",
+    phonetic: "/ˈhæpi/",
+    meaning: "Feeling or showing pleasure or contentment",
+    example: "I am happy to see you.",
+    difficulty: "beginner",
+    category: "Adjectives"
+  },
+  {
+    id: "22",
+    word: "Friend",
+    phonetic: "/frend/",
+    meaning: "A person with whom one has a bond of mutual affection",
+    example: "She is my best friend.",
+    difficulty: "beginner",
+    category: "Nouns"
+  },
+  {
+    id: "23",
+    word: "Study",
+    phonetic: "/ˈstʌdi/",
+    meaning: "To devote time and attention to gaining knowledge",
+    example: "I study English every day.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "24",
+    word: "Weather",
+    phonetic: "/ˈweðər/",
+    meaning: "The state of the atmosphere at a particular time and place",
+    example: "The weather is nice today.",
+    difficulty: "beginner",
+    category: "Nouns"
+  },
+  {
+    id: "25",
+    word: "Delicious",
+    phonetic: "/dɪˈlɪʃəs/",
+    meaning: "Highly pleasant to the taste",
+    example: "This food is delicious.",
+    difficulty: "beginner",
+    category: "Adjectives"
+  },
+  
+  // Additional Intermediate Words (IELTS Common)
+  {
+    id: "26",
+    word: "Analyze",
+    phonetic: "/ˈænəlaɪz/",
+    meaning: "To examine something in detail to understand it better",
+    example: "We need to analyze the data carefully.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "27",
+    word: "Beneficial",
+    phonetic: "/ˌbenɪˈfɪʃl/",
+    meaning: "Favorable or advantageous; resulting in good",
+    example: "Exercise is beneficial for your health.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "28",
+    word: "Contribute",
+    phonetic: "/kənˈtrɪbjuːt/",
+    meaning: "To give something in order to help achieve or provide something",
+    example: "Everyone should contribute to the project.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "29",
+    word: "Diverse",
+    phonetic: "/daɪˈvɜːrs/",
+    meaning: "Showing a great deal of variety; very different",
+    example: "The city has a diverse population.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "30",
+    word: "Efficient",
+    phonetic: "/ɪˈfɪʃnt/",
+    meaning: "Achieving maximum productivity with minimum wasted effort",
+    example: "This is an efficient way to work.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  
+  // Additional Advanced Words (IELTS Academic)
+  {
+    id: "31",
+    word: "Ambiguous",
+    phonetic: "/æmˈbɪɡjuəs/",
+    meaning: "Open to more than one interpretation; not having one obvious meaning",
+    example: "The statement was deliberately ambiguous.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "32",
+    word: "Contemplate",
+    phonetic: "/ˈkɑːntəmpleɪt/",
+    meaning: "To think about something carefully and for a long time",
+    example: "He contemplated his future career.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "33",
+    word: "Diligent",
+    phonetic: "/ˈdɪlɪdʒənt/",
+    meaning: "Having or showing care and conscientiousness in one's work",
+    example: "She is a diligent worker.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "34",
+    word: "Eloquent",
+    phonetic: "/ˈeləkwənt/",
+    meaning: "Fluent or persuasive in speaking or writing",
+    example: "He gave an eloquent speech.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "35",
+    word: "Facilitate",
+    phonetic: "/fəˈsɪlɪteɪt/",
+    meaning: "To make an action or process easy or easier",
+    example: "Technology can facilitate learning.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "36",
+    word: "Hypothesis",
+    phonetic: "/haɪˈpɑːθəsɪs/",
+    meaning: "A proposed explanation made on the basis of limited evidence",
+    example: "The scientist tested her hypothesis.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "37",
+    word: "Implement",
+    phonetic: "/ˈɪmplɪment/",
+    meaning: "To put a decision or plan into effect",
+    example: "We will implement the new policy next month.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "38",
+    word: "Justify",
+    phonetic: "/ˈdʒʌstɪfaɪ/",
+    meaning: "To show or prove to be right or reasonable",
+    example: "Can you justify your decision?",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "39",
+    word: "Pragmatic",
+    phonetic: "/præɡˈmætɪk/",
+    meaning: "Dealing with things sensibly and realistically",
+    example: "We need a pragmatic approach to this problem.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "40",
+    word: "Resilient",
+    phonetic: "/rɪˈzɪliənt/",
+    meaning: "Able to withstand or recover quickly from difficult conditions",
+    example: "Children are remarkably resilient.",
+    difficulty: "advanced",
+    category: "Adjectives"
   }
 ];
 

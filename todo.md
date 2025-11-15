@@ -119,7 +119,7 @@
 - [x] Implement data loading states
 
 ## Phase 11: Audio Features
-- [ ] Integrate Web Speech API for text-to-speech
-- [ ] Add pronunciation reference playback buttons
-- [ ] Expand IELTS vocabulary with more categories
-- [ ] Add sample sentences for vocabulary words
+- [x] Integrate Web Speech API for text-to-speech
+- [x] Add pronunciation reference playback buttons
+- [x] Expand IELTS vocabulary with more categories
+- [x] Add sample sentences for vocabulary words

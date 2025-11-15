@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import SpeechRecorder from "@/components/SpeechRecorder";
 import { getRandomWords, type VocabularyWord } from "@/data/vocabulary";
-import { ArrowRight, RotateCcw, Trophy } from "lucide-react";
+import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
 export default function Practice() {
   const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
@@ -13,6 +14,7 @@ export default function Practice() {
   const [score, setScore] = useState<number | null>(null);
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
+  const { speak, isSpeaking } = useTextToSpeech();
 
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
     setDifficulty(level);
@@ -183,9 +185,20 @@ export default function Practice() {
         {/* Current Word */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-center text-4xl font-bold text-foreground">
-              {currentWord.word}
-            </CardTitle>
+            <div className="flex items-center justify-center gap-4">
+              <CardTitle className="text-center text-4xl font-bold text-foreground">
+                {currentWord.word}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => speak(currentWord.word)}
+                disabled={isSpeaking}
+                className="rounded-full"
+              >
+                <Volume2 className={`h-6 w-6 ${isSpeaking ? 'text-primary animate-pulse' : ''}`} />
+              </Button>
+            </div>
             <CardDescription className="text-center text-lg">
               {currentWord.phonetic}
             </CardDescription>
