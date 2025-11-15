@@ -144,7 +144,8 @@
 - [ ] Add "Review Difficult Words" practice mode
 - [x] Update vocabulary progress tracking
 
-## Bug Fixes
+## Bug Fixes - CRITICAL
+- [x] Fix authentication middleware redirecting users to login on Practice page (added throwOnError: false to auth.me queries)
 - [x] Fix Practice page crash when selecting practice mode (was authentication redirect)
 - [x] Make Practice page work without login (optional backend save)
 - [x] Test all pages for stability

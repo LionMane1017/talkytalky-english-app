@@ -26,7 +26,10 @@ export default function MatchCards() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
-  const { data: user } = trpc.auth.me.useQuery();
+  const { data: user } = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    throwOnError: false,
+  });
   
   const saveSessionMutation = trpc.practice.saveSession.useMutation({
     onSuccess: () => {

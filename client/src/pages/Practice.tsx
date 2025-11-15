@@ -17,7 +17,11 @@ export default function Practice() {
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
   const { speak, isSpeaking } = useTextToSpeech();
-  const { data: user } = trpc.auth.me.useQuery();
+  const { data: user } = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    // Don't throw error to prevent redirect
+    throwOnError: false,
+  });
   const saveSessionMutation = trpc.practice.saveSession.useMutation({
     onSuccess: () => {
       toast.success("Practice session saved!");
