@@ -17,13 +17,17 @@ export default function Practice() {
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
   const { speak, isSpeaking } = useTextToSpeech();
+  const { data: user } = trpc.auth.me.useQuery();
   const saveSessionMutation = trpc.practice.saveSession.useMutation({
     onSuccess: () => {
       toast.success("Practice session saved!");
     },
     onError: (error) => {
       console.error("Failed to save session:", error);
-      toast.error("Failed to save session. Please try again.");
+      // Don't show error toast if user is not logged in
+      if (!error.message.includes("UNAUTHORIZED")) {
+        toast.error("Failed to save session. Please try again.");
+      }
     },
   });
 
@@ -41,8 +45,8 @@ export default function Practice() {
     setSessionScore(prev => [...prev, pronunciationScore]);
     setAttempts(prev => prev + 1);
     
-    // Save session to backend
-    if (difficulty && currentWord) {
+    // Save session to backend (only if logged in)
+    if (user && difficulty && currentWord) {
       saveSessionMutation.mutate({
         type: "pronunciation",
         difficulty,

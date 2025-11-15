@@ -143,3 +143,8 @@
 - [x] Create review queue for difficult words
 - [ ] Add "Review Difficult Words" practice mode
 - [x] Update vocabulary progress tracking
+
+## Bug Fixes
+- [x] Fix Practice page crash when selecting practice mode (was authentication redirect)
+- [x] Make Practice page work without login (optional backend save)
+- [x] Test all pages for stability

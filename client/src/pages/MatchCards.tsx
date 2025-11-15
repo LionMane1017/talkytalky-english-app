@@ -26,6 +26,7 @@ export default function MatchCards() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const { data: user } = trpc.auth.me.useQuery();
   
   const saveSessionMutation = trpc.practice.saveSession.useMutation({
     onSuccess: () => {
@@ -107,9 +108,9 @@ export default function MatchCards() {
             setGameComplete(true);
             setIsPlaying(false);
             
-            // Save session to backend
+            // Save session to backend (only if logged in)
             const finalAccuracy = Math.round(((matches + 1) / attempts) * 100);
-            if (difficulty) {
+            if (user && difficulty) {
               saveSessionMutation.mutate({
                 type: "matching",
                 difficulty,
