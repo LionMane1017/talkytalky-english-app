@@ -149,3 +149,6 @@
 - [x] Fix Practice page crash when selecting practice mode (was authentication redirect)
 - [x] Make Practice page work without login (optional backend save)
 - [x] Test all pages for stability
+
+## Bug Fixes - Speech Recognition
+- [x] Fix speech recognition not working on Practice page (wrapped handleTranscript in useCallback)

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +44,7 @@ export default function Practice() {
     setAttempts(0);
   };
 
-  const handleTranscript = (transcript: string, pronunciationScore: number) => {
+  const handleTranscript = useCallback((transcript: string, pronunciationScore: number) => {
     setScore(pronunciationScore);
     setSessionScore(prev => [...prev, pronunciationScore]);
     setAttempts(prev => prev + 1);
@@ -59,7 +59,7 @@ export default function Practice() {
         accuracy: pronunciationScore,
       });
     }
-  };
+  }, [user, difficulty, currentWord, saveSessionMutation]);
 
   const nextWord = () => {
     if (difficulty) {
