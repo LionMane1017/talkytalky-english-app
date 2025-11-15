@@ -127,7 +127,7 @@ export default function MatchCards() {
 
   if (!difficulty || cards.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen pb-20">
         <div className="container py-6 max-w-4xl">
           <h1 className="text-3xl font-bold mb-2 text-foreground">Match Cards</h1>
           <p className="text-muted-foreground mb-8">

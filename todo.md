@@ -98,3 +98,28 @@
 - [x] Add backdrop-filter blur effect to all cards
 - [x] Apply glassmorphism styling globally
 - [x] Test in both light and dark modes
+
+## Phase 8: Complete Remaining Pages
+- [x] Update Practice page with glassmorphism design
+- [x] Update Match Cards page with glassmorphism design
+- [x] Update IELTS Practice page with glassmorphism design
+- [ ] Update Profile page with glassmorphism design
+
+## Phase 9: Backend Implementation
+- [x] Create tRPC procedures for practice sessions
+- [x] Create tRPC procedures for vocabulary progress
+- [x] Create tRPC procedures for user statistics
+- [ ] Implement IELTS Ready Meter calculation logic
+
+## Phase 10: Frontend-Backend Integration
+- [x] Connect Dashboard to real backend data
+- [ ] Connect Practice page to save sessions
+- [ ] Connect Match Cards to save progress
+- [ ] Connect IELTS Practice to save scores
+- [x] Implement data loading states
+
+## Phase 11: Audio Features
+- [ ] Integrate Web Speech API for text-to-speech
+- [ ] Add pronunciation reference playback buttons
+- [ ] Expand IELTS vocabulary with more categories
+- [ ] Add sample sentences for vocabulary words

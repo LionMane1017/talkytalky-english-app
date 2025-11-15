@@ -143,7 +143,7 @@ export default function IELTSPractice() {
 
   if (!mode) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen pb-20">
         <div className="container py-6 max-w-4xl">
           <h1 className="text-3xl font-bold mb-2 text-foreground">IELTS Practice</h1>
           <p className="text-muted-foreground mb-8">
@@ -264,7 +264,7 @@ export default function IELTSPractice() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen pb-20">
       <div className="container py-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>

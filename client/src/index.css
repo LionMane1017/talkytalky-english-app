@@ -195,16 +195,30 @@
   }
 
   /* Improve text readability on glassmorphism cards */
-  [data-card] .text-muted-foreground {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  [data-card] * {
-    color: white;
+  [data-card] *,
+  [data-card] .text-muted-foreground,
+  [data-card] .text-foreground,
+  [data-card] [data-slot="card-title"],
+  [data-card] [data-slot="card-description"],
+  [data-card] p,
+  [data-card] span,
+  [data-card] div {
+    color: white !important;
   }
 
   [data-card] .text-primary {
-    color: hsl(var(--primary));
+    color: hsl(var(--primary)) !important;
+  }
+
+  /* Keep specific colored elements */
+  [data-card] .text-green-600,
+  [data-card] .text-yellow-600,
+  [data-card] .text-red-600,
+  [data-card] .text-blue-600,
+  [data-card] .text-purple-600,
+  [data-card] .text-cyan-600,
+  [data-card] .text-indigo-600 {
+    /* Keep their original colors */
   }
 
   [data-card]:hover {

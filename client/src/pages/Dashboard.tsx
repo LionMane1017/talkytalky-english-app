@@ -14,11 +14,17 @@ import {
   Sun
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { trpc } from "@/lib/trpc";
 
 export default function Dashboard() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
-  const [useSimulatedData, setUseSimulatedData] = useState(true);
   const { theme, toggleTheme } = useTheme();
+  
+  // Fetch real user progress data
+  const { data: userProgress, isLoading: progressLoading } = trpc.progress.getStats.useQuery();
+  const { data: recentSessions, isLoading: sessionsLoading } = trpc.practice.getSessions.useQuery({ limit: 10 });
+  
+  const hasRealData = userProgress && userProgress.totalSessions > 0;
 
   // Simulated stats
   const simulatedStats = {
@@ -49,7 +55,6 @@ export default function Dashboard() {
   };
 
   const handleClearData = () => {
-    setUseSimulatedData(false);
     setShowDisclaimer(false);
   };
 
@@ -81,7 +86,7 @@ export default function Dashboard() {
 
       <div className="container py-6 max-w-7xl">
         {/* Disclaimer Banner */}
-        {showDisclaimer && useSimulatedData && (
+        {showDisclaimer && !hasRealData && (
           <Alert className="mb-6 bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900">
             <AlertDescription className="flex items-center justify-between">
               <span className="text-sm">
@@ -109,7 +114,7 @@ export default function Dashboard() {
           </Alert>
         )}
 
-        {useSimulatedData ? (
+        {!hasRealData ? (
           <>
             {/* Top Stats Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
