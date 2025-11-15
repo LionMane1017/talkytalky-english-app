@@ -1,19 +1,43 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import Practice from "@/pages/Practice";
+import MatchCards from "@/pages/MatchCards";
+import Dashboard from "@/pages/Dashboard";
+import Profile from "@/pages/Profile";
+import IELTSPractice from "@/pages/IELTSPractice";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
+import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 function Router() {
+  const [location] = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <div className="pb-16">
+        <Switch>
+          <Route path={"/"} component={Home} />
+          <Route path={"/practice"} component={Practice} />
+          <Route path={"/match"} component={MatchCards} />
+          <Route path={"/dashboard"} component={Dashboard} />
+          <Route path={"/profile"} component={Profile} />
+          <Route path={"/ielts"} component={IELTSPractice} />
+          <Route path={"/404"} component={NotFound} />
+          {/* Final fallback route */}
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+      <BottomNav />
+    </>
   );
 }
 
