@@ -17,6 +17,7 @@ export default function IELTSPractice() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [questionsCompleted, setQuestionsCompleted] = useState(0);
+  const [usedQuestionIds, setUsedQuestionIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -53,9 +54,21 @@ export default function IELTSPractice() {
   };
 
   const loadQuestion = (part: 1 | 2 | 3) => {
-    const question = getRandomQuestion(part);
-    setCurrentQuestion(question);
-    setPhase("intro");
+    const question = getRandomQuestion(part, usedQuestionIds);
+    if (question) {
+      setCurrentQuestion(question);
+      setUsedQuestionIds(prev => new Set(Array.from(prev).concat(question.id)));
+      setPhase("intro");
+    } else {
+      toast.error("No more questions available. Starting over...");
+      setUsedQuestionIds(new Set());
+      const freshQuestion = getRandomQuestion(part, new Set());
+      if (freshQuestion) {
+        setCurrentQuestion(freshQuestion);
+        setUsedQuestionIds(new Set([freshQuestion.id]));
+        setPhase("intro");
+      }
+    }
   };
 
   const startPreparation = () => {

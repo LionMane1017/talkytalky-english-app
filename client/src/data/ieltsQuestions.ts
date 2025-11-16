@@ -200,8 +200,19 @@ export function getQuestionsByPart(part: 1 | 2 | 3) {
   return ieltsQuestions.filter(q => q.part === part);
 }
 
-export function getRandomQuestion(part: 1 | 2 | 3) {
-  const questions = getQuestionsByPart(part);
+export function getRandomQuestion(part: 1 | 2 | 3, usedIds?: Set<string>) {
+  let questions = getQuestionsByPart(part);
+  
+  // Filter out already used questions
+  if (usedIds && usedIds.size > 0) {
+    questions = questions.filter(q => !usedIds.has(q.id));
+  }
+  
+  // Return null if no questions available
+  if (questions.length === 0) {
+    return null;
+  }
+  
   return questions[Math.floor(Math.random() * questions.length)];
 }
 

@@ -12,6 +12,7 @@ import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Modules from "./pages/Modules";
 
 function Router() {
   const [location] = useLocation();
@@ -26,6 +27,7 @@ function Router() {
       <div className="pb-16">
         <Switch>
           <Route path={"/"} component={Dashboard} />
+      <Route path={"/modules"} component={Modules} />
       <Route path={"/home"} component={Home} />
           <Route path={"/practice"} component={Practice} />
           <Route path={"/match"} component={MatchCards} />
