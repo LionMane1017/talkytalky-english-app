@@ -1,11 +1,11 @@
-import { Home, Mic, Grid3x3, BarChart3, User, BookOpen } from "lucide-react";
+import { Home, Mic, Grid3x3, BarChart3, User } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/practice", icon: Mic, label: "Practice" },
-  { path: "/modules", icon: BookOpen, label: "Modules" },
+  { path: "/match", icon: Grid3x3, label: "Match" },
   { path: "/ielts", icon: BarChart3, label: "IELTS" },
   { path: "/profile", icon: User, label: "Profile" },
 ];

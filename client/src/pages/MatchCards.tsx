@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { getRandomWords, type VocabularyWord } from "@/data/vocabulary";
+import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
 import { Trophy, RotateCcw, Clock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
@@ -26,6 +26,8 @@ export default function MatchCards() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
+  const [gamesPlayed, setGamesPlayed] = useState(0);
   const { data: user } = trpc.auth.me.useQuery(undefined, {
     retry: false,
     throwOnError: false,
@@ -50,9 +52,41 @@ export default function MatchCards() {
     return () => clearInterval(interval);
   }, [isPlaying, gameComplete]);
 
+  // Get available words for current difficulty
+  const availableWords = useMemo(() => {
+    if (!difficulty) return [];
+    return vocabularyData.filter(
+      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+    );
+  }, [difficulty, usedWordIds]);
+
+  const wordsRemaining = availableWords.length;
+  const totalWords = vocabularyData.filter(w => w.difficulty === difficulty).length;
+
   const startGame = (level: "beginner" | "intermediate" | "advanced") => {
     setDifficulty(level);
-    const words = getRandomWords(6, level);
+    
+    // Get available words that haven't been used
+    const available = vocabularyData.filter(
+      word => word.difficulty === level && !usedWordIds.has(word.id)
+    );
+    
+    // If not enough words available, reset the pool
+    let words: VocabularyWord[];
+    if (available.length < 6) {
+      toast.info("You've practiced all words! Starting over...");
+      setUsedWordIds(new Set());
+      const allWords = vocabularyData.filter(w => w.difficulty === level);
+      words = allWords.sort(() => Math.random() - 0.5).slice(0, 6);
+      setUsedWordIds(new Set(words.map(w => w.id)));
+    } else {
+      words = available.sort(() => Math.random() - 0.5).slice(0, 6);
+      setUsedWordIds(prev => {
+        const newSet = new Set(prev);
+        words.forEach(w => newSet.add(w.id));
+        return newSet;
+      });
+    }
     
     const gameCards: MatchCard[] = [];
     words.forEach(word => {
@@ -143,6 +177,15 @@ export default function MatchCards() {
     setTimeElapsed(0);
     setIsPlaying(false);
     setGameComplete(false);
+    setUsedWordIds(new Set());
+    setGamesPlayed(0);
+  };
+
+  const playAgain = () => {
+    if (difficulty) {
+      setGamesPlayed(prev => prev + 1);
+      startGame(difficulty);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -248,13 +291,10 @@ export default function MatchCards() {
         </div>
 
         {/* Game Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="pt-6 text-center">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <p className="text-2xl font-bold text-foreground">{formatTime(timeElapsed)}</p>
-              </div>
+              <p className="text-2xl font-bold text-foreground">{formatTime(timeElapsed)}</p>
               <p className="text-sm text-muted-foreground">Time</p>
             </CardContent>
           </Card>
@@ -270,6 +310,13 @@ export default function MatchCards() {
             <CardContent className="pt-6 text-center">
               <p className="text-2xl font-bold text-accent-foreground">{attempts}</p>
               <p className="text-sm text-muted-foreground">Attempts</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <p className="text-2xl font-bold text-chart-3">{wordsRemaining}/{totalWords}</p>
+              <p className="text-sm text-muted-foreground">Remaining</p>
             </CardContent>
           </Card>
         </div>
@@ -302,9 +349,14 @@ export default function MatchCards() {
                   <p className="text-sm text-muted-foreground">Accuracy</p>
                 </div>
               </div>
-              <Button className="mt-6" onClick={resetGame}>
-                Play Again
-              </Button>
+              <div className="flex gap-3 mt-6 justify-center">
+                <Button onClick={playAgain}>
+                  Play Again
+                </Button>
+                <Button variant="outline" onClick={resetGame}>
+                  Change Level
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}

@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import SpeechRecorder from "@/components/SpeechRecorder";
-import { getRandomWords, type VocabularyWord } from "@/data/vocabulary";
+import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
 import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { trpc } from "@/lib/trpc";
@@ -16,6 +16,7 @@ export default function Practice() {
   const [score, setScore] = useState<number | null>(null);
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
+  const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
   const { speak, isSpeaking } = useTextToSpeech();
   const { data: user } = trpc.auth.me.useQuery(undefined, {
     retry: false,
@@ -35,10 +36,26 @@ export default function Practice() {
     },
   });
 
+  // Get available words for current difficulty
+  const availableWords = useMemo(() => {
+    if (!difficulty) return [];
+    return vocabularyData.filter(
+      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+    );
+  }, [difficulty, usedWordIds]);
+
+  const wordsRemaining = availableWords.length;
+  const totalWords = vocabularyData.filter(w => w.difficulty === difficulty).length;
+
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
     setDifficulty(level);
-    const words = getRandomWords(1, level);
-    setCurrentWord(words[0]);
+    setUsedWordIds(new Set());
+    const words = vocabularyData.filter(w => w.difficulty === level);
+    if (words.length > 0) {
+      const randomWord = words[Math.floor(Math.random() * words.length)];
+      setCurrentWord(randomWord);
+      setUsedWordIds(new Set([randomWord.id]));
+    }
     setScore(null);
     setSessionScore([]);
     setAttempts(0);
@@ -62,11 +79,31 @@ export default function Practice() {
   }, [user, difficulty, currentWord, saveSessionMutation]);
 
   const nextWord = () => {
-    if (difficulty) {
-      const words = getRandomWords(1, difficulty);
-      setCurrentWord(words[0]);
-      setScore(null);
+    if (!difficulty) return;
+
+    const available = vocabularyData.filter(
+      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+    );
+
+    if (available.length === 0) {
+      toast.info("You've practiced all words in this level! Starting over...");
+      setUsedWordIds(new Set());
+      const allWords = vocabularyData.filter(w => w.difficulty === difficulty);
+      if (allWords.length > 0) {
+        const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+        setCurrentWord(randomWord);
+        setUsedWordIds(new Set([randomWord.id]));
+      }
+    } else {
+      const randomWord = available[Math.floor(Math.random() * available.length)];
+      setCurrentWord(randomWord);
+      setUsedWordIds(prev => {
+        const newSet = new Set(prev);
+        newSet.add(randomWord.id);
+        return newSet;
+      });
     }
+    setScore(null);
   };
 
   const resetSession = () => {
@@ -75,6 +112,7 @@ export default function Practice() {
     setScore(null);
     setSessionScore([]);
     setAttempts(0);
+    setUsedWordIds(new Set());
   };
 
   const averageScore = sessionScore.length > 0
@@ -192,7 +230,7 @@ export default function Practice() {
         {sessionScore.length > 0 && (
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-foreground">{attempts}</p>
                   <p className="text-sm text-muted-foreground">Attempts</p>
@@ -206,6 +244,10 @@ export default function Practice() {
                     {sessionScore.filter(s => s >= 70).length}
                   </p>
                   <p className="text-sm text-muted-foreground">Good Scores</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-chart-3">{wordsRemaining}/{totalWords}</p>
+                  <p className="text-sm text-muted-foreground">Remaining</p>
                 </div>
               </div>
             </CardContent>

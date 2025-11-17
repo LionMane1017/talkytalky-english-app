@@ -144,7 +144,13 @@
 - [ ] Add "Review Difficult Words" practice mode
 - [x] Update vocabulary progress tracking
 
-## Bug Fixes - CRITICAL
+## Bug Fixes - CRITICAL PRIORITY
+- [x] Fix broken Modules page (showing error screen)
+- [x] Implement anti-repetition on Practice page
+- [x] Implement anti-repetition on Match Cards page
+- [x] Add 80 more IELTS questions (25 → 105 total)
+- [x] Add 110 more vocabulary words (40 → 150 total)
+- [ ] Test all pages to verify no repetition occurs
 - [x] Fix authentication middleware redirecting users to login on Practice page (added throwOnError: false to auth.me queries)
 - [x] Fix Practice page crash when selecting practice mode (was authentication redirect)
 - [x] Make Practice page work without login (optional backend save)
@@ -152,17 +158,3 @@
 
 ## Bug Fixes - Speech Recognition
 - [x] Fix speech recognition not working on Practice page (wrapped handleTranscript in useCallback)
-
-## Content Refinement - CRITICAL
-- [ ] Research IELTS preparation app competition (IELTS Liz, Magoosh, British Council)
-- [x] Design module browsing UI/UX
-- [ ] Expand vocabulary database to 200+ words across all levels
-- [ ] Create comprehensive IELTS question bank (100+ unique questions)
-- [x] Implement anti-repetition logic (no duplicate questions in same session)
-- [x] Add session tracking for used questions
-- [ ] Add "questions remaining" counter
-- [x] Show message when content pool is exhausted
-- [ ] Test to verify no repeats in same session
-- [x] Add module catalog page showing all available content
-- [ ] Organize content into clear learning paths
-- [ ] Ensure 4-8 hours of unique practice material
