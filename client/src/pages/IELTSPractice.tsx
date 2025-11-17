@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { getRandomQuestion, type IELTSQuestion } from "@/data/ieltsQuestions";
 import { Clock, Mic, MicOff, ArrowRight, RotateCcw, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import TalkyLogo from "@/components/TalkyLogo";
 
 type PracticeMode = "part1" | "part2" | "part3" | "mock" | null;
 type SessionPhase = "intro" | "preparation" | "speaking" | "complete";
@@ -145,6 +146,9 @@ export default function IELTSPractice() {
     return (
       <div className="min-h-screen pb-20">
         <div className="container py-6 max-w-4xl">
+          <div className="mb-8">
+            <TalkyLogo />
+          </div>
           <h1 className="text-3xl font-bold mb-2 text-foreground">IELTS Practice</h1>
           <p className="text-muted-foreground mb-8">
             Practice for IELTS Speaking test with realistic questions and timing

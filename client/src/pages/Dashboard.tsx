@@ -18,6 +18,7 @@ import { trpc } from "@/lib/trpc";
 import { achievements } from "@shared/achievements";
 import { useAchievementChecker } from "@/hooks/useAchievementChecker";
 import { Badge } from "@/components/ui/badge";
+import TalkyLogo from "@/components/TalkyLogo";
 
 export default function Dashboard() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
@@ -67,14 +68,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pb-20">
-      {/* Header with theme toggle */}
+      {/* Header with logo and theme toggle */}
       <div className="border-b bg-card">
         <div className="container py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Track your English learning progress</p>
-            </div>
+            <TalkyLogo />
             <Button
               variant="ghost"
               size="icon"

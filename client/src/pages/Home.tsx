@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic, Grid3x3, Trophy, BarChart3, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import TalkyLogo from "@/components/TalkyLogo";
 
 export default function Home() {
   const features = [
@@ -47,6 +49,11 @@ export default function Home() {
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-primary/5 to-transparent py-16 px-4">
         <div className="container max-w-4xl text-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <TalkyLogo />
+          </div>
+          
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 mb-6">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm text-primary font-medium">AI-Powered Learning Platform</span>

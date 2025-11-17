@@ -8,6 +8,7 @@ import { Trophy, RotateCcw, Clock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import TalkyLogo from "@/components/TalkyLogo";
 
 interface MatchCard {
   id: string;
@@ -200,6 +201,9 @@ export default function MatchCards() {
     return (
       <div className="min-h-screen pb-20">
         <div className="container py-6 max-w-4xl">
+          <div className="mb-8">
+            <TalkyLogo />
+          </div>
           <h1 className="text-3xl font-bold mb-2 text-foreground">Match Cards</h1>
           <p className="text-muted-foreground mb-8">
             Match English words with their meanings to build your vocabulary

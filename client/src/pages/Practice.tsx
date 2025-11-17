@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import TalkyLogo from "@/components/TalkyLogo";
 
 export default function Practice() {
   const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
@@ -136,6 +137,9 @@ export default function Practice() {
     return (
       <div className="min-h-screen pb-20">
         <div className="container py-6 max-w-4xl">
+          <div className="mb-8">
+            <TalkyLogo />
+          </div>
           <h1 className="text-3xl font-bold mb-2 text-foreground">Practice Speaking</h1>
           <p className="text-muted-foreground mb-8">
             Choose a difficulty level to start practicing pronunciation

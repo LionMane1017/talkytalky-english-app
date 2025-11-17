@@ -158,3 +158,12 @@
 
 ## Bug Fixes - Speech Recognition
 - [x] Fix speech recognition not working on Practice page (wrapped handleTranscript in useCallback)
+
+## Phase 15: Creative Branding
+- [x] Create animated Talky Talky logo component
+- [x] Add logo to Dashboard header with glassmorphic styling
+- [x] Integrate microphone icon into logo design
+- [x] Add subtle glow and animation effects
+- [x] Add logo to Home page hero section
+- [x] Add logo to Practice, Match Cards, IELTS, and Modules pages
+- [x] Test logo across all pages for consistency
