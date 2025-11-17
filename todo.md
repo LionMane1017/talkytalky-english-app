@@ -167,3 +167,14 @@
 - [x] Add logo to Home page hero section
 - [x] Add logo to Practice, Match Cards, IELTS, and Modules pages
 - [x] Test logo across all pages for consistency
+
+## Phase 16: Structured Learning Paths
+- [x] Design learning path data structure (tracks, lessons, vocabulary)
+- [x] Create vocabulary tracks: Business English, Travel Essentials, Academic English, Daily Conversation, IELTS Prep
+- [x] Build Learning Paths page with track browsing UI
+- [x] Implement track detail page with lesson list
+- [x] Add sequential lesson unlocking system
+- [x] Implement lesson practice page with track context (demo mode)
+- [x] Add progress tracking for tracks and lessons (client-side demo)
+- [x] Update navigation to include Learning Paths
+- [x] Test all tracks and lesson progression
