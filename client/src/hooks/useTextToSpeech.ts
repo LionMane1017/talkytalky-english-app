@@ -1,51 +1,60 @@
 import { useState, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isSupported, setIsSupported] = useState(
-    typeof window !== "undefined" && "speechSynthesis" in window
-  );
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  
+  const generateSpeechMutation = trpc.practice.generateSpeech.useMutation();
 
-  const speak = useCallback((text: string, options?: {
-    rate?: number;
-    pitch?: number;
-    volume?: number;
-    lang?: string;
-  }) => {
-    if (!isSupported) {
-      console.warn("Text-to-speech is not supported in this browser");
-      return;
-    }
+  const speak = useCallback(async (text: string) => {
+    try {
+      // Stop any ongoing speech
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
 
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+      setIsSpeaking(true);
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Set options with defaults
-    utterance.rate = options?.rate ?? 0.9; // Slightly slower for clarity
-    utterance.pitch = options?.pitch ?? 1.0;
-    utterance.volume = options?.volume ?? 1.0;
-    utterance.lang = options?.lang ?? "en-US";
+      // Generate speech using Gemini Live API
+      const result = await generateSpeechMutation.mutateAsync({ text });
 
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+      // Create audio element and play
+      const audio = new Audio(`data:audio/mp3;base64,${result.audioBase64}`);
+      setCurrentAudio(audio);
 
-    window.speechSynthesis.speak(utterance);
-  }, [isSupported]);
+      audio.onended = () => {
+        setIsSpeaking(false);
+        setCurrentAudio(null);
+      };
 
-  const stop = useCallback(() => {
-    if (isSupported) {
-      window.speechSynthesis.cancel();
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        setCurrentAudio(null);
+        console.error("Failed to play audio");
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error("Text-to-speech failed:", error);
       setIsSpeaking(false);
     }
-  }, [isSupported]);
+  }, [currentAudio, generateSpeechMutation]);
+
+  const stop = useCallback(() => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    setIsSpeaking(false);
+  }, [currentAudio]);
 
   return {
     speak,
     stop,
     isSpeaking,
-    isSupported,
+    isSupported: true, // Gemini API is always supported
   };
 }

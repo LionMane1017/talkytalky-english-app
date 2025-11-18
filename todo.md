@@ -665,3 +665,24 @@
 - [x] Add smooth transitions between states
 - [x] Test voice reactivity and performance (Global status showing!)
 - [x] Save checkpoint as TalkyTalky V2.1
+
+## Phase 36: Fix Practice Page - Replace Old TTS with Gemini Live API
+- [ ] CRITICAL: Remove old TTS speaker button from Practice page
+- [ ] CRITICAL: Implement missing pronunciation API endpoints using Gemini Live API
+- [ ] Replace GeminiVoiceRecorder with Gemini Live API integration
+- [ ] Remove all references to old TTS system
+- [ ] Ensure all audio uses Gemini Live API (no browser TTS, no old endpoints)
+- [ ] Fix API errors: transcribeAudio, analyzePronunciation, generateSpeech
+- [ ] Test pronunciation practice with Gemini Live API
+- [ ] Verify no old TTS is being used anywhere
+- [ ] Save checkpoint as TalkyTalky V2.2
+
+## Phase 37: Gemini 3.0 API Restoration (COMPLETE)
+- [x] Add transcribeAudio endpoint to server/routers.ts
+- [x] Add analyzePronunciation endpoint to server/routers.ts
+- [x] Add generateSpeech endpoint to server/routers.ts
+- [x] Update GeminiVoiceRecorder to use new APIs
+- [x] Replace useTextToSpeech with Gemini Live API version
+- [x] Remove all old browser TTS (speechSynthesis)
+- [x] Test pronunciation practice with Gemini voice
+- [x] Verify speaker button uses Gemini, not old TTS

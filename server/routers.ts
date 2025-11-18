@@ -7,6 +7,8 @@ import { z } from "zod";
 import { achievements } from "@shared/achievements";
 import { assessPronunciation } from "./pronunciationAssessment";
 import * as gemini from "./geminiService";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { TRPCError } from "@trpc/server";
 import { aiCoachRouter } from "./routers/aiCoach";
 import { configRouter } from "./routers/config";
 import { ragRouter } from "./ragRouter";
@@ -76,7 +78,100 @@ export const appRouter = router({
         return result;
       }),
 
-    // OLD TTS AND ANALYSIS REMOVED - Using Gemini Live API for everything now
+    // Gemini Live API Endpoints for Pronunciation Practice
+    transcribeAudio: protectedProcedure
+      .input(z.object({
+        audioBase64: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+
+          const result = await model.generateContent({
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType: "audio/webm", data: input.audioBase64 } },
+                { text: "Transcribe this audio exactly as spoken. Return ONLY the text." }
+              ]
+            }]
+          });
+
+          return { transcript: result.response.text() };
+        } catch (error) {
+          console.error("Transcription failed:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to transcribe audio" });
+        }
+      }),
+
+    analyzePronunciation: protectedProcedure
+      .input(z.object({
+        word: z.string(),
+        audioBase64: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+          const model = genAI.getGenerativeModel({ 
+            model: "gemini-2.0-flash-exp",
+            generationConfig: { responseMimeType: "application/json" } 
+          });
+
+          const result = await model.generateContent({
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType: "audio/webm", data: input.audioBase64 } },
+                { text: `Analyze the pronunciation of the word "${input.word}". 
+                   Provide: 
+                   1) Accuracy score (0-100)
+                   2) Specific feedback
+                   3) Strengths
+                   4) Weaknesses
+                   Return JSON: { "score": number, "feedback": string, "strengths": string, "weaknesses": string }` }
+              ]
+            }]
+          });
+
+          return JSON.parse(result.response.text());
+        } catch (error) {
+          console.error("Analysis failed:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to analyze pronunciation" });
+        }
+      }),
+
+    generateSpeech: protectedProcedure
+      .input(z.object({
+        text: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+          const model = genAI.getGenerativeModel({ 
+            model: "gemini-2.0-flash-exp"
+          });
+
+          const result = await model.generateContent({
+            contents: [{
+              role: "user",
+              parts: [{ text: `Say this clearly and naturally: "${input.text}"` }]
+            }]
+          });
+
+          // Extract audio blob from response
+          const audioPart = result.response.candidates?.[0].content.parts.find(p => p.inlineData?.mimeType?.startsWith('audio'));
+          
+          if (!audioPart || !audioPart.inlineData?.data) {
+              throw new Error("No audio generated");
+          }
+
+          return { audioBase64: audioPart.inlineData.data };
+        } catch (error) {
+          console.error("TTS failed:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to generate speech" });
+        }
+      }),
 
     // Get personalized recommendations
     getRecommendations: publicProcedure
