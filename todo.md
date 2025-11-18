@@ -301,3 +301,19 @@
 - [x] Improve error messages to guide users
 - [x] Add specific handling for network, no-speech, and permission errors
 - [ ] Test speech recognition in production with real users
+
+## Phase 28: CRITICAL - Add Manual Text Input Fallback
+- [ ] Add text input field as alternative to voice recording
+- [ ] Keep voice recording as optional feature
+- [ ] Add toggle button to switch between voice and text input
+- [ ] Maintain same scoring logic for text input
+- [ ] Update UI to show both input methods
+- [ ] Test text input functionality
+
+## Phase 29: Separate Landing Page & Restore Dashboard
+- [x] Copy Landing page code to separate export file
+- [x] Restore Dashboard as homepage (/)
+- [x] Update App.tsx routes
+- [x] Remove Landing page from main app
+- [x] Test Dashboard as homepage
+- [x] Create landing page export package

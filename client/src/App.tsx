@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Landing from "./pages/Landing";
+
 
 function Router() {
   const [location] = useLocation();
@@ -30,7 +30,7 @@ function Router() {
     <>
       <div className="pb-16">
         <Switch>
-          <Route path={"/"} component={Landing} />
+          <Route path={"/"} component={Dashboard} />
           <Route path={"/practice"} component={Practice} />
           <Route path={"/match"} component={MatchCards} />
           <Route path={"/dashboard"} component={Dashboard} />
