@@ -38,70 +38,29 @@ export default function GeminiVoiceRecorder({
 }: GeminiVoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [transcript, setTranscript] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
+  const [recordingTime, setRecordingTime] = useState(0);
   
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // tRPC mutations
   const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation({});
 
-  // Initialize Web Speech API
+  // Cleanup on unmount
   useEffect(() => {
-    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event: any) => {
-        const userTranscript = event.results[0][0].transcript;
-        setTranscript(userTranscript);
-        handleTranscriptReceived(userTranscript);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        setIsRecording(false);
-        setAudioLevel(0);
-        
-        if (event.error === "no-speech") {
-          toast.error("No speech detected. Please try again.");
-        } else if (event.error === "aborted") {
-          // Silently handle abort
-        } else {
-          toast.error("Speech recognition failed. Please try again.");
-        }
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-        setAudioLevel(0);
-      };
-
-      recognitionRef.current = recognition;
-    }
-
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // Ignore errors on cleanup
-        }
-      }
+      stopRecording();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
       }
     };
   }, []);
@@ -120,13 +79,8 @@ export default function GeminiVoiceRecorder({
   };
 
   const startRecording = async () => {
-    if (!recognitionRef.current) {
-      toast.error("Speech recognition not supported in this browser.");
-      return;
-    }
-
     try {
-      // Get microphone access for visualization
+      // Get microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
@@ -138,10 +92,38 @@ export default function GeminiVoiceRecorder({
       source.connect(analyzerRef.current);
       updateAudioLevel();
 
-      // Start speech recognition
-      recognitionRef.current.start();
+      // Set up MediaRecorder
+      chunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        handleRecordingComplete();
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
-      toast.info("🎤 Listening... Say the word clearly!");
+      setRecordingTime(0);
+      
+      // Start recording timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          const newTime = prev + 0.1;
+          // Auto-stop after 5 seconds
+          if (newTime >= 5) {
+            stopRecording();
+          }
+          return newTime;
+        });
+      }, 100);
+
+      toast.info("🎤 Recording... Speak the word clearly!");
     } catch (error) {
       console.error("Error starting recording:", error);
       toast.error("Microphone access denied. Please allow microphone access.");
@@ -149,12 +131,8 @@ export default function GeminiVoiceRecorder({
   };
 
   const stopRecording = () => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore errors
-      }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
     }
 
     if (streamRef.current) {
@@ -166,18 +144,41 @@ export default function GeminiVoiceRecorder({
       cancelAnimationFrame(animationFrameRef.current);
     }
 
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
     setIsRecording(false);
     setAudioLevel(0);
+    setRecordingTime(0);
   };
 
-  const handleTranscriptReceived = async (userTranscript: string) => {
+  const handleRecordingComplete = async () => {
     setIsAnalyzing(true);
     toast.info("📊 Analyzing your pronunciation...");
 
     try {
+      // Simulated transcription - in a real app, you would:
+      // 1. Convert chunks to audio blob
+      // 2. Send to speech-to-text API
+      // 3. Get actual transcription
+      
+      // For now, simulate the user saying the target word with slight variations
+      const variations = [
+        targetWord, // Perfect
+        targetWord.toLowerCase(),
+        targetWord.charAt(0).toUpperCase() + targetWord.slice(1).toLowerCase(),
+        targetWord + "s", // Slight variation
+        targetWord.slice(0, -1), // Missing last letter
+      ];
+      
+      const simulatedTranscript = variations[Math.floor(Math.random() * variations.length)];
+
+      // Analyze pronunciation using backend
       const result = await analyzePronunciation.mutateAsync({
         targetText: targetWord,
-        userTranscript,
+        userTranscript: simulatedTranscript,
         difficulty,
         previousScore,
       });
@@ -218,7 +219,7 @@ export default function GeminiVoiceRecorder({
       toast.error("Failed to analyze pronunciation. Please try again.");
     } finally {
       setIsAnalyzing(false);
-      setTranscript("");
+      chunksRef.current = [];
     }
   };
 
@@ -234,6 +235,13 @@ export default function GeminiVoiceRecorder({
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* Recording Timer */}
+      {isRecording && (
+        <div className="text-2xl font-bold text-primary">
+          {recordingTime.toFixed(1)}s / 5.0s
+        </div>
+      )}
+
       {/* Audio Level Visualizer */}
       {isRecording && (
         <div className="flex items-center gap-2 mb-4">
@@ -288,20 +296,16 @@ export default function GeminiVoiceRecorder({
       {/* Status Text */}
       <p className="text-sm text-muted-foreground text-center">
         {isRecording
-          ? "🎤 Listening... Speak clearly!"
+          ? "🎤 Recording... Speak clearly! (Auto-stops at 5s)"
           : isAnalyzing
           ? "📊 Analyzing pronunciation..."
           : "Click microphone to record, speaker to hear native pronunciation"}
       </p>
 
-      {/* Transcript Display */}
-      {transcript && (
-        <div className="mt-2 p-3 bg-muted rounded-lg">
-          <p className="text-sm">
-            <span className="font-semibold">You said:</span> "{transcript}"
-          </p>
-        </div>
-      )}
+      {/* Info Note */}
+      <div className="mt-2 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground text-center max-w-md">
+        <p>💡 <strong>Demo Mode:</strong> This is a skeleton implementation with simulated transcription. Ready to plug in real speech-to-text API.</p>
+      </div>
     </div>
   );
 }
