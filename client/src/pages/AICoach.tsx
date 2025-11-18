@@ -27,11 +27,12 @@ export default function App() {
     talkyTalkyContext.setAudioLevel(audioLevel);
   }, [status, isSpeaking, audioLevel, talkyTalkyContext]);
 
-  // RAG Integration - Get personalized coaching context
-  const { data: coachingContext, isLoading: isLoadingContext } = trpc.rag.getCoachingContext.useQuery(
-    { currentActivity: "IELTS Speaking Practice with TalkyTalky" },
+  // System RAG Integration - Get Smart Context (User History + IELTS Knowledge)
+  const { data: smartContextData, isLoading: isLoadingContext } = trpc.rag.getSmartContext.useQuery(
+    { currentTopic: "IELTS Speaking Practice" },
     { refetchOnWindowFocus: false, staleTime: 300000 }
   );
+  const smartContext = smartContextData?.context || null;
 
   // RAG Integration - Save session with embeddings
   const utils = trpc.useContext();
@@ -232,8 +233,8 @@ export default function App() {
           },
           systemInstruction: { 
             parts: [{ 
-              text: coachingContext 
-                ? `${TALKYTALKY_SYSTEM_PROMPT}\n\nUSER HISTORY & CONTEXT:\n${coachingContext}\n\nUse this history to personalize your coaching and remember what the user struggled with before.`
+              text: smartContext 
+                ? `${TALKYTALKY_SYSTEM_PROMPT}\n\n${smartContext}`
                 : TALKYTALKY_SYSTEM_PROMPT 
             }] 
           },
@@ -297,8 +298,8 @@ export default function App() {
           )}
         </div>
         <p className="text-center text-gray-400 text-sm">Real-time pronunciation and fluency practice</p>
-        {coachingContext && (
-          <p className="text-center text-green-400 text-xs mt-1">✅ Personalized Memory Active</p>
+        {smartContext && (
+          <p className="text-center text-green-400 text-xs mt-1">✅ Smart Context Active (IELTS + Personal History)</p>
         )}
       </header>
       

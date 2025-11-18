@@ -5,8 +5,9 @@
 
 import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
-import { practiceSessions } from "../drizzle/schema";
+import { practiceSessions, systemKnowledge } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * Generate embedding for text using OpenAI embeddings
@@ -206,6 +207,82 @@ export async function buildCoachingContext(
   context += "Use this information to provide personalized, contextual coaching that builds on their progress and addresses their specific challenges.";
   
   return context;
+}
+
+/**
+ * Get Smart Context: Hybrid RAG combining User History + System Knowledge
+ * This is the key upgrade that transforms TalkyTalky from generic AI to certified IELTS instructor
+ */
+export async function getSmartContext(
+  userId: number,
+  currentTopic: string
+): Promise<string> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[System RAG] Database not available");
+    return "";
+  }
+
+  try {
+    // Initialize Gemini for embeddings
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn("[System RAG] GEMINI_API_KEY not set");
+      return "";
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+
+    // 1. Vectorize the current topic/question
+    const result = await model.embedContent(currentTopic);
+    const queryVector = result.embedding.values;
+
+    // 2. Retrieve USER History (Personal RAG) - Use existing buildCoachingContext!
+    const userContext = await buildCoachingContext(userId, currentTopic);
+
+    // 3. Retrieve SYSTEM Knowledge (Expert RAG)
+    const allKnowledge = await db.select().from(systemKnowledge);
+
+    // Calculate similarity scores and rank
+    const rankedKnowledge = allKnowledge
+      .filter(doc => doc.embedding) // Only docs with embeddings
+      .map(doc => {
+        const docEmbedding = JSON.parse(doc.embedding!);
+        const score = cosineSimilarity(queryVector, docEmbedding);
+        return { ...doc, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3); // Top 3 most relevant knowledge pieces
+
+    // 4. Construct the Ultimate Hybrid Context
+    let smartContext = "";
+
+    // Add System Knowledge first (Expert Foundation)
+    if (rankedKnowledge.length > 0) {
+      smartContext += "📚 EXPERT KNOWLEDGE BASE:\n";
+      rankedKnowledge.forEach(k => {
+        smartContext += `- [${k.category}] ${k.topic}: ${k.content}\n`;
+      });
+      smartContext += "\n";
+    }
+
+    // Add User History (Personalization)
+    if (userContext) {
+      smartContext += "👤 USER HISTORY:\n";
+      smartContext += userContext;
+      smartContext += "\n";
+    }
+
+    // Add Instruction
+    smartContext += "🎯 INSTRUCTION:\n";
+    smartContext += "You are TalkyTalky, a certified IELTS instructor. Use the Expert Knowledge Base to provide accurate, grounded feedback based on official IELTS criteria. Reference the User History to personalize your coaching. If the user makes a mistake related to their past struggles, gently point it out and provide specific improvement strategies.\n";
+
+    return smartContext;
+  } catch (error) {
+    console.error("[System RAG] Error building smart context:", error);
+    // Fallback to user context only
+    return await buildCoachingContext(userId, currentTopic);
+  }
 }
 
 /**

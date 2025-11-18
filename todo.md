@@ -686,3 +686,40 @@
 - [x] Remove all old browser TTS (speechSynthesis)
 - [x] Test pronunciation practice with Gemini voice
 - [x] Verify speaker button uses Gemini, not old TTS
+
+## Phase 38: System RAG (Knowledge Base) Implementation
+- [ ] Create system_knowledge table in database schema
+- [ ] Add IELTS Band Descriptors to knowledge base
+- [ ] Add vocabulary curriculum (Match Game words) to KB
+- [ ] Add pronunciation rules and phoneme guidelines to KB
+- [ ] Create KB query function with semantic search
+- [ ] Merge System RAG with existing User RAG in AI Coach
+- [ ] Update AI Coach to inject curriculum context
+- [ ] Test TalkyTalky with IELTS-specific knowledge
+- [ ] Verify grounded, textbook-quality feedback
+
+
+## Phase 34: TalkyTalky Ultimate Upgrade (System RAG + API Restoration)
+- [x] Add systemKnowledge table to drizzle/schema.ts
+- [x] Run database migration (pnpm db:push)
+- [x] Create scripts/seed-knowledge.ts with IELTS Band Descriptors
+- [x] Run seed script to populate knowledge base
+- [x] Add cosineSimilarity helper function to server/ragService.ts (already existed)
+- [x] Add transcribeAudio endpoint to practice router (real Gemini API) (already existed)
+- [x] Add analyzePronunciation endpoint to practice router (real Gemini API) (already existed)
+- [x] Add generateSpeech endpoint to practice router (real Gemini TTS) (already existed)
+- [x] Add getSmartContext function to server/ragService.ts (Hybrid RAG)
+- [x] Add getSmartContext endpoint to rag router
+- [x] Import systemKnowledge table in ragService.ts
+- [x] Update GeminiVoiceRecorder to use real analyzePronunciation API (already using it)
+- [x] Remove mock/simulated transcription logic from voice recorder (already done)
+- [x] Update Practice page to use generateSpeech API for native audio (using useTextToSpeech hook)
+- [x] Add audio playback with PCM format handling (handled in useTextToSpeech)
+- [x] Update AICoach.tsx to fetch smartContext from backend
+- [x] Inject smartContext into AI Coach system prompt
+- [ ] Test pronunciation practice with real Gemini API
+- [ ] Test AI Coach with System RAG knowledge (IELTS Band Descriptors)
+- [ ] Verify TalkyTalky references official IELTS criteria in responses
+- [x] Verify no TypeScript errors
+- [ ] Check that all features work end-to-end
+- [ ] Create checkpoint: "TalkyTalky Ultimate Upgrade - System RAG + API Restoration Complete"

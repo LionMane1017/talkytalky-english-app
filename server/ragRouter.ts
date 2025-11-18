@@ -4,7 +4,7 @@
 
 import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { buildCoachingContext, saveSessionWithEmbedding } from "./ragService";
+import { buildCoachingContext, saveSessionWithEmbedding, getSmartContext } from "./ragService";
 
 export const ragRouter = router({
   /**
@@ -42,5 +42,18 @@ export const ragRouter = router({
       });
       
       return { success: true };
+    }),
+
+  /**
+   * Get Smart Context: Hybrid RAG (User History + System Knowledge)
+   * This endpoint provides grounded IELTS instruction combined with personalized coaching
+   */
+  getSmartContext: protectedProcedure
+    .input(z.object({
+      currentTopic: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const context = await getSmartContext(ctx.user.id, input.currentTopic);
+      return { context };
     }),
 });

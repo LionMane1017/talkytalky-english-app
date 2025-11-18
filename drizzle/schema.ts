@@ -167,3 +167,19 @@ export const leaderboardEntries = mysqlTable("leaderboardEntries", {
 
 export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
 export type InsertLeaderboardEntry = typeof leaderboardEntries.$inferInsert;
+
+/**
+ * System Knowledge Base table - stores IELTS criteria, vocabulary lists, and curriculum
+ * This enables System RAG for grounded, textbook-quality AI coaching
+ */
+export const systemKnowledge = mysqlTable("systemKnowledge", {
+  id: int("id").autoincrement().primaryKey(),
+  category: varchar("category", { length: 50 }), // e.g. IELTS_RUBRIC, VOCAB_LIST, PRONUNCIATION
+  topic: varchar("topic", { length: 100 }), // e.g. "Band 7 Fluency", "Travel Words"
+  content: text("content").notNull(), // The actual knowledge text
+  embedding: text("embedding"), // Vector representation (stored as JSON array)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SystemKnowledge = typeof systemKnowledge.$inferSelect;
+export type InsertSystemKnowledge = typeof systemKnowledge.$inferInsert;

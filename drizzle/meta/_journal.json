@@ -50,6 +50,13 @@
       "when": 1763469194660,
       "tag": "0006_nebulous_quasar",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1763506176471,
+      "tag": "0007_absurd_namora",
+      "breakpoints": true
     }
   ]
 }
