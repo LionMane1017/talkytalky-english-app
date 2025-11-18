@@ -523,3 +523,4 @@
 
 ## AI Page Gradient Overlay Adjustment
 - [x] Reduce gradient overlay opacity by 70% (from 5% to 1.5%) for better background visibility
+- [x] Remove gradient overlay completely - too saturated, can't see backgrounds

@@ -410,8 +410,7 @@ export default function AICoach() {
             }}
           />
         ))}
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/[0.015] via-pink-500/[0.015] to-purple-600/[0.015]" />
+        {/* Gradient Overlay - Removed for better background visibility */}
       </div>
 
       {/* Content with Glassmorphism */}
