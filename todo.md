@@ -534,3 +534,8 @@
 - [x] Optimize AI Coach page to fit on one mobile screen without scrolling
 - [x] Reduce spacing and padding for mobile viewport (py-3, smaller button 28x28)
 - [x] Make button and key elements visible above the fold (fixed header, mt-32)
+
+## Manual UI Controls
+- [x] Replace auto-hide header with manual collapse/expand toggle button
+- [x] Show small tab when header is collapsed (chevron button at bottom)
+- [x] Add toggle to pause/resume background animation cycling (Pause/Play button)

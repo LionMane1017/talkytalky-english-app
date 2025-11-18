@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, MicOff, MessageCircle, Sparkles, Zap, User } from "lucide-react";
+import { Mic, MicOff, MessageCircle, Sparkles, User, ChevronDown, ChevronUp, Pause, Play, Zap } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
@@ -29,8 +29,8 @@ const backgroundImages = [
 ];
 
 export default function AICoach() {
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [bgAnimationPaused, setBgAnimationPaused] = useState(false);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -60,34 +60,16 @@ export default function AICoach() {
   const generateSpeech = trpc.practice.generateSpeech.useMutation();
   const getAIResponse = trpc.aiCoach.getResponse.useMutation();
 
-   // Auto-hide header on scroll
+  // Cycle background images (only when not paused)
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scrolling down & past threshold
-        setHeaderVisible(false);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up
-        setHeaderVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  // Cycle background images
-  useEffect(() => {
+    if (bgAnimationPaused) return;
+    
     const interval = setInterval(() => {
       setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
     }, 8000); // Change every 8 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [bgAnimationPaused]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -438,10 +420,21 @@ export default function AICoach() {
 
       {/* Content with Glassmorphism */}
       <div className="relative z-10">
-        {/* Header with Heavy Glass Effect - Auto-hiding */}
-        <div className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl py-3 sm:py-4 px-4 transition-transform duration-300 ${
-          headerVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}>
+        {/* Header with Heavy Glass Effect - Manual Toggle */}
+        <div className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl transition-all duration-300 ${
+          headerCollapsed ? '-translate-y-[calc(100%-2rem)]' : 'translate-y-0'
+        } py-3 sm:py-4 px-4`}>
+          {/* Collapse/Expand Toggle Tab */}
+          <button
+            onClick={() => setHeaderCollapsed(!headerCollapsed)}
+            className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-xl bg-white/20 hover:bg-white/30 px-4 py-1 rounded-b-lg border border-t-0 border-white/30 transition-all group"
+          >
+            {headerCollapsed ? (
+              <ChevronDown className="h-4 w-4 text-purple-900" />
+            ) : (
+              <ChevronUp className="h-4 w-4 text-purple-900" />
+            )}
+          </button>
           <div className="container max-w-4xl">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <div className={`backdrop-blur-xl bg-white/20 rounded-2xl px-4 py-2 border border-white/30 transition-all duration-300 ${
@@ -449,15 +442,30 @@ export default function AICoach() {
             }`}>
                 <TalkyLogo />
               </div>
-              <Link href="/profile">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setBgAnimationPaused(!bgAnimationPaused)}
                   className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
+                  title={bgAnimationPaused ? "Resume background animation" : "Pause background animation"}
                 >
-                  <User className="h-5 w-5" />
+                  {bgAnimationPaused ? (
+                    <Play className="h-4 w-4" />
+                  ) : (
+                    <Pause className="h-4 w-4" />
+                  )}
                 </Button>
-              </Link>
+                <Link href="/profile">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
