@@ -655,3 +655,13 @@
 - [x] Test Gemini Live API with RAG integration (UI working perfectly)
 - [x] Test session saving with embeddings (Save Session button implemented)
 - [x] Save checkpoint as TalkyTalky V2
+
+## Phase 35: Voice-Reactive Animations & Visual Feedback
+- [x] Add real-time waveform visualization to AI Coach page
+- [x] Create animated voice bars that react to TalkyTalky's speech
+- [x] Add global status indicator (listening/speaking/idle states)
+- [x] Make Dashboard cards pulse and glow when TalkyTalky speaks
+- [x] Synchronize animations across all pages (TalkyTalkyContext)
+- [x] Add smooth transitions between states
+- [x] Test voice reactivity and performance (Global status showing!)
+- [x] Save checkpoint as TalkyTalky V2.1

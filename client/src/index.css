@@ -388,3 +388,40 @@
     }
   }
 }
+
+/* Neon Glow Effects for Voice-Reactive Animations */
+@layer components {
+  .neon-glow-card {
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+    transition: box-shadow 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  .neon-glow-card:hover {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  }
+
+  .neon-stroke {
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+  }
+
+  .neon-icon {
+    filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.6));
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% {
+      text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+    }
+    50% {
+      text-shadow: 0 0 16px rgba(168, 85, 247, 0.9);
+    }
+  }
+
+  .neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+}

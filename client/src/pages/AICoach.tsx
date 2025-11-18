@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Blob as GenAIBlob } from '@google/genai';
 // Fix: Removed import for `LiveSession` as it is not an exported member of `@google/genai`.
 import { TALKYTALKY_SYSTEM_PROMPT } from '../constants';
@@ -8,11 +8,24 @@ import { decode, encode, decodeAudioData } from '../utils/audio';
 import { MicrophoneIcon, StopIcon } from '../components/Icons';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
+import { VoiceWaveform, GlobalStatusIndicator } from '@/components/VoiceWaveform';
+import { useTalkyTalky } from '@/contexts/TalkyTalkyContext';
 
 export default function App() {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [transcripts, setTranscripts] = useState<Message[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Connect to global TalkyTalky context for cross-page animations
+  const talkyTalkyContext = useTalkyTalky();
+
+  // Sync local state to global context
+  useEffect(() => {
+    talkyTalkyContext.setIsActive(status === AppStatus.CONNECTED);
+    talkyTalkyContext.setIsSpeaking(isSpeaking);
+    talkyTalkyContext.setAudioLevel(audioLevel);
+  }, [status, isSpeaking, audioLevel, talkyTalkyContext]);
 
   // RAG Integration - Get personalized coaching context
   const { data: coachingContext, isLoading: isLoadingContext } = trpc.rag.getCoachingContext.useQuery(
@@ -172,6 +185,7 @@ export default function App() {
             
             const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio && outputAudioContextRef.current) {
+              setIsSpeaking(true);
               const audioBuffer = await decodeAudioData(decode(base64Audio), outputAudioContextRef.current, 24000, 1);
               const source = outputAudioContextRef.current.createBufferSource();
               source.buffer = audioBuffer;
@@ -186,6 +200,9 @@ export default function App() {
               audioSourcesRef.current.add(source);
               source.onended = () => {
                 audioSourcesRef.current.delete(source);
+                if (audioSourcesRef.current.size === 0) {
+                  setIsSpeaking(false);
+                }
               };
             }
 
@@ -247,8 +264,14 @@ export default function App() {
 
   const { text, action, icon, disabled, animate } = getButtonState();
 
+  // Determine global status
+  const globalStatus = status === AppStatus.IDLE ? 'idle' : 
+                       isSpeaking ? 'speaking' : 
+                       audioLevel > 0.1 ? 'listening' : 'thinking';
+
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white font-sans overflow-hidden">
+      <GlobalStatusIndicator status={globalStatus} />
       <header className="p-4 border-b border-gray-700 shadow-lg bg-gray-900/50 backdrop-blur-sm">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
@@ -292,6 +315,15 @@ export default function App() {
              <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <MicrophoneIcon className="w-16 h-16 mb-4"/>
                 <p className="text-lg">Click "Start Live Chat" to begin.</p>
+             </div>
+           )}
+           {status === AppStatus.CONNECTED && (
+             <div className="mt-8">
+               <VoiceWaveform 
+                 audioLevel={audioLevel} 
+                 isActive={status === AppStatus.CONNECTED}
+                 isSpeaking={isSpeaking}
+               />
              </div>
            )}
         </div>

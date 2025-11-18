@@ -12,6 +12,7 @@ import {
   User
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useTalkyTalky } from "@/contexts/TalkyTalkyContext";
 import { trpc } from "@/lib/trpc";
 import { achievements } from "@shared/achievements";
 import { useAchievementChecker } from "@/hooks/useAchievementChecker";
@@ -20,6 +21,7 @@ import { Link } from "wouter";
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme();
+  const { isSpeaking, audioLevel } = useTalkyTalky();
   
   // Check for new achievements
   useAchievementChecker();
@@ -102,7 +104,13 @@ export default function Dashboard() {
 
       <div className="container py-6 max-w-7xl">
         {/* Top Stats Grid with Neon Glow */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div 
+          className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6"
+          style={{
+            transform: isSpeaking ? `scale(${1 + audioLevel * 0.01})` : undefined,
+            transition: 'transform 0.3s ease-out'
+          }}
+        >
           {/* IELTS Ready Meter */}
           <Card className="neon-glow-card">
             <CardHeader className="pb-3">

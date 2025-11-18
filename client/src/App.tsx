@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { TalkyTalkyProvider } from "./contexts/TalkyTalkyContext";
 
 
 function Router() {
@@ -61,15 +62,17 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <TalkyTalkyProvider>
+        <ThemeProvider
+          defaultTheme="light"
+          switchable
+        >
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </TalkyTalkyProvider>
     </ErrorBoundary>
   );
 }
