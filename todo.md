@@ -337,3 +337,8 @@
 - [x] Remove login redirects from all pages
 - [x] Make all features accessible without authentication
 - [x] Test all pages work without any login prompts
+
+## CRITICAL BACKEND FIX
+- [x] Change all backend API procedures from protectedProcedure to publicProcedure
+- [x] Allow guest access to all endpoints
+- [x] Test API endpoints work without authentication

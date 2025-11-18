@@ -23,7 +23,7 @@ export const appRouter = router({
   }),
 
   practice: router({
-    saveSession: protectedProcedure
+    saveSession: publicProcedure
       .input(z.object({
         type: z.enum(["pronunciation", "matching", "ielts_part1", "ielts_part2", "ielts_part3", "mock_test"]),
         difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
@@ -33,6 +33,7 @@ export const appRouter = router({
         duration: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) return { success: false, message: "Guest mode - session not saved" };
         return await db.createPracticeSession({
           userId: ctx.user.id,
           type: input.type,
@@ -44,11 +45,12 @@ export const appRouter = router({
         });
       }),
 
-    getSessions: protectedProcedure
+    getSessions: publicProcedure
       .input(z.object({
         limit: z.number().optional(),
       }).optional())
       .query(async ({ ctx, input }) => {
+        if (!ctx.user) return [];
         return await db.getUserPracticeSessions(ctx.user.id, input?.limit);
       }),
 
@@ -102,7 +104,7 @@ export const appRouter = router({
       }),
 
     // Get personalized recommendations
-    getRecommendations: protectedProcedure
+    getRecommendations: publicProcedure
       .input(z.object({
         weakPhonemes: z.array(z.string()),
         difficulty: z.enum(["beginner", "intermediate", "advanced"]),
@@ -116,18 +118,20 @@ export const appRouter = router({
   }),
 
   progress: router({
-    getStats: protectedProcedure
+    getStats: publicProcedure
       .query(async ({ ctx }) => {
+        if (!ctx.user) return null;
         return await db.getUserProgress(ctx.user.id);
       }),
 
-    updateVocabulary: protectedProcedure
+    updateVocabulary: publicProcedure
       .input(z.object({
         wordId: z.string(),
         correct: z.boolean(),
         score: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) return { success: false, message: "Guest mode - progress not saved" };
         const existing = await db.getVocabularyProgressByWord(ctx.user.id, input.wordId);
         const attempts = (existing?.attempts || 0) + 1;
         const successCount = (existing?.successCount || 0) + (input.correct ? 1 : 0);
@@ -157,8 +161,9 @@ export const appRouter = router({
         });
       }),
 
-    getWordsNeedingReview: protectedProcedure
+    getWordsNeedingReview: publicProcedure
       .query(async ({ ctx }) => {
+        if (!ctx.user) return [];
         return await db.getWordsNeedingReview(ctx.user.id);
       }),
   }),
@@ -169,16 +174,18 @@ export const appRouter = router({
         return achievements;
       }),
 
-    getUserAchievements: protectedProcedure
+    getUserAchievements: publicProcedure
       .query(async ({ ctx }) => {
+        if (!ctx.user) return [];
         return await db.getUserAchievements(ctx.user.id);
       }),
 
-    checkAndUnlock: protectedProcedure
+    checkAndUnlock: publicProcedure
       .input(z.object({
         achievementId: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) return { success: false, message: "Guest mode - achievement not saved" };
         return await db.unlockAchievement(ctx.user.id, input.achievementId);
       }),
   }),
