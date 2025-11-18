@@ -121,9 +121,9 @@ export default function Practice() {
     : 0;
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600";
-    if (score >= 70) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 90) return "text-green-300";
+    if (score >= 70) return "text-yellow-300";
+    return "text-red-300";
   };
 
   const getScoreFeedback = (score: number) => {
@@ -215,16 +215,16 @@ export default function Practice() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
       <div className="container py-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Practice Session</h1>
-            <Badge className="mt-2" variant="secondary">
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Practice Session</h1>
+            <Badge className="mt-2 bg-white/20 text-white border-white/30 backdrop-blur-sm">
               {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
             </Badge>
           </div>
-          <Button variant="outline" onClick={resetSession}>
+          <Button variant="outline" onClick={resetSession} className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm">
             <RotateCcw className="h-4 w-4 mr-2" />
             Change Level
           </Button>
@@ -232,26 +232,26 @@ export default function Practice() {
 
         {/* Session Stats */}
         {sessionScore.length > 0 && (
-          <Card className="mb-6">
+          <Card className="mb-6 bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
             <CardContent className="pt-6">
               <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{attempts}</p>
-                  <p className="text-sm text-muted-foreground">Attempts</p>
+                  <p className="text-2xl font-bold text-white">{attempts}</p>
+                  <p className="text-sm text-white/70">Attempts</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-primary">{averageScore}%</p>
-                  <p className="text-sm text-muted-foreground">Avg Score</p>
+                  <p className="text-2xl font-bold text-yellow-300">{averageScore}%</p>
+                  <p className="text-sm text-white/70">Avg Score</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-accent-foreground">
+                  <p className="text-2xl font-bold text-green-300">
                     {sessionScore.filter(s => s >= 70).length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Good Scores</p>
+                  <p className="text-sm text-white/70">Good Scores</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-chart-3">{wordsRemaining}/{totalWords}</p>
-                  <p className="text-sm text-muted-foreground">Remaining</p>
+                  <p className="text-2xl font-bold text-blue-300">{wordsRemaining}/{totalWords}</p>
+                  <p className="text-sm text-white/70">Remaining</p>
                 </div>
               </div>
             </CardContent>
@@ -259,10 +259,10 @@ export default function Practice() {
         )}
 
         {/* Current Word */}
-        <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20">
+        <Card className="mb-6 bg-white/15 backdrop-blur-lg border-2 border-white/30 shadow-2xl">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-center gap-4">
-              <CardTitle className="text-center text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <CardTitle className="text-center text-6xl font-bold text-white drop-shadow-2xl animate-pulse">
                 {currentWord.word}
               </CardTitle>
               <Button
@@ -270,23 +270,23 @@ export default function Practice() {
                 size="icon"
                 onClick={() => speak(currentWord.word)}
                 disabled={isSpeaking}
-                className="rounded-full hover:bg-primary/20"
+                className="rounded-full bg-white/20 hover:bg-white/30 border-white/40"
               >
-                <Volume2 className={`h-6 w-6 ${isSpeaking ? 'text-primary animate-pulse' : 'text-primary'}`} />
+                <Volume2 className={`h-6 w-6 text-white ${isSpeaking ? 'animate-pulse' : ''}`} />
               </Button>
             </div>
-            <CardDescription className="text-center text-xl font-medium text-foreground/80 mt-2">
+            <CardDescription className="text-center text-2xl font-medium text-yellow-200 mt-3">
               {currentWord.phonetic}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="bg-background/80 p-4 rounded-lg border border-border">
-              <p className="text-sm font-semibold text-primary mb-2">Meaning:</p>
-              <p className="text-foreground text-lg">{currentWord.meaning}</p>
+          <CardContent className="space-y-4">
+            <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-5 rounded-xl border border-white/20 backdrop-blur-sm">
+              <p className="text-sm font-bold text-yellow-300 mb-2 uppercase tracking-wide">📖 Meaning</p>
+              <p className="text-white text-lg leading-relaxed">{currentWord.meaning}</p>
             </div>
-            <div className="bg-background/80 p-4 rounded-lg border border-border">
-              <p className="text-sm font-semibold text-primary mb-2">Example:</p>
-              <p className="text-foreground text-lg italic">"{currentWord.example}"</p>
+            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 p-5 rounded-xl border border-white/20 backdrop-blur-sm">
+              <p className="text-sm font-bold text-yellow-300 mb-2 uppercase tracking-wide">💬 Example</p>
+              <p className="text-white text-lg italic leading-relaxed">"{currentWord.example}"</p>
             </div>
           </CardContent>
         </Card>
@@ -318,28 +318,28 @@ export default function Practice() {
         {/* Score Display */}
         {score !== null && (
           <div className="mt-6 space-y-4">
-            <Card>
+            <Card className="bg-white/15 backdrop-blur-lg border-2 border-white/30 shadow-2xl">
               <CardContent className="pt-6">
                 <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground mb-2">Your Score</p>
-                  <p className={`text-5xl font-bold ${getScoreColor(score)}`}>
+                  <p className="text-sm text-white/70 mb-2 uppercase tracking-wide">Your Score</p>
+                  <p className={`text-6xl font-bold ${getScoreColor(score)} drop-shadow-lg`}>
                     {score}%
                   </p>
-                  <p className="text-lg text-muted-foreground mt-2">
+                  <p className="text-xl text-white mt-3">
                     {getScoreFeedback(score)}
                   </p>
                 </div>
-                <Progress value={score} className="mb-4" />
+                <Progress value={score} className="mb-4 h-3" />
               </CardContent>
             </Card>
             
             <Button 
-              className="w-full gap-2"
+              className="w-full gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg shadow-xl"
               onClick={nextWord}
               size="lg"
             >
               Next Word
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
         )}
