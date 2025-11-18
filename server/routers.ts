@@ -79,7 +79,7 @@ export const appRouter = router({
       }),
 
     // Gemini Live API Endpoints for Pronunciation Practice
-    transcribeAudio: protectedProcedure
+    transcribeAudio: publicProcedure
       .input(z.object({
         audioBase64: z.string(),
       }))
@@ -105,7 +105,7 @@ export const appRouter = router({
         }
       }),
 
-    analyzePronunciation: protectedProcedure
+    analyzePronunciation: publicProcedure
       .input(z.object({
         word: z.string(),
         audioBase64: z.string(),
@@ -141,7 +141,7 @@ export const appRouter = router({
         }
       }),
 
-    generateSpeech: protectedProcedure
+    generateSpeech: publicProcedure
       .input(z.object({
         text: z.string(),
       }))

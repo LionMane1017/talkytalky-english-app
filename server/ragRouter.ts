@@ -48,12 +48,14 @@ export const ragRouter = router({
    * Get Smart Context: Hybrid RAG (User History + System Knowledge)
    * This endpoint provides grounded IELTS instruction combined with personalized coaching
    */
-  getSmartContext: protectedProcedure
+  getSmartContext: publicProcedure
     .input(z.object({
       currentTopic: z.string(),
     }))
     .query(async ({ ctx, input }) => {
-      const context = await getSmartContext(ctx.user.id, input.currentTopic);
+      // Use user ID if logged in, otherwise use guest ID (0)
+      const userId = ctx.user?.id || 0;
+      const context = await getSmartContext(userId, input.currentTopic);
       return { context };
     }),
 });
