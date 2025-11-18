@@ -6,6 +6,7 @@ import * as db from "./db";
 import { z } from "zod";
 import { achievements } from "@shared/achievements";
 import { assessPronunciation } from "./pronunciationAssessment";
+import * as gemini from "./geminiService";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -68,6 +69,49 @@ export const appRouter = router({
         );
         
         return result;
+      }),
+
+    // Gemini AI pronunciation analysis
+    analyzePronunciation: publicProcedure
+      .input(z.object({
+        targetText: z.string(),
+        userTranscript: z.string(),
+        difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+        previousScore: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await gemini.getPronunciationAnalysis(
+          input.targetText,
+          input.userTranscript,
+          input.difficulty || "beginner",
+          input.previousScore
+        );
+      }),
+
+    // Generate native speaker audio
+    generateSpeech: publicProcedure
+      .input(z.object({
+        text: z.string(),
+        accent: z.enum(["US", "UK"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await gemini.generateSpeech(
+          input.text,
+          input.accent || "US"
+        );
+      }),
+
+    // Get personalized recommendations
+    getRecommendations: protectedProcedure
+      .input(z.object({
+        weakPhonemes: z.array(z.string()),
+        difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+      }))
+      .mutation(async ({ input }) => {
+        return await gemini.getPersonalizedRecommendations(
+          input.weakPhonemes,
+          input.difficulty
+        );
       }),
   }),
 

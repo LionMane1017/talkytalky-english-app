@@ -317,3 +317,16 @@
 - [x] Remove Landing page from main app
 - [x] Test Dashboard as homepage
 - [x] Create landing page export package
+
+## Phase 30: Gemini AI Pronunciation Coach Integration
+- [x] Install Gemini AI SDK dependencies
+- [x] Create enhanced Gemini service with coaching prompts
+- [x] Add difficulty-aware feedback system
+- [x] Implement gamification language in responses
+- [x] Create tRPC endpoints for pronunciation analysis (analyzePronunciation, generateSpeech, getRecommendations)
+- [x] Build new voice recorder with Gemini integration
+- [x] Add visual feedback animations (audio level visualizer)
+- [x] Integrate GeminiVoiceRecorder into Practice page
+- [x] Store pronunciation history in database (via saveSession)
+- [ ] Test with real voice input and Gemini API
+- [x] Add Gemini API key to secrets

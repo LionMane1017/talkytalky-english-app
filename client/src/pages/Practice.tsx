@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import PracticeInput from "@/components/PracticeInput";
+import GeminiVoiceRecorder from "@/components/GeminiVoiceRecorder";
 import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
 import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
@@ -293,10 +293,28 @@ export default function Practice() {
           </CardContent>
         </Card>
 
-        {/* Practice Input */}
-        <PracticeInput 
+        {/* Gemini Voice Recorder */}
+        <GeminiVoiceRecorder 
           targetWord={currentWord.word}
-          onSubmit={handleTranscript}
+          difficulty={difficulty}
+          onResult={(result) => {
+            setScore(result.scores.overall);
+            setSessionScore(prev => [...prev, result.scores.overall]);
+            setAttempts(prev => prev + 1);
+            
+            // Save session if user is logged in
+            if (user) {
+              saveSessionMutation.mutate({
+                type: "pronunciation",
+                difficulty,
+                score: result.scores.overall,
+                wordsCompleted: 1,
+                accuracy: result.scores.accuracy,
+                duration: 30,
+              });
+            }
+          }}
+          previousScore={sessionScore[sessionScore.length - 1]}
         />
 
         {/* Score Display */}
