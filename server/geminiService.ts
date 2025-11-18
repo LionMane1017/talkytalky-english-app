@@ -1,8 +1,7 @@
-/**
- * Clean Skeleton API Service
- * All functions return mock/placeholder responses
- * Ready to plug in real API implementations later
- */
+import { GoogleGenAI, Modality, Type } from "@google/genai";
+import { ENV } from "./_core/env";
+
+const ai = new GoogleGenAI({ apiKey: ENV.geminiApiKey });
 
 export interface PronunciationAnalysis {
   success: boolean;
@@ -25,124 +24,156 @@ export interface PronunciationAnalysis {
 }
 
 /**
- * Generate native speaker audio for a word/phrase (MOCK)
- * Returns empty string - audio generation disabled in skeleton
+ * Generates speech from text using Gemini TTS.
  */
-export async function generateSpeech(
-  text: string,
-  accent: "US" | "UK" = "US"
-): Promise<string> {
-  // Mock: Return empty string (no audio generation in skeleton)
-  return "";
+export async function generateSpeech(text: string, accent: 'US' | 'UK' = 'US'): Promise<string> {
+  try {
+    const voice = accent === 'US' ? 'Kore' : 'Puck';
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text: `Speak this word clearly: ${text}` }] }],
+      config: {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: voice },
+          },
+        },
+      },
+    });
+
+    const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (!audioData) {
+      throw new Error("No audio data received from API.");
+    }
+
+    return audioData;
+  } catch (error) {
+    console.error("Error in generateSpeech:", error);
+    throw new Error("Failed to generate speech.");
+  }
 }
 
 /**
- * Transcribe audio to text (MOCK)
- * Returns the expected text for demo purposes
+ * Transcribes audio to text using Gemini 2.5 Flash multimodal.
  */
-export async function transcribeAudio(
-  audioBase64: string,
-  mimeType: string = "audio/webm"
-): Promise<string> {
-  // Mock: Return placeholder transcription
-  return "Mock transcription";
+export async function transcribeAudio(audioBase64: string, mimeType: string): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: {
+        parts: [
+          { inlineData: { data: audioBase64, mimeType } },
+          { text: "Transcribe the spoken word in this audio. Provide only the word." }
+        ]
+      },
+    });
+
+    const transcript = response.text?.trim() || '';
+    return transcript;
+  } catch (error) {
+    console.error("Error in transcribeAudio:", error);
+    throw new Error("Failed to transcribe audio.");
+  }
 }
 
+const pronunciationAnalysisSchema = {
+  type: Type.OBJECT,
+  properties: {
+    success: { type: Type.BOOLEAN },
+    transcript: { type: Type.STRING },
+    targetWord: { type: Type.STRING },
+    scores: {
+      type: Type.OBJECT,
+      properties: {
+        accuracy: { type: Type.NUMBER },
+        fluency: { type: Type.NUMBER },
+        completeness: { type: Type.NUMBER },
+        overall: { type: Type.NUMBER },
+      },
+      required: ["accuracy", "fluency", "completeness", "overall"],
+    },
+    phonemeAnalysis: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          phoneme: { type: Type.STRING },
+          accuracy: { type: Type.NUMBER },
+        },
+        required: ["phoneme", "accuracy"],
+      },
+    },
+    feedback: { type: Type.STRING },
+    suggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+    motivationalMessage: { type: Type.STRING },
+    streakBonus: { type: Type.BOOLEAN },
+  },
+  required: ["success", "transcript", "targetWord", "scores", "phonemeAnalysis", "feedback", "suggestions"],
+};
+
 /**
- * Analyze user's pronunciation with mock scoring (SKELETON)
+ * Analyzes pronunciation using Gemini 2.5 Pro.
  */
 export async function getPronunciationAnalysis(
   targetText: string,
   userTranscript: string,
-  difficulty: "beginner" | "intermediate" | "advanced" = "beginner",
+  difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate',
   previousScore?: number
 ): Promise<PronunciationAnalysis> {
-  
-  // Calculate mock score based on similarity (simple string comparison)
-  const targetLower = targetText.toLowerCase().trim();
-  const userLower = userTranscript.toLowerCase().trim();
-  
-  let baseScore = 50;
-  
-  // Exact match = 95-100
-  if (targetLower === userLower) {
-    baseScore = 95 + Math.floor(Math.random() * 6);
-  }
-  // Contains target word = 70-85
-  else if (userLower.includes(targetLower) || targetLower.includes(userLower)) {
-    baseScore = 70 + Math.floor(Math.random() * 16);
-  }
-  // Similar length = 60-75
-  else if (Math.abs(targetLower.length - userLower.length) <= 3) {
-    baseScore = 60 + Math.floor(Math.random() * 16);
-  }
-  // Otherwise 40-60
-  else {
-    baseScore = 40 + Math.floor(Math.random() * 21);
-  }
+  const prompt = `
+    You are an expert English pronunciation coach. Analyze the user's pronunciation of a target word.
+    
+    Target Word: "${targetText}"
+    User's Transcript: "${userTranscript}"
+    Difficulty Level: ${difficulty}
+    Previous Overall Score: ${previousScore === undefined ? 'N/A' : previousScore}
 
-  const overall = baseScore;
-  const accuracy = Math.min(100, overall + Math.floor(Math.random() * 10) - 5);
-  const fluency = Math.min(100, overall + Math.floor(Math.random() * 10) - 5);
-  const completeness = Math.min(100, overall + Math.floor(Math.random() * 10) - 5);
+    Instructions:
+    1.  Compare the user's transcript to the target word phonetically.
+    2.  Break down the target word into its International Phonetic Alphabet (IPA) phonemes.
+    3.  For each phoneme, assess the accuracy based on the user's transcript. A perfect match in the transcript means 100% accuracy for that phoneme. If a sound is slightly off or missing, reduce the score.
+    4.  Calculate the following scores from 0-100:
+        *   **Accuracy**: Phonetic similarity. How close was "${userTranscript}" to "${targetText}"?
+        *   **Completeness**: Did the user say the whole word? Penalize for missing syllables or final sounds (e.g., "hous" for "house").
+        *   **Fluency**: Estimate based on how well-formed the transcript is. A clean, correct transcript implies higher fluency.
+        *   **Overall**: Weighted average: (accuracy * 0.5) + (fluency * 0.3) + (completeness * 0.2).
+    5.  **Difficulty Adjustment**: 
+        *   'beginner': Add a 10-point bonus to each score (max 100).
+        *   'intermediate': No adjustment.
+        *   'advanced': Subtract 10 points from each score (min 0).
+        *   Apply this adjustment BEFORE calculating the final Overall score.
+    6.  Provide a short, encouraging, and specific **feedback** message.
+    7.  Give 2-3 actionable **suggestions** for improvement.
+    8.  Provide a brief, uplifting **motivationalMessage**.
+    9.  Set **streakBonus** to true if the new overall score is higher than the previousScore.
+    10. If the transcript is empty or nonsensical, assign very low scores and provide feedback to try again.
+    
+    Return the analysis ONLY in the specified JSON format.
+  `;
 
-  // Generate feedback based on score
-  let feedback = "";
-  let motivationalMessage = "";
-  
-  if (overall >= 90) {
-    feedback = "🎉 Excellent pronunciation! You sound like a native speaker!";
-    motivationalMessage = "🔥 You're on fire! Keep up the amazing work!";
-  } else if (overall >= 75) {
-    feedback = "⭐ Great job! Your pronunciation is very good!";
-    motivationalMessage = "💪 You're making excellent progress!";
-  } else if (overall >= 60) {
-    feedback = "👍 Good effort! Keep practicing to improve.";
-    motivationalMessage = "📚 Practice makes perfect!";
-  } else if (overall >= 40) {
-    feedback = "🎯 Not bad! Focus on the sounds and try again.";
-    motivationalMessage = "💡 You're learning! Don't give up!";
-  } else {
-    feedback = "🌱 Keep trying! Listen carefully and practice more.";
-    motivationalMessage = "🚀 Every attempt makes you better!";
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: pronunciationAnalysisSchema,
+      },
+    });
+
+    const jsonText = response.text || '{}';
+    const result = JSON.parse(jsonText);
+    return result;
+  } catch (error) {
+    console.error("Error in analyzePronunciation:", error);
+    throw new Error("Failed to analyze pronunciation.");
   }
-
-  // Mock phoneme analysis
-  const phonemes = targetText.split('').slice(0, 5).map((char, i) => ({
-    phoneme: char,
-    accuracy: Math.min(100, overall + Math.floor(Math.random() * 20) - 10)
-  }));
-
-  // Suggestions based on score
-  const suggestions = [];
-  if (overall < 90) {
-    suggestions.push("Listen to the native pronunciation and repeat");
-    suggestions.push("Focus on pronouncing each syllable clearly");
-  }
-  if (overall < 70) {
-    suggestions.push("Practice the word slowly, then speed up");
-  }
-
-  return {
-    success: true,
-    transcript: userTranscript,
-    targetWord: targetText,
-    scores: {
-      accuracy,
-      fluency,
-      completeness,
-      overall
-    },
-    phonemeAnalysis: phonemes,
-    feedback,
-    suggestions,
-    motivationalMessage,
-    streakBonus: !!(previousScore && previousScore >= 80 && overall >= 80)
-  };
 }
 
 /**
- * Get personalized recommendations (MOCK)
+ * Get personalized recommendations (MOCK - for future implementation)
  */
 export async function getPersonalizedRecommendations(
   weakPhonemes: string[],

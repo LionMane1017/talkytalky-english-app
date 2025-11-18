@@ -394,3 +394,44 @@
 - [x] Adjust container max-width for small screens
 - [x] Reduce padding on mobile
 - [x] Test all pages on mobile viewport
+
+## CRITICAL: Integrate Gemini 2.5 Pro's Complete Backend
+- [x] Install @google/genai SDK
+- [x] Replace geminiService.ts with Gemini 2.5 Pro's implementation
+- [x] Add helper functions (blobToBase64, decodeAudioData)
+- [x] Update tRPC routers to use new Gemini functions
+- [x] Update frontend GeminiVoiceRecorder to use real transcription
+- [ ] Test speech-to-text transcription
+- [ ] Test pronunciation analysis with phoneme breakdown
+- [ ] Test text-to-speech audio playback
+- [ ] Verify all features work end-to-end
+
+## CRITICAL: Fix Backend 500/502 Errors
+- [ ] Check server logs for error details
+- [ ] Fix Gemini API integration causing 500 errors
+- [ ] Test transcribeAudio endpoint
+- [ ] Test generateSpeech endpoint
+- [ ] Verify GEMINI_API_KEY is accessible
+- [ ] Test end-to-end voice recording flow
+
+## DEBUG: Fix Malformed API URLs (502 Errors)
+- [ ] Check tRPC client configuration
+- [ ] Verify API endpoint paths are correct
+- [ ] Fix corrupted URL encoding in frontend requests
+- [ ] Test API calls with proper data
+
+## CRITICAL: Fix Voice Recorder Infinite Loading
+- [ ] Add timeout to Gemini API calls (30 seconds max)
+- [ ] Add better error handling for failed API calls
+- [ ] Fix speaker button not playing audio
+- [ ] Show error messages instead of infinite loading
+- [ ] Test with actual microphone input
+
+## Teacher Audio & Conversational Mode
+- [x] Increase timeout to 60 seconds (Gemini takes 30-40s)
+- [x] Add AI voice feedback after pronunciation analysis (teacher speaks the feedback)
+- [ ] Auto-play teacher pronunciation when word loads
+- [ ] Add audio toggle control (enable/disable auto-play)
+- [ ] Implement AI conversational live mode (continuous listening + voice responses)
+- [ ] Test Gemini TTS audio generation
+- [ ] Fix slow audio generation (optimize API calls)

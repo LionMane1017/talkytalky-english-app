@@ -18,7 +18,8 @@ export default function Practice() {
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
   const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
-  const { speak, isSpeaking } = useTextToSpeech();
+  const [autoPlayAudio, setAutoPlayAudio] = useState(true); // Auto-play teacher audio
+  const { speak, isSpeaking} = useTextToSpeech();
   const { data: user } = trpc.auth.me.useQuery(undefined, {
     retry: false,
     // Don't throw error to prevent redirect

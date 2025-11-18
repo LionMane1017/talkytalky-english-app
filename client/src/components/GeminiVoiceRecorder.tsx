@@ -49,8 +49,27 @@ export default function GeminiVoiceRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // tRPC mutations
-  const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation({});
+  // tRPC mutations with timeout
+  const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation({
+    onError: (error) => {
+      console.error('Pronunciation analysis error:', error);
+      toast.error(`Analysis failed: ${error.message}`);
+      setIsAnalyzing(false);
+    },
+  });
+  const transcribeAudio = trpc.practice.transcribeAudio.useMutation({
+    onError: (error) => {
+      console.error('Transcription error:', error);
+      toast.error(`Transcription failed: ${error.message}`);
+      setIsAnalyzing(false);
+    },
+  });
+  const generateSpeech = trpc.practice.generateSpeech.useMutation({
+    onError: (error) => {
+      console.error('Speech generation error:', error);
+      toast.error(`Audio generation failed: ${error.message}`);
+    },
+  });
 
   // Cleanup on unmount
   useEffect(() => {
@@ -158,27 +177,38 @@ export default function GeminiVoiceRecorder({
     setIsAnalyzing(true);
     toast.info("📊 Analyzing your pronunciation...");
 
+    // Set a 60-second timeout (G    // Set a 60-second timeout (Gemini can take 30-40 seconds)
+    const timeoutId = setTimeout(() => {
+      setIsAnalyzing(false);
+      toast.error('Analysis timed out. Please try again.');
+    }, 60000);
     try {
-      // Simulated transcription - in a real app, you would:
-      // 1. Convert chunks to audio blob
-      // 2. Send to speech-to-text API
-      // 3. Get actual transcription
+      // Convert audio chunks to blob
+      const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
       
-      // For now, simulate the user saying the target word with slight variations
-      const variations = [
-        targetWord, // Perfect
-        targetWord.toLowerCase(),
-        targetWord.charAt(0).toUpperCase() + targetWord.slice(1).toLowerCase(),
-        targetWord + "s", // Slight variation
-        targetWord.slice(0, -1), // Missing last letter
-      ];
-      
-      const simulatedTranscript = variations[Math.floor(Math.random() * variations.length)];
+      // Convert blob to base64
+      const reader = new FileReader();
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          // Remove data:audio/webm;base64, prefix
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+      });
 
-      // Analyze pronunciation using backend
+      // Step 1: Transcribe audio using Gemini
+      const transcript = await transcribeAudio.mutateAsync({
+        audioBase64: base64Audio,
+        mimeType: 'audio/webm',
+      });
+
+      // Step 2: Analyze pronunciation using Gemini
       const result = await analyzePronunciation.mutateAsync({
         targetText: targetWord,
-        userTranscript: simulatedTranscript,
+        userTranscript: transcript,
         difficulty,
         previousScore,
       });
@@ -191,6 +221,25 @@ export default function GeminiVoiceRecorder({
       }
 
       onResult(result as PronunciationResult);
+
+      // Generate AI voice feedback
+      const feedbackText = `Your score is ${result.scores.overall} percent. ${result.feedback}`;
+      const feedbackAudio = await generateSpeech.mutateAsync({
+        text: feedbackText,
+        accent: 'US',
+      });
+
+      // Play AI teacher voice feedback
+      if (feedbackAudio) {
+        const audioContext = new AudioContext();
+        const audioData = Uint8Array.from(atob(feedbackAudio), c => c.charCodeAt(0));
+        const audioBuffer = await audioContext.decodeAudioData(audioData.buffer);
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+        toast.success("🎤 Teacher feedback", { duration: 3000 });
+      }
 
       // Show feedback toast
       if (result.scores.overall >= 90) {
@@ -218,19 +267,56 @@ export default function GeminiVoiceRecorder({
       console.error("Error analyzing pronunciation:", error);
       toast.error("Failed to analyze pronunciation. Please try again.");
     } finally {
+      clearTimeout(timeoutId);
       setIsAnalyzing(false);
       chunksRef.current = [];
     }
   };
 
-  const playNativeAudio = () => {
-    // Use browser's built-in speech synthesis
-    const utterance = new SpeechSynthesisUtterance(targetWord);
-    utterance.lang = "en-US";
-    utterance.rate = 0.8; // Slightly slower for learning
-    
-    toast.info("🔊 Playing native pronunciation...");
-    window.speechSynthesis.speak(utterance);
+  const playNativeAudio = async () => {
+    try {
+      toast.info("🔊 Generating native pronunciation...");
+      
+      // Generate speech using Gemini TTS
+      const audioBase64 = await generateSpeech.mutateAsync({
+        text: targetWord,
+        accent: 'US',
+      });
+
+      if (!audioBase64) {
+        throw new Error('No audio data received');
+      }
+
+      // Decode base64 to audio buffer
+      const audioContext = new AudioContext({ sampleRate: 24000 });
+
+      // Decode base64 string
+      const binaryString = atob(audioBase64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Convert PCM to AudioBuffer
+      const dataInt16 = new Int16Array(bytes.buffer);
+      const frameCount = dataInt16.length;
+      const buffer = audioContext.createBuffer(1, frameCount, 24000);
+      const channelData = buffer.getChannelData(0);
+      for (let i = 0; i < frameCount; i++) {
+        channelData[i] = dataInt16[i] / 32768.0;
+      }
+
+      // Play audio
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.onended = () => toast.success("✅ Audio playback complete");
+      source.start();
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      toast.error('Failed to play audio. Please try again.');
+    }
   };
 
   return (
@@ -302,10 +388,7 @@ export default function GeminiVoiceRecorder({
           : "Click microphone to record, speaker to hear native pronunciation"}
       </p>
 
-      {/* Info Note */}
-      <div className="mt-2 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground text-center max-w-md">
-        <p>💡 <strong>Demo Mode:</strong> This is a skeleton implementation with simulated transcription. Ready to plug in real speech-to-text API.</p>
-      </div>
+
     </div>
   );
 }
