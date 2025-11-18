@@ -11,7 +11,8 @@ import {
   Calendar,
   X,
   Moon,
-  Sun
+  Sun,
+  User
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
@@ -19,6 +20,7 @@ import { achievements } from "@shared/achievements";
 import { useAchievementChecker } from "@/hooks/useAchievementChecker";
 import { Badge } from "@/components/ui/badge";
 import TalkyLogo from "@/components/TalkyLogo";
+import { Link } from "wouter";
 
 export default function Dashboard() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
@@ -73,18 +75,25 @@ export default function Dashboard() {
         <div className="container py-4">
           <div className="flex items-center justify-between">
             <TalkyLogo />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-full"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="rounded-full"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
+              <Link href="/profile">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -476,3 +476,22 @@
 - [x] Create special branding and visual identity for AI Coach
 - [x] Add AI Coach to main navigation with Sparkles icon
 - [x] Test full conversational flow with new personality
+
+## Navigation Reorganization
+- [x] Replace Profile with Learning Paths in bottom navigation
+- [x] Add Profile link to Dashboard header
+- [x] Add Profile link to AI Coach header
+
+## AI Coach Live Chat Mode
+- [x] Convert AI Coach to continuous listening mode (not record-then-process)
+- [x] Implement real-time voice activity detection with silence detection
+- [x] Auto-start listening after AI response completes
+- [x] Add visual indicators for listening/speaking states (audio level bar)
+
+## AI Coach Glassmorphism Redesign
+- [x] Generate matching background image for AI Coach page
+- [x] Create animated background with fading images
+- [x] Add heavy blur effect behind frosted glass layer (60px blur)
+- [x] Implement glassmorphism with backdrop-blur-3xl (frosted ice effect)
+- [x] Redesign cards with strong glass effect (bg-white/15 with border-white/30)
+- [x] Match reference design style with vibrant gradient blend
