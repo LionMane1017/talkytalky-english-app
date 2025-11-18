@@ -1,406 +1,338 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mic, MicOff, MessageCircle, Sparkles, User, ChevronDown, ChevronUp, Pause, Play, Zap } from "lucide-react";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
 import { Link } from "wouter";
+import { GoogleGenAI, LiveServerMessage, Modality, Blob as GenAIBlob } from '@google/genai';
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
+// TalkyTalky System Prompt
+const TALKYTALKY_SYSTEM_PROMPT = `
+You are TalkyTalky, an enthusiastic and supportive English pronunciation coach specializing in IELTS preparation. Your mission is to help learners improve their English speaking skills through encouraging, personalized feedback.
+
+PERSONALITY & TONE:
+- Warm, friendly, and motivating - like a patient teacher who genuinely celebrates student progress.
+- Upbeat and energetic, but never overwhelming.
+- Use conversational language, not overly formal.
+- Sprinkle in light encouragement phrases: "Great job!", "You're improving!", "Let's try this together!".
+- Balance honesty with kindness - point out errors gently while highlighting strengths.
+
+TEACHING APPROACH:
+- Focus on pronunciation accuracy, fluency, vocabulary range, and grammatical accuracy (the 4 IELTS criteria).
+- Break down complex words into syllables and phonemes.
+- Provide specific, actionable feedback (e.g., "Try rounding your lips more for the 'oo' sound").
+- Use the user's transcript to provide targeted feedback on what they actually said.
+- If pronunciation is unclear, ask them to repeat rather than guessing.
+
+INTERACTION STYLE:
+- Keep responses concise (2-3 sentences for feedback).
+- Listen actively and respond naturally to what the user says.
+- If they ask a question about English, answer it clearly and concisely.
+- If they want to practice a specific word, guide them through it.
+- If they're struggling, offer hints or break the word down step-by-step.
+- Keep the conversation flowing - don't just wait for commands.
+
+FEEDBACK STRUCTURE:
+1. Acknowledge their attempt positively.
+2. Provide a score or assessment (e.g., "Your pronunciation was 85% accurate!").
+3. Highlight what they did well.
+4. Give 1-2 specific improvements.
+5. End with encouragement or next steps.
+
+BOUNDARIES:
+- Stay focused on English learning and IELTS preparation.
+- If asked off-topic questions, politely redirect: "I'm here to help with your English! Let's get back to practice."
+- Don't provide medical, legal, or financial advice.
+`;
+
+// Audio utility functions
+function decode(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 }
 
-const backgroundImages = [
-  '/bg1.webp',
-  '/bg2.jpg',
-  '/bg3.jpg',
-  '/bg4.jpg',
-  '/bg5.jpg',
-  '/bg6.jpg',
-  '/bg7.jpg',
-  '/bg8.jpg',
-  '/bg9.jpg',
-  '/bg10.jpg',
-];
+async function decodeAudioData(
+  data: Uint8Array,
+  ctx: AudioContext,
+  sampleRate: number,
+  numChannels: number,
+): Promise<AudioBuffer> {
+  const dataInt16 = new Int16Array(data.buffer);
+  const frameCount = dataInt16.length / numChannels;
+  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = buffer.getChannelData(channel);
+    for (let i = 0; i < frameCount; i++) {
+      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+    }
+  }
+  return buffer;
+}
+
+function encode(bytes: Uint8Array): string {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+enum AppStatus {
+  IDLE = 'idle',
+  CONNECTING = 'connecting',
+  LISTENING = 'listening',
+  SPEAKING = 'speaking',
+  STOPPING = 'stopping',
+  ERROR = 'error',
+}
+
+interface ConversationTurn {
+  speaker: 'user' | 'model';
+  text: string;
+}
+
+interface CurrentTranscription {
+  user: string;
+  model: string;
+}
 
 export default function AICoach() {
+  const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
+  const [conversation, setConversation] = useState<ConversationTurn[]>([]);
+  const [currentTranscription, setCurrentTranscription] = useState<CurrentTranscription>({ user: '', model: '' });
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [bgAnimationPaused, setBgAnimationPaused] = useState(false);
-  
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: "Hi there! I'm TalkyTalky, your personal English pronunciation coach! 🎤✨ Click 'Start Live Chat' and we can have a real conversation. I'll listen and respond to you naturally!",
-      timestamp: new Date(),
-    },
-  ]);
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [audioLevel, setAudioLevel] = useState(0);
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
-  
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  const sessionPromiseRef = useRef<Promise<any> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const analyzerRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | undefined>(undefined);
-  const streamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const outputAudioContextRef = useRef<AudioContext | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const microphoneStreamRef = useRef<MediaStream | null>(null);
+  const nextStartTimeRef = useRef<number>(0);
+  const audioSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
-  const transcribeAudio = trpc.practice.transcribeAudio.useMutation();
-  const generateSpeech = trpc.practice.generateSpeech.useMutation();
-  const getAIResponse = trpc.aiCoach.getResponse.useMutation();
+  // Background images
+  const backgroundImages = [
+    '/bg1.jpg',
+    '/bg2.jpg',
+    '/bg3.jpg',
+    '/bg4.jpg',
+    '/bg5.jpg',
+    '/bg6.jpg',
+    '/bg7.jpg',
+    '/bg8.jpg',
+    '/bg9.jpg',
+    '/bg10.jpg',
+  ];
 
-  // Cycle background images (only when not paused)
+  // Background animation
   useEffect(() => {
     if (bgAnimationPaused) return;
     
     const interval = setInterval(() => {
       setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
-    }, 8000); // Change every 8 seconds
+    }, 8000);
 
     return () => clearInterval(interval);
-  }, [bgAnimationPaused]);
+  }, [bgAnimationPaused, backgroundImages.length]);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const resetState = () => {
+    setStatus(AppStatus.IDLE);
+    setConversation([]);
+    setCurrentTranscription({ user: '', model: '' });
+    sessionPromiseRef.current = null;
+    nextStartTimeRef.current = 0;
+  };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopLiveMode();
-    };
+  const stopSession = useCallback(async () => {
+    console.log('Attempting to stop session...');
+    setStatus(AppStatus.STOPPING);
+
+    if (sessionPromiseRef.current) {
+      const session = await sessionPromiseRef.current;
+      session.close();
+      sessionPromiseRef.current = null;
+    }
+
+    if (microphoneStreamRef.current) {
+      microphoneStreamRef.current.getTracks().forEach(track => track.stop());
+      microphoneStreamRef.current = null;
+    }
+
+    if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.disconnect();
+      scriptProcessorRef.current = null;
+    }
+
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      await audioContextRef.current.close();
+    }
+    if (outputAudioContextRef.current && outputAudioContextRef.current.state !== 'closed') {
+      await outputAudioContextRef.current.close();
+    }
+
+    audioSourcesRef.current.forEach(source => source.stop());
+    audioSourcesRef.current.clear();
+
+    resetState();
+    console.log('Session stopped and resources cleaned up.');
+    toast.success("Chat ended");
   }, []);
 
-  // Helper function to create WAV file from PCM data
-  const createWavBlob = (pcmData: Uint8Array, sampleRate: number, numChannels: number, bitsPerSample: number): Blob => {
-    const dataLength = pcmData.length;
-    const buffer = new ArrayBuffer(44 + dataLength);
-    const view = new DataView(buffer);
-
-    const writeString = (offset: number, string: string) => {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    };
-
-    writeString(0, 'RIFF');
-    view.setUint32(4, 36 + dataLength, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true);
-    view.setUint16(32, numChannels * (bitsPerSample / 8), true);
-    view.setUint16(34, bitsPerSample, true);
-    writeString(36, 'data');
-    view.setUint32(40, dataLength, true);
-
-    for (let i = 0; i < dataLength; i++) {
-      view.setUint8(44 + i, pcmData[i]);
-    }
-
-    return new Blob([buffer], { type: 'audio/wav' });
-  };
-
-  // Visualize audio level
-  const visualizeAudio = () => {
-    if (!analyzerRef.current) return;
-
-    const dataArray = new Uint8Array(analyzerRef.current.frequencyBinCount);
-    analyzerRef.current.getByteFrequencyData(dataArray);
-
-    const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-    const level = Math.min(100, (average / 128) * 100);
-    setAudioLevel(level);
-
-    // Detect silence (auto-stop after 2 seconds of silence)
-    if (level < 5 && isListening && !isSpeaking) {
-      if (!silenceTimeoutRef.current) {
-        silenceTimeoutRef.current = setTimeout(() => {
-          stopListening();
-        }, 2000);
-      }
-    } else {
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
-        silenceTimeoutRef.current = null;
-      }
-    }
-
-    animationFrameRef.current = requestAnimationFrame(visualizeAudio);
-  };
-
-  // Start live mode
-  const startLiveMode = async () => {
+  const startSession = useCallback(async () => {
+    setStatus(AppStatus.CONNECTING);
+    toast.info("Connecting to TalkyTalky...");
+    
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-
-      // Set up audio context for visualization
-      audioContextRef.current = new AudioContext();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      analyzerRef.current = audioContextRef.current.createAnalyser();
-      analyzerRef.current.fftSize = 256;
-      source.connect(analyzerRef.current);
-
-      setIsLiveMode(true);
-      toast.success("Live chat started! Start speaking naturally.");
-      
-      // Auto-start listening
-      startListening();
-
-    } catch (error) {
-      console.error('Error starting live mode:', error);
-      toast.error('Could not access microphone. Please check permissions.');
-    }
-  };
-
-  // Stop live mode
-  const stopLiveMode = () => {
-    stopListening();
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = undefined;
-    }
-
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-
-    setIsLiveMode(false);
-    setIsListening(false);
-    setIsSpeaking(false);
-    setAudioLevel(0);
-  };
-
-  // Start listening
-  const startListening = () => {
-    if (!streamRef.current || isSpeaking) return;
-
-    try {
-      const mediaRecorder = new MediaRecorder(streamRef.current);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        await processRecording();
-      };
-
-      mediaRecorder.start();
-      setIsListening(true);
-      visualizeAudio();
-
-    } catch (error) {
-      console.error('Error starting listening:', error);
-    }
-  };
-
-  // Stop listening
-  const stopListening = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
-    setIsListening(false);
-    setAudioLevel(0);
-
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-      silenceTimeoutRef.current = null;
-    }
-  };
-
-  // Process recording
-  const processRecording = async () => {
-    if (chunksRef.current.length === 0) return;
-
-    try {
-      const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-      const reader = new FileReader();
-
-      const base64Audio = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          const base64 = result.split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(audioBlob);
-      });
-
-      // Transcribe audio
-      const transcript = await transcribeAudio.mutateAsync({
-        audioBase64: base64Audio,
-        mimeType: 'audio/webm',
-      });
-
-      if (transcript && transcript.trim()) {
-        // Add user message
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          role: "user",
-          content: transcript,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, userMessage]);
-
-        // Get AI response
-        await handleAIResponse(transcript);
-      } else {
-        // No speech detected, restart listening
-        if (isLiveMode) {
-          setTimeout(() => startListening(), 500);
-        }
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API key not found");
       }
 
-    } catch (error) {
-      console.error('Error processing recording:', error);
-      // Restart listening on error
-      if (isLiveMode) {
-        setTimeout(() => startListening(), 500);
-      }
-    }
-  };
+      const ai = new GoogleGenAI({ apiKey });
+      let tempUserInput = '';
+      let tempModelOutput = '';
 
-  // Get AI response and speak it
-  const handleAIResponse = async (userInput: string) => {
-    try {
-      // Add "thinking" message immediately for better UX
-      const thinkingMessage: Message = {
-        id: `thinking-${Date.now()}`,
-        role: "assistant",
-        content: "💭 Thinking...",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, thinkingMessage]);
-      setIsSpeaking(true);
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
+      outputAudioContextRef.current = new AudioContext({ sampleRate: 24000 });
+      nextStartTimeRef.current = 0;
 
-      // Get conversational response from TalkyTalky
-      const conversationHistory = messages.slice(-10).map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      sessionPromiseRef.current = ai.live.connect({
+        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        config: {
+          responseModalities: [Modality.AUDIO],
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+          },
+          systemInstruction: TALKYTALKY_SYSTEM_PROMPT,
+        },
+        callbacks: {
+          onopen: async () => {
+            console.log('Session opened.');
+            setStatus(AppStatus.LISTENING);
+            toast.success("Connected! Start speaking...");
+            
+            microphoneStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioContextRef.current!.createMediaStreamSource(microphoneStreamRef.current);
+            scriptProcessorRef.current = audioContextRef.current!.createScriptProcessor(4096, 1, 1);
+            
+            scriptProcessorRef.current.onaudioprocess = (audioProcessingEvent) => {
+              const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+              const l = inputData.length;
+              const int16 = new Int16Array(l);
+              for (let i = 0; i < l; i++) {
+                int16[i] = inputData[i] * 32768;
+              }
+              const pcmBlob: GenAIBlob = {
+                data: encode(new Uint8Array(int16.buffer)),
+                mimeType: 'audio/pcm;rate=16000',
+              };
+              sessionPromiseRef.current!.then((session) => {
+                session.sendRealtimeInput({ media: pcmBlob });
+              });
+            };
 
-      // Start both API calls in parallel for faster response
-      const aiResponsePromise = getAIResponse.mutateAsync({
-        userMessage: userInput,
-        conversationHistory,
+            source.connect(scriptProcessorRef.current);
+            scriptProcessorRef.current.connect(audioContextRef.current!.destination);
+          },
+          onmessage: async (message: LiveServerMessage) => {
+            if (status === AppStatus.STOPPING) return;
+
+            // Handle transcription
+            if (message.serverContent?.inputTranscription) {
+              tempUserInput += message.serverContent.inputTranscription.text;
+              setCurrentTranscription(prev => ({ ...prev, user: tempUserInput }));
+            }
+            if (message.serverContent?.outputTranscription) {
+              tempModelOutput += message.serverContent.outputTranscription.text;
+              setCurrentTranscription(prev => ({ ...prev, model: tempModelOutput }));
+            }
+
+            // Handle audio output
+            const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+            if (base64Audio && outputAudioContextRef.current) {
+              setStatus(AppStatus.SPEAKING);
+              const audioBuffer = await decodeAudioData(decode(base64Audio), outputAudioContextRef.current, 24000, 1);
+              nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputAudioContextRef.current.currentTime);
+              
+              const source = outputAudioContextRef.current.createBufferSource();
+              source.buffer = audioBuffer;
+              source.connect(outputAudioContextRef.current.destination);
+              source.start(nextStartTimeRef.current);
+              nextStartTimeRef.current += audioBuffer.duration;
+              
+              audioSourcesRef.current.add(source);
+              source.onended = () => {
+                const wasDeleted = audioSourcesRef.current.delete(source);
+                if (wasDeleted && audioSourcesRef.current.size === 0) {
+                  setStatus(AppStatus.LISTENING);
+                }
+              };
+            }
+
+            // Handle interruption
+            const interrupted = message.serverContent?.interrupted;
+            if (interrupted) {
+              audioSourcesRef.current.forEach(source => source.stop());
+              audioSourcesRef.current.clear();
+              nextStartTimeRef.current = 0;
+              setStatus(AppStatus.LISTENING);
+            }
+
+            // Finalize turn
+            if (message.serverContent?.turnComplete) {
+              setConversation(prev => [
+                ...prev,
+                { speaker: 'user', text: tempUserInput },
+                { speaker: 'model', text: tempModelOutput },
+              ]);
+              tempUserInput = '';
+              tempModelOutput = '';
+              setCurrentTranscription({ user: '', model: '' });
+            }
+          },
+          onclose: () => {
+            console.log('Session closed.');
+            if (status !== AppStatus.STOPPING) {
+              stopSession();
+            }
+          },
+          onerror: (e: ErrorEvent) => {
+            console.error('Session error:', e);
+            setStatus(AppStatus.ERROR);
+            toast.error("Connection error");
+            stopSession();
+          },
+        },
       });
-
-      const aiResponse = await aiResponsePromise;
-      const responseText = aiResponse.response;
-
-      // Remove thinking message and add real response
-      setMessages(prev => prev.filter(m => m.id !== thinkingMessage.id));
-
-      // Generate speech while user reads the text response
-      const audioDataPromise = generateSpeech.mutateAsync({
-        text: responseText,
-        accent: 'US',
-      });
-
-      const audioData = await audioDataPromise;
-
-      // Add assistant message
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: responseText,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-
-      if (audioData) {
-        const binaryString = atob(audioData);
-        const pcmData = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          pcmData[i] = binaryString.charCodeAt(i);
-        }
-
-        const wavBlob = createWavBlob(pcmData, 24000, 1, 16);
-        const audioUrl = URL.createObjectURL(wavBlob);
-        const audio = new Audio(audioUrl);
-        currentAudioRef.current = audio;
-
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          setIsSpeaking(false);
-          currentAudioRef.current = null;
-          
-          // Auto-restart listening after AI finishes speaking
-          if (isLiveMode) {
-            setTimeout(() => startListening(), 500);
-          }
-        };
-
-        audio.onerror = (e) => {
-          console.error('Audio playback error:', e);
-          URL.revokeObjectURL(audioUrl);
-          setIsSpeaking(false);
-          currentAudioRef.current = null;
-          
-          // Restart listening even on error
-          if (isLiveMode) {
-            setTimeout(() => startListening(), 500);
-          }
-        };
-
-        await audio.play();
-      } else {
-        setIsSpeaking(false);
-        // Restart listening if no audio
-        if (isLiveMode) {
-          setTimeout(() => startListening(), 500);
-        }
-      }
-
     } catch (error) {
-      console.error('Error getting AI response:', error);
-      toast.error('Failed to get AI response. Please try again.');
-      setIsSpeaking(false);
-      
-      // Restart listening on error
-      if (isLiveMode) {
-        setTimeout(() => startListening(), 500);
-      }
+      console.error('Failed to start session:', error);
+      setStatus(AppStatus.ERROR);
+      toast.error("Failed to connect");
     }
-  };
+  }, [stopSession, status]);
+
+  const isSpeaking = status === AppStatus.SPEAKING;
+  const isListening = status === AppStatus.LISTENING;
+  const isActive = status === AppStatus.LISTENING || status === AppStatus.SPEAKING;
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-20">
-      {/* Animated Background with Heavy Blur */}
-      <div className="fixed inset-0 z-0">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10">
         {backgroundImages.map((img, index) => (
           <div
             key={img}
@@ -411,220 +343,252 @@ export default function AICoach() {
               backgroundImage: `url(${img})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: 'blur(20px) brightness(1.05)',
+              filter: 'blur(20px)',
             }}
           />
         ))}
-        {/* Gradient Overlay - Removed for better background visibility */}
       </div>
 
-      {/* Content with Glassmorphism */}
-      <div className="relative z-10">
-        {/* Header with Heavy Glass Effect - Manual Toggle */}
-        <div className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl transition-all duration-300 ${
-          headerCollapsed ? '-translate-y-[calc(100%-2rem)]' : 'translate-y-0'
-        } py-3 sm:py-4 px-4`}>
-          {/* Collapse/Expand Toggle Tab */}
-          <button
-            onClick={() => setHeaderCollapsed(!headerCollapsed)}
-            className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-xl bg-white/20 hover:bg-white/30 px-4 py-1 rounded-b-lg border border-t-0 border-white/30 transition-all group"
-          >
-            {headerCollapsed ? (
-              <ChevronDown className="h-4 w-4 text-purple-900" />
-            ) : (
-              <ChevronUp className="h-4 w-4 text-purple-900" />
-            )}
-          </button>
-          <div className="container max-w-4xl">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className={`backdrop-blur-xl bg-white/20 rounded-2xl px-4 py-2 border border-white/30 transition-all duration-300 ${
+      {/* Header */}
+      <div
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
+          headerCollapsed ? '-translate-y-full' : 'translate-y-0'
+        }`}
+      >
+        <div className="backdrop-blur-xl bg-white/20 border-b border-white/30 py-3 px-4">
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            <div className={`flex items-center gap-3 ${
               isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
             }`}>
-                <TalkyLogo />
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setBgAnimationPaused(!bgAnimationPaused)}
-                  className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
-                  title={bgAnimationPaused ? "Resume background animation" : "Pause background animation"}
-                >
-                  {bgAnimationPaused ? (
-                    <Play className="h-4 w-4" />
-                  ) : (
-                    <Pause className="h-4 w-4" />
-                  )}
-                </Button>
-                <Link href="/profile">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
+              <TalkyLogo />
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
-                <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 drop-shadow-md">
-                  AI Coach
-                </h1>
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
-              </div>
-              <p className="text-purple-800 text-xs sm:text-sm font-medium drop-shadow">
-                Live conversation with your personal English coach
-              </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBgAnimationPaused(!bgAnimationPaused)}
+                className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
+                title={bgAnimationPaused ? "Resume background animation" : "Pause background animation"}
+              >
+                {bgAnimationPaused ? (
+                  <Play className="h-4 w-4" />
+                ) : (
+                  <Pause className="h-4 w-4" />
+                )}
+              </Button>
+              <Link href="/profile">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-purple-900 border border-white/30 rounded-full"
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 drop-shadow-lg">
+                AI Coach
+              </h1>
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
+            </div>
+            <p className="text-purple-800 text-sm sm:text-base font-medium drop-shadow">
+              Live conversation with your personal English coach
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* Chat Container with Frosted Glass */}
-        <div className="container max-w-4xl px-4 py-3 sm:py-4 mt-32 sm:mt-36">
-          <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-2xl border-2 transition-all duration-300 ${
-            isSpeaking ? 'animate-[border-glow_1.5s_ease-in-out_infinite]' : ''
+      {/* Collapse/Expand Button */}
+      <button
+        onClick={() => setHeaderCollapsed(!headerCollapsed)}
+        className="fixed top-2 right-2 z-[60] backdrop-blur-xl bg-white/30 hover:bg-white/40 text-purple-900 border border-white/40 rounded-full p-2 transition-all"
+      >
+        {headerCollapsed ? (
+          <ChevronDown className="h-5 w-5" />
+        ) : (
+          <ChevronUp className="h-5 w-5" />
+        )}
+      </button>
+
+      {/* Main Content */}
+      <div className={`container mx-auto px-4 ${headerCollapsed ? 'pt-16' : 'pt-32'} pb-24 transition-all duration-300`}>
+        <div className="max-w-4xl mx-auto space-y-4">
+          {/* Live Conversation Card */}
+          <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-2xl transition-all duration-500 ${
+            isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
           }`}>
-            <CardHeader className="border-b border-white/20 backdrop-blur-xl bg-white/10 py-3 sm:py-4">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-purple-900 flex items-center gap-2 font-bold">
-                    <MessageCircle className="h-5 w-5 text-purple-700" />
-                    Live Conversation
-                  </CardTitle>
-                  <CardDescription className="text-purple-800 font-medium">
-                    {isLiveMode 
-                      ? isSpeaking 
-                        ? "TalkyTalky is speaking..."
-                        : isListening
-                        ? "Listening to you..."
-                        : "Processing..."
-                      : "Start a live chat with TalkyTalky"
-                    }
-                  </CardDescription>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-purple-700" />
+                  <CardTitle className="text-purple-900">Live Conversation</CardTitle>
                 </div>
-                <Badge 
-                  variant="secondary" 
-                  className={`${
-                    isLiveMode 
-                      ? 'bg-gradient-to-r from-green-400 to-emerald-400' 
-                      : 'bg-gradient-to-r from-purple-400 to-pink-400'
-                  } text-white border-0 shadow-lg backdrop-blur-xl`}
-                >
-                  <Zap className="h-3 w-3 mr-1" />
-                  {isLiveMode ? 'Live' : 'Offline'}
+                <Badge variant="secondary" className={`${
+                  isActive ? 'bg-green-500/80 text-white' : 'bg-gray-400/80 text-white'
+                }`}>
+                  {isActive ? 'Online' : 'Offline'}
                 </Badge>
               </div>
+              <CardDescription className="text-purple-800">
+                {isActive ? 'Chat with TalkyTalky in real-time' : 'Start a live chat with TalkyTalky'}
+              </CardDescription>
             </CardHeader>
+            <CardContent className="space-y-4">
+              {!isActive && (
+                <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-lg p-4 text-purple-900">
+                  <p className="text-sm sm:text-base">
+                    Hi there! I'm TalkyTalky, your personal English pronunciation coach! ✨🎤 Click 'Start Live Chat' and we can have a real conversation. I'll listen and respond to you naturally!
+                  </p>
+                </div>
+              )}
 
-            <CardContent className="p-3 sm:p-4">
-              {/* Messages */}
-              <div className="space-y-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto p-2 sm:p-3 mb-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
+              {/* Conversation History */}
+              {conversation.length > 0 && (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {conversation.map((turn, index) => (
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-lg ${
-                        message.role === "user"
-                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                          : "backdrop-blur-2xl bg-white/25 text-purple-900 border-2 border-white/40"
+                      key={index}
+                      className={`p-3 rounded-lg ${
+                        turn.speaker === 'user'
+                          ? 'bg-purple-500/20 ml-8'
+                          : 'bg-pink-500/20 mr-8'
                       }`}
                     >
-                      <p className="text-sm sm:text-base font-medium">{message.content}</p>
+                      <p className="text-sm font-semibold text-purple-900">
+                        {turn.speaker === 'user' ? 'You' : 'TalkyTalky'}
+                      </p>
+                      <p className="text-sm text-purple-800">{turn.text}</p>
                     </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {/* Live Mode Controls */}
+              {/* Current Transcription */}
+              {isActive && (currentTranscription.user || currentTranscription.model) && (
+                <div className="space-y-2">
+                  {currentTranscription.user && (
+                    <div className="p-3 rounded-lg bg-purple-500/20 ml-8">
+                      <p className="text-sm font-semibold text-purple-900">You (live)</p>
+                      <p className="text-sm text-purple-800">{currentTranscription.user}</p>
+                    </div>
+                  )}
+                  {currentTranscription.model && (
+                    <div className="p-3 rounded-lg bg-pink-500/20 mr-8">
+                      <p className="text-sm font-semibold text-purple-900">TalkyTalky (live)</p>
+                      <p className="text-sm text-purple-800">{currentTranscription.model}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Status Indicator */}
+              {isActive && (
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl bg-white/30 border border-white/40">
+                    {isSpeaking ? (
+                      <>
+                        <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" />
+                        <span className="text-sm font-medium text-purple-900">TalkyTalky is speaking...</span>
+                      </>
+                    ) : isListening ? (
+                      <>
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-sm font-medium text-purple-900">Listening...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                        <span className="text-sm font-medium text-purple-900">Processing...</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Start/Stop Button */}
               <div className="flex flex-col items-center gap-4">
-                {/* Audio Level Visualizer */}
-                {isLiveMode && (
-                  <div className={`w-full backdrop-blur-xl bg-white/20 rounded-2xl p-4 border border-white/30 transition-all duration-300 ${
-                    isSpeaking ? 'animate-[glow-pulse-pink_1.5s_ease-in-out_infinite]' : ''
-                  }`}>
-                    <div className="h-4 bg-white/30 rounded-full overflow-hidden shadow-inner">
-                      <div
-                        className={`h-full transition-all duration-100 shadow-lg ${
-                          isSpeaking 
-                            ? 'bg-gradient-to-r from-green-400 to-emerald-400'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                        }`}
-                        style={{ width: `${audioLevel}%` }}
-                      />
-                    </div>
-                    <p className="text-center text-purple-900 text-sm mt-3 font-bold drop-shadow">
-                      {isSpeaking ? '🔊 TalkyTalky is speaking...' : isListening ? '🎤 Listening... (pauses auto-detect)' : '⏸️ Processing...'}
-                    </p>
-                  </div>
-                )}
-
-                {/* Start/Stop Button - Big Sexy Glowing Circle */}
                 <button
-                  onClick={isLiveMode ? stopLiveMode : startLiveMode}
+                  onClick={isActive ? stopSession : startSession}
+                  disabled={status === AppStatus.CONNECTING || status === AppStatus.STOPPING}
                   className={`relative group transition-all duration-300 outline-none focus:outline-none focus-visible:outline-none border-0 ring-0 focus:ring-0 focus-visible:ring-0 overflow-hidden ${
-                    isLiveMode ? '' : 'animate-[button-glow_2s_ease-in-out_infinite]'
+                    !isActive ? 'animate-[button-glow_2s_ease-in-out_infinite]' : ''
                   }`}
                   style={{ outline: 'none', boxShadow: 'none' }}
                 >
                   <div className={`w-28 h-28 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isLiveMode
-                      ? "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105"
-                      : "bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 hover:scale-110"
-                  } border-4 border-white/50 shadow-2xl group-hover:border-white/70`}
-                  >
-                    {isLiveMode ? (
+                    isActive
+                      ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 group-hover:scale-110'
+                  } shadow-2xl`}>
+                    {isActive ? (
                       <MicOff className="h-12 w-12 sm:h-16 sm:w-16 text-white drop-shadow-lg" />
                     ) : (
-                      <Mic className="h-12 w-12 sm:h-16 sm:w-16 text-white drop-shadow-lg animate-pulse" />
+                      <Mic className="h-12 w-12 sm:h-16 sm:w-16 text-white drop-shadow-lg" />
                     )}
                   </div>
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                    <span className="text-purple-900 font-bold text-sm drop-shadow backdrop-blur-xl bg-white/30 px-4 py-1 rounded-full border border-white/40">
-                      {isLiveMode ? 'End Chat' : 'Start Chat'}
-                    </span>
-                  </div>
                 </button>
-
-                <p className="text-purple-900 text-sm text-center max-w-md font-medium drop-shadow backdrop-blur-xl bg-white/20 rounded-full px-6 py-2 border border-white/30">
-                  {isLiveMode 
-                    ? "Speak naturally! TalkyTalky will detect when you pause and respond automatically."
-                    : "Click to start a live conversation. TalkyTalky will listen and respond in real-time!"
-                  }
-                </p>
+                
+                <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-full px-6 py-3 text-center max-w-md">
+                  <p className="text-purple-900 text-sm sm:text-base font-medium">
+                    {isActive
+                      ? 'Click to stop the conversation. TalkyTalky will say goodbye!'
+                      : status === AppStatus.CONNECTING
+                      ? 'Connecting to TalkyTalky...'
+                      : status === AppStatus.STOPPING
+                      ? 'Ending conversation...'
+                      : 'Click to start a live conversation. TalkyTalky will listen and respond in real-time!'}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Features Grid with Glass Effect */}
-          <div className="grid sm:grid-cols-3 gap-4 mt-6">
-            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
-              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-xl transition-all duration-500 ${
+              isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
             }`}>
-              <Sparkles className="h-8 w-8 text-yellow-400 mx-auto mb-2 drop-shadow-lg" />
-              <h3 className="text-purple-900 font-bold mb-1">Live Conversation</h3>
-              <p className="text-purple-800 text-sm font-medium">Real-time back-and-forth chat</p>
+              <CardHeader className="text-center pb-2">
+                <Sparkles className="h-8 w-8 mx-auto text-purple-600 mb-2" />
+                <CardTitle className="text-base text-purple-900">Live Conversation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-center text-purple-800">
+                  Real-time voice chat with instant AI responses
+                </p>
+              </CardContent>
             </Card>
 
-            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
-              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+            <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-xl transition-all duration-500 ${
+              isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
             }`}>
-              <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2 drop-shadow-lg" />
-              <h3 className="text-purple-900 font-bold mb-1">Auto-Detection</h3>
-              <p className="text-purple-800 text-sm font-medium">Pauses trigger responses</p>
+              <CardHeader className="text-center pb-2">
+                <Zap className="h-8 w-8 mx-auto text-purple-600 mb-2" />
+                <CardTitle className="text-base text-purple-900">Auto-Detection</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-center text-purple-800">
+                  Automatic voice activity detection and turn-taking
+                </p>
+              </CardContent>
             </Card>
 
-            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
-              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+            <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-xl transition-all duration-500 ${
+              isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
             }`}>
-              <MessageCircle className="h-8 w-8 text-pink-600 mx-auto mb-2 drop-shadow-lg" />
-              <h3 className="text-purple-900 font-bold mb-1">Natural Flow</h3>
-              <p className="text-purple-800 text-sm font-medium">Just like talking to a friend</p>
+              <CardHeader className="text-center pb-2">
+                <MessageCircle className="h-8 w-8 mx-auto text-purple-600 mb-2" />
+                <CardTitle className="text-base text-purple-900">Natural Flow</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-center text-purple-800">
+                  Conversational AI that responds naturally to your speech
+                </p>
+              </CardContent>
             </Card>
           </div>
         </div>

@@ -543,3 +543,15 @@
 ## Button Outline Fix (CRITICAL)
 - [x] Completely remove ugly dashed square around circular button
 - [x] Mask out all focus states and browser defaults (added !important rules)
+
+## AI Response Performance (CRITICAL - TOO SLOW)
+- [x] Copied fast AI code from NEWAPP.zip exactly
+- [x] Replaced slow REST API with Gemini Live API (native audio streaming)
+- [x] Implemented real-time audio input/output with Web Audio API
+- [x] Fixed TypeScript errors (LiveSession, parts array, iterator)
+- [ ] Test if new implementation works and is fast
+
+## Dashed Square Outline (STILL NOT FIXED)
+- [ ] The dashed square is STILL showing - CSS fixes didn't work
+- [ ] Find the actual source (might be SVG, canvas, or parent element)
+- [ ] Completely remove it
