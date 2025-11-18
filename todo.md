@@ -561,3 +561,26 @@
 - [x] Created config router to expose API key from server-side ENV
 - [x] Updated AICoach to fetch API key via trpc endpoint
 - [x] Use correct environment variable name (GEMINI_API_KEY from server)
+
+## VITE_GEMINI_API_KEY Implementation
+- [ ] Add VITE_GEMINI_API_KEY to environment variables
+- [ ] Update AICoach.tsx to use client-side env variable
+- [ ] Remove server-side API key fetch workaround
+- [ ] Test instant connection to Gemini Live API
+
+## Comprehensive HTML Handoff
+- [ ] Gather complete AICoach.tsx code
+- [ ] Include all styling and CSS
+- [ ] Embed entire codebase in single HTML file
+- [ ] Deliver to user for Gemini AI assistance
+
+## Apply Complete Fix from talkytalky-ai-english-coach.zip
+- [x] Extract ZIP file and examine solution
+- [x] Apply fix to AICoach.tsx (copied working code)
+- [x] Create missing files (Icons.tsx, constants.ts, types.ts, utils/audio.ts)
+- [x] Fix import paths and TypeScript errors
+- [x] Update API key to use VITE_GEMINI_API_KEY
+- [x] Restart dev server - no TypeScript errors
+- [ ] Test AI Coach functionality in browser
+- [ ] Verify fast response times
+- [ ] Save checkpoint with working solution
