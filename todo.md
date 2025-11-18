@@ -502,3 +502,21 @@
 - [x] Add glowing border animations to chat container
 - [x] Add pink glow pulse to audio visualizer when speaking
 - [x] Sync all animations with isSpeaking state
+
+## AI Chat Performance Optimization (CRITICAL UX ISSUE)
+- [x] Implement parallel API calls (transcription + TTS generation simultaneously)
+- [x] Add "TalkyTalky is thinking..." message for immediate feedback
+- [x] Show thinking indicator during processing
+- [x] Optimize response flow to reduce perceived wait time
+- [ ] Further backend optimization to reduce 30-40s response time to under 10s (needs server-side work)
+- [ ] Consider response caching for common phrases (future enhancement)
+
+## Sexy Glowing Circular Button & Background Improvements
+- [x] Reduce background blur to show more detail (60px → 20px)
+- [x] Tone down gradient overlay opacity for better visibility (30% → 5%)
+- [x] Generate 5 more beautiful NATURE/OUTDOOR background images (lavender fields, mountains, ocean, cherry blossoms, meadow)
+- [x] Add new images to cycling rotation (10 total backgrounds)
+- [x] Transform Start Live Chat button into large circular design (140px circle)
+- [x] Add constant pulsing glow animation to button (button-glow keyframe)
+- [x] Make button visually irresistible with gradient and shadows
+- [x] Add hover effects with scale (110%) and extra glow

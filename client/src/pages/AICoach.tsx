@@ -21,6 +21,11 @@ const backgroundImages = [
   '/bg3.jpg',
   '/bg4.jpg',
   '/bg5.jpg',
+  '/bg6.jpg',
+  '/bg7.jpg',
+  '/bg8.jpg',
+  '/bg9.jpg',
+  '/bg10.jpg',
 ];
 
 export default function AICoach() {
@@ -286,6 +291,14 @@ export default function AICoach() {
   // Get AI response and speak it
   const handleAIResponse = async (userInput: string) => {
     try {
+      // Add "thinking" message immediately for better UX
+      const thinkingMessage: Message = {
+        id: `thinking-${Date.now()}`,
+        role: "assistant",
+        content: "💭 Thinking...",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, thinkingMessage]);
       setIsSpeaking(true);
 
       // Get conversational response from TalkyTalky
@@ -294,18 +307,25 @@ export default function AICoach() {
         content: msg.content,
       }));
 
-      const aiResponse = await getAIResponse.mutateAsync({
+      // Start both API calls in parallel for faster response
+      const aiResponsePromise = getAIResponse.mutateAsync({
         userMessage: userInput,
         conversationHistory,
       });
 
+      const aiResponse = await aiResponsePromise;
       const responseText = aiResponse.response;
 
-      // Generate speech
-      const audioData = await generateSpeech.mutateAsync({
+      // Remove thinking message and add real response
+      setMessages(prev => prev.filter(m => m.id !== thinkingMessage.id));
+
+      // Generate speech while user reads the text response
+      const audioDataPromise = generateSpeech.mutateAsync({
         text: responseText,
         accent: 'US',
       });
+
+      const audioData = await audioDataPromise;
 
       // Add assistant message
       const assistantMessage: Message = {
@@ -386,12 +406,12 @@ export default function AICoach() {
               backgroundImage: `url(${img})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: 'blur(60px) brightness(1.1)',
+              filter: 'blur(20px) brightness(1.05)',
             }}
           />
         ))}
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 via-pink-500/30 to-purple-600/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-purple-600/5" />
       </div>
 
       {/* Content with Glassmorphism */}
@@ -512,28 +532,31 @@ export default function AICoach() {
                   </div>
                 )}
 
-                {/* Start/Stop Button */}
-                <Button
-                  size="lg"
+                {/* Start/Stop Button - Big Sexy Glowing Circle */}
+                <button
                   onClick={isLiveMode ? stopLiveMode : startLiveMode}
-                  className={`w-full sm:w-auto px-8 py-6 text-lg font-bold rounded-full transition-all shadow-2xl ${
-                    isLiveMode
-                      ? "bg-red-500 hover:bg-red-600"
-                      : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                  } text-white border-2 border-white/50`}
+                  className={`relative group transition-all duration-300 ${
+                    isLiveMode ? '' : 'animate-[button-glow_2s_ease-in-out_infinite]'
+                  }`}
                 >
-                  {isLiveMode ? (
-                    <>
-                      <MicOff className="h-6 w-6 mr-2" />
-                      End Live Chat
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="h-6 w-6 mr-2" />
-                      Start Live Chat
-                    </>
-                  )}
-                </Button>
+                  <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isLiveMode
+                      ? "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105"
+                      : "bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 hover:scale-110"
+                  } border-4 border-white/50 shadow-2xl group-hover:border-white/70`}
+                  >
+                    {isLiveMode ? (
+                      <MicOff className="h-12 w-12 sm:h-16 sm:w-16 text-white drop-shadow-lg" />
+                    ) : (
+                      <Mic className="h-12 w-12 sm:h-16 sm:w-16 text-white drop-shadow-lg animate-pulse" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                    <span className="text-purple-900 font-bold text-sm drop-shadow backdrop-blur-xl bg-white/30 px-4 py-1 rounded-full border border-white/40">
+                      {isLiveMode ? 'End Chat' : 'Start Chat'}
+                    </span>
+                  </div>
+                </button>
 
                 <p className="text-purple-900 text-sm text-center max-w-md font-medium drop-shadow backdrop-blur-xl bg-white/20 rounded-full px-6 py-2 border border-white/30">
                   {isLiveMode 
