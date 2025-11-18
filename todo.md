@@ -495,3 +495,10 @@
 - [x] Implement glassmorphism with backdrop-blur-3xl (frosted ice effect)
 - [x] Redesign cards with strong glass effect (bg-white/15 with border-white/30)
 - [x] Match reference design style with vibrant gradient blend
+
+## Glowing Animations When TalkyTalky Speaks
+- [x] Add pulsing glow effect to TalkyTalky logo when speaking
+- [x] Animate cards with synchronized glow pulses (all 3 feature cards)
+- [x] Add glowing border animations to chat container
+- [x] Add pink glow pulse to audio visualizer when speaking
+- [x] Sync all animations with isSpeaking state

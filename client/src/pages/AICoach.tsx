@@ -400,7 +400,9 @@ export default function AICoach() {
         <div className="backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl py-6 px-4">
           <div className="container max-w-4xl">
             <div className="flex items-center justify-between mb-4">
-              <div className="backdrop-blur-xl bg-white/20 rounded-2xl px-4 py-2 border border-white/30">
+              <div className={`backdrop-blur-xl bg-white/20 rounded-2xl px-4 py-2 border border-white/30 transition-all duration-300 ${
+              isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
+            }`}>
                 <TalkyLogo />
               </div>
               <Link href="/profile">
@@ -430,7 +432,9 @@ export default function AICoach() {
 
         {/* Chat Container with Frosted Glass */}
         <div className="container max-w-4xl px-4 py-6">
-          <Card className="backdrop-blur-3xl bg-white/15 border-white/30 shadow-2xl border-2">
+          <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-2xl border-2 transition-all duration-300 ${
+            isSpeaking ? 'animate-[border-glow_1.5s_ease-in-out_infinite]' : ''
+          }`}>
             <CardHeader className="border-b border-white/20 backdrop-blur-xl bg-white/10">
               <div className="flex items-center justify-between">
                 <div>
@@ -489,7 +493,9 @@ export default function AICoach() {
               <div className="flex flex-col items-center gap-4">
                 {/* Audio Level Visualizer */}
                 {isLiveMode && (
-                  <div className="w-full backdrop-blur-xl bg-white/20 rounded-2xl p-4 border border-white/30">
+                  <div className={`w-full backdrop-blur-xl bg-white/20 rounded-2xl p-4 border border-white/30 transition-all duration-300 ${
+                    isSpeaking ? 'animate-[glow-pulse-pink_1.5s_ease-in-out_infinite]' : ''
+                  }`}>
                     <div className="h-4 bg-white/30 rounded-full overflow-hidden shadow-inner">
                       <div
                         className={`h-full transition-all duration-100 shadow-lg ${
@@ -541,19 +547,25 @@ export default function AICoach() {
 
           {/* Features Grid with Glass Effect */}
           <div className="grid sm:grid-cols-3 gap-4 mt-6">
-            <Card className="backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all">
+            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
+              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+            }`}>
               <Sparkles className="h-8 w-8 text-yellow-400 mx-auto mb-2 drop-shadow-lg" />
               <h3 className="text-purple-900 font-bold mb-1">Live Conversation</h3>
               <p className="text-purple-800 text-sm font-medium">Real-time back-and-forth chat</p>
             </Card>
 
-            <Card className="backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all">
+            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
+              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+            }`}>
               <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2 drop-shadow-lg" />
               <h3 className="text-purple-900 font-bold mb-1">Auto-Detection</h3>
               <p className="text-purple-800 text-sm font-medium">Pauses trigger responses</p>
             </Card>
 
-            <Card className="backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all">
+            <Card className={`backdrop-blur-2xl bg-white/15 border-white/30 border-2 text-center p-4 shadow-xl hover:bg-white/20 transition-all ${
+              isSpeaking ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : ''
+            }`}>
               <MessageCircle className="h-8 w-8 text-pink-600 mx-auto mb-2 drop-shadow-lg" />
               <h3 className="text-purple-900 font-bold mb-1">Natural Flow</h3>
               <p className="text-purple-800 text-sm font-medium">Just like talking to a friend</p>
