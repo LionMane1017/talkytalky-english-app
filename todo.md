@@ -766,3 +766,18 @@
 - [x] Fix callback name mismatch (onResult → onAnalysisComplete)
 - [x] Verify pronunciation analysis works without errors
 - [x] Create checkpoint with bug fix
+
+
+## Phase 39: Add Gemini Live Pronunciation Coach to Practice Page
+- [ ] Add Gemini Live session to Practice.tsx (similar to AICoach implementation)
+- [ ] Create pronunciation coach system prompt (introduce words, give tips, congratulate)
+- [ ] Implement word introduction when new word appears
+- [x] Add VoiceWaveform component for recording animation
+- [x] Implement 5-second auto-stop countdown timer
+- [x] Add visual countdown display during recording (number + ring animation)
+- [x] Add audio level monitoring for waveform
+- [ ] Implement live feedback after recording (Gemini congratulates, provides feedback)
+- [ ] Add audio playback for Gemini's voice responses
+- [ ] Test conversational flow (intro → record with animation → feedback → next word)
+- [ ] Verify coaching feels natural and encouraging
+- [ ] Create checkpoint with Gemini Live coaching
