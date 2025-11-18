@@ -191,3 +191,31 @@
 - [x] Update Dashboard to fetch real data from backend API (already implemented)
 - [x] Replace simulated stats with actual database queries (already implemented)
 - [x] Test Dashboard with real practice sessions and verify data flow
+
+## Phase 18: Real-time Pronunciation Feedback (Azure Speech API)
+- [x] Set up Azure Speech API credentials (optional, falls back to intelligent mock)
+- [x] Create pronunciation assessment endpoint in backend
+- [x] Create PronunciationFeedback component with detailed metrics
+- [x] Integrate pronunciation scoring into Practice page
+- [x] Display detailed feedback (accuracy, fluency, completeness)
+- [ ] Update SpeechRecorder to capture and send raw audio (future enhancement)
+- [ ] Test pronunciation assessment with various accents
+
+## Phase 19: Weekly/Monthly Email Reports
+- [x] Design email report template with progress summary
+- [x] Create database schema for email preferences
+- [x] Implement report generation logic (top words, trends, recommendations)
+- [x] Add database functions for date-range queries
+- [ ] Set up scheduled job for weekly/monthly email sending (requires cron setup)
+- [ ] Add email preferences page in Profile
+- [ ] Integrate email service (SendGrid/AWS SES) for actual sending
+
+## Phase 20: Social Features & Leaderboards
+- [x] Create database schema for study groups
+- [x] Create database schema for leaderboards
+- [x] Build global leaderboard with period filters (daily/weekly/monthly/alltime)
+- [x] Add leaderboard to navigation
+- [x] Create podium display for top 3 users
+- [ ] Implement achievement sharing to social media (future enhancement)
+- [ ] Build study groups creation and management UI (future enhancement)
+- [ ] Connect leaderboard to real backend data

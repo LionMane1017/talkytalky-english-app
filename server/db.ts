@@ -269,3 +269,66 @@ export async function getWordsNeedingReview(userId: number) {
     )
     .orderBy(vocabularyProgress.lastPracticed);
 }
+
+// Get user by ID
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// Get practice sessions in date range
+export async function getUserPracticeSessionsInRange(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db
+    .select()
+    .from(practiceSessions)
+    .where(
+      and(
+        eq(practiceSessions.userId, userId),
+        sql`${practiceSessions.createdAt} >= ${startDate}`,
+        sql`${practiceSessions.createdAt} <= ${endDate}`
+      )
+    )
+    .orderBy(desc(practiceSessions.createdAt));
+}
+
+// Get vocabulary progress in date range
+export async function getUserVocabularyProgressInRange(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db
+    .select()
+    .from(vocabularyProgress)
+    .where(
+      and(
+        eq(vocabularyProgress.userId, userId),
+        sql`${vocabularyProgress.lastPracticed} >= ${startDate}`,
+        sql`${vocabularyProgress.lastPracticed} <= ${endDate}`
+      )
+    )
+    .orderBy(desc(vocabularyProgress.lastPracticed));
+}
+
+// Get achievements in date range
+export async function getUserAchievementsInRange(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db
+    .select()
+    .from(userAchievements)
+    .where(
+      and(
+        eq(userAchievements.userId, userId),
+        sql`${userAchievements.unlockedAt} >= ${startDate}`,
+        sql`${userAchievements.unlockedAt} <= ${endDate}`
+      )
+    )
+    .orderBy(desc(userAchievements.unlockedAt));
+}

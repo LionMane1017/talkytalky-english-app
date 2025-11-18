@@ -5,6 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import * as db from "./db";
 import { z } from "zod";
 import { achievements } from "@shared/achievements";
+import { assessPronunciation } from "./pronunciationAssessment";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -48,6 +49,25 @@ export const appRouter = router({
       }).optional())
       .query(async ({ ctx, input }) => {
         return await db.getUserPracticeSessions(ctx.user.id, input?.limit);
+      }),
+
+    assessPronunciation: publicProcedure
+      .input(z.object({
+        audioData: z.string(), // base64 encoded audio
+        referenceText: z.string(),
+        duration: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Convert base64 to buffer
+        const audioBuffer = Buffer.from(input.audioData, "base64");
+        
+        const result = await assessPronunciation(
+          audioBuffer,
+          input.referenceText,
+          { duration: input.duration || 0 }
+        );
+        
+        return result;
       }),
   }),
 

@@ -94,3 +94,70 @@ export const userAchievements = mysqlTable("userAchievements", {
 
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+
+/**
+ * Email preferences table - controls email notifications and reports
+ */
+export const emailPreferences = mysqlTable("emailPreferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  weeklyReport: mysqlEnum("weeklyReport", ["enabled", "disabled"]).default("enabled").notNull(),
+  monthlyReport: mysqlEnum("monthlyReport", ["enabled", "disabled"]).default("enabled").notNull(),
+  achievementNotifications: mysqlEnum("achievementNotifications", ["enabled", "disabled"]).default("enabled").notNull(),
+  preferredDay: mysqlEnum("preferredDay", ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]).default("monday"),
+  lastWeeklyReport: timestamp("lastWeeklyReport"),
+  lastMonthlyReport: timestamp("lastMonthlyReport"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EmailPreference = typeof emailPreferences.$inferSelect;
+export type InsertEmailPreference = typeof emailPreferences.$inferInsert;
+
+/**
+ * Study groups table - collaborative learning groups
+ */
+export const studyGroups = mysqlTable("studyGroups", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  creatorId: int("creatorId").notNull(),
+  isPublic: mysqlEnum("isPublic", ["yes", "no"]).default("yes").notNull(),
+  memberCount: int("memberCount").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StudyGroup = typeof studyGroups.$inferSelect;
+export type InsertStudyGroup = typeof studyGroups.$inferInsert;
+
+/**
+ * Study group members table - tracks group membership
+ */
+export const studyGroupMembers = mysqlTable("studyGroupMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  groupId: int("groupId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["admin", "member"]).default("member").notNull(),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+});
+
+export type StudyGroupMember = typeof studyGroupMembers.$inferSelect;
+export type InsertStudyGroupMember = typeof studyGroupMembers.$inferInsert;
+
+/**
+ * Leaderboard entries table - tracks user rankings
+ */
+export const leaderboardEntries = mysqlTable("leaderboardEntries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  period: mysqlEnum("period", ["daily", "weekly", "monthly", "alltime"]).notNull(),
+  score: int("score").notNull(),
+  rank: int("rank"),
+  sessionsCount: int("sessionsCount").default(0),
+  wordsLearned: int("wordsLearned").default(0),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+export type InsertLeaderboardEntry = typeof leaderboardEntries.$inferInsert;

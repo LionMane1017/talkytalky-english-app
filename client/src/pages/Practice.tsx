@@ -105,6 +105,7 @@ export default function Practice() {
       });
     }
     setScore(null);
+    setDetailedFeedback(null);
   };
 
   const resetSession = () => {
@@ -301,29 +302,41 @@ export default function Practice() {
 
         {/* Score Display */}
         {score !== null && (
-          <Card className="mt-6">
-            <CardContent className="pt-6">
-              <div className="text-center mb-4">
-                <p className="text-sm text-muted-foreground mb-2">Your Score</p>
-                <p className={`text-5xl font-bold ${getScoreColor(score)}`}>
-                  {score}%
-                </p>
-                <p className="text-lg text-muted-foreground mt-2">
-                  {getScoreFeedback(score)}
-                </p>
-              </div>
-              
-              <Progress value={score} className="mb-4" />
-              
-              <Button 
-                className="w-full gap-2"
-                onClick={nextWord}
-              >
-                Next Word
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="mt-6 space-y-4">
+            {detailedFeedback ? (
+              <PronunciationFeedback
+                accuracyScore={detailedFeedback.accuracyScore}
+                fluencyScore={detailedFeedback.fluencyScore}
+                completenessScore={detailedFeedback.completenessScore}
+                pronunciationScore={detailedFeedback.pronunciationScore}
+                feedback={detailedFeedback.feedback}
+              />
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center mb-4">
+                    <p className="text-sm text-muted-foreground mb-2">Your Score</p>
+                    <p className={`text-5xl font-bold ${getScoreColor(score)}`}>
+                      {score}%
+                    </p>
+                    <p className="text-lg text-muted-foreground mt-2">
+                      {getScoreFeedback(score)}
+                    </p>
+                  </div>
+                  <Progress value={score} className="mb-4" />
+                </CardContent>
+              </Card>
+            )}
+            
+            <Button 
+              className="w-full gap-2"
+              onClick={nextWord}
+              size="lg"
+            >
+              Next Word
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
     </div>
