@@ -27,10 +27,10 @@ export default function Dashboard() {
   // Check for new achievements
   useAchievementChecker();
   
-  // Fetch real user progress data
-  const { data: userProgress, isLoading: progressLoading } = trpc.progress.getStats.useQuery();
-  const { data: recentSessions, isLoading: sessionsLoading } = trpc.practice.getSessions.useQuery({ limit: 10 });
-  const { data: userAchievements } = trpc.achievements.getUserAchievements.useQuery();
+  // Fetch real user progress data (guest mode compatible)
+  const { data: userProgress, isLoading: progressLoading } = trpc.progress.getStats.useQuery(undefined, { throwOnError: false });
+  const { data: recentSessions, isLoading: sessionsLoading } = trpc.practice.getSessions.useQuery({ limit: 10 }, { throwOnError: false });
+  const { data: userAchievements } = trpc.achievements.getUserAchievements.useQuery(undefined, { throwOnError: false });
   
   const hasRealData = userProgress && userProgress.totalSessions > 0;
 

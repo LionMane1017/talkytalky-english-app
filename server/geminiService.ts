@@ -1,8 +1,9 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { ENV } from "./_core/env";
 
 // Initialize Gemini AI client
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = ENV.geminiApiKey;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable not set");
   }
