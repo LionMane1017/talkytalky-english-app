@@ -539,3 +539,7 @@
 - [x] Replace auto-hide header with manual collapse/expand toggle button
 - [x] Show small tab when header is collapsed (chevron button at bottom)
 - [x] Add toggle to pause/resume background animation cycling (Pause/Play button)
+
+## Button Outline Fix (CRITICAL)
+- [x] Completely remove ugly dashed square around circular button
+- [x] Mask out all focus states and browser defaults (added !important rules)

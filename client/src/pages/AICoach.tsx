@@ -567,9 +567,10 @@ export default function AICoach() {
                 {/* Start/Stop Button - Big Sexy Glowing Circle */}
                 <button
                   onClick={isLiveMode ? stopLiveMode : startLiveMode}
-                  className={`relative group transition-all duration-300 outline-none focus:outline-none ${
+                  className={`relative group transition-all duration-300 outline-none focus:outline-none focus-visible:outline-none border-0 ring-0 focus:ring-0 focus-visible:ring-0 overflow-hidden ${
                     isLiveMode ? '' : 'animate-[button-glow_2s_ease-in-out_infinite]'
                   }`}
+                  style={{ outline: 'none', boxShadow: 'none' }}
                 >
                   <div className={`w-28 h-28 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isLiveMode

@@ -342,6 +342,21 @@
                   inset 0 0 40px rgba(255, 255, 255, 0.3);
     }
   }
+
+  /* Force remove all button outlines */
+  button {
+    outline: none !important;
+    outline-style: none !important;
+    outline-width: 0 !important;
+  }
+  
+  button:focus,
+  button:focus-visible,
+  button:active {
+    outline: none !important;
+    outline-style: none !important;
+    outline-width: 0 !important;
+  }
 }
 
 @layer components {
