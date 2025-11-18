@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import SpeechRecorderWithPlayback from "@/components/SpeechRecorderWithPlayback";
+import EnhancedSpeechRecorder from "@/components/EnhancedSpeechRecorder";
 import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
 import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
@@ -105,7 +105,6 @@ export default function Practice() {
       });
     }
     setScore(null);
-    setDetailedFeedback(null);
   };
 
   const resetSession = () => {
@@ -295,7 +294,7 @@ export default function Practice() {
         </Card>
 
         {/* Speech Recorder */}
-        <SpeechRecorderWithPlayback 
+        <EnhancedSpeechRecorder 
           targetWord={currentWord.word}
           onTranscript={handleTranscript}
         />
@@ -303,30 +302,20 @@ export default function Practice() {
         {/* Score Display */}
         {score !== null && (
           <div className="mt-6 space-y-4">
-            {detailedFeedback ? (
-              <PronunciationFeedback
-                accuracyScore={detailedFeedback.accuracyScore}
-                fluencyScore={detailedFeedback.fluencyScore}
-                completenessScore={detailedFeedback.completenessScore}
-                pronunciationScore={detailedFeedback.pronunciationScore}
-                feedback={detailedFeedback.feedback}
-              />
-            ) : (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center mb-4">
-                    <p className="text-sm text-muted-foreground mb-2">Your Score</p>
-                    <p className={`text-5xl font-bold ${getScoreColor(score)}`}>
-                      {score}%
-                    </p>
-                    <p className="text-lg text-muted-foreground mt-2">
-                      {getScoreFeedback(score)}
-                    </p>
-                  </div>
-                  <Progress value={score} className="mb-4" />
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-muted-foreground mb-2">Your Score</p>
+                  <p className={`text-5xl font-bold ${getScoreColor(score)}`}>
+                    {score}%
+                  </p>
+                  <p className="text-lg text-muted-foreground mt-2">
+                    {getScoreFeedback(score)}
+                  </p>
+                </div>
+                <Progress value={score} className="mb-4" />
+              </CardContent>
+            </Card>
             
             <Button 
               className="w-full gap-2"
