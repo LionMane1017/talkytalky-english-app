@@ -734,3 +734,11 @@
 - [x] Test Practice page works without login
 - [x] Verify no authentication errors (original bug fixed)
 - [x] Create checkpoint with bug fix
+
+
+## Phase 36: Implement Proper Gemini TTS Audio Playback (PCM Format)
+- [x] Update useTextToSpeech hook to handle PCM audio format
+- [x] Add AudioContext fallback for raw PCM 24kHz audio
+- [ ] Test audio playback with Gemini TTS (waiting for API quota reset)
+- [ ] Verify audio quality and format handling
+- [ ] Create checkpoint with proper TTS implementation

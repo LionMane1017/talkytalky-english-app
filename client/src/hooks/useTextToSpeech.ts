@@ -21,8 +21,9 @@ export function useTextToSpeech() {
         // Try Gemini Live API first
         const result = await generateSpeechMutation.mutateAsync({ text });
 
-        // Create audio element and play
-        const audio = new Audio(`data:audio/mp3;base64,${result.audioBase64}`);
+        // Try to play audio with standard Audio element first
+        const audioDataUrl = `data:audio/pcm;rate=24000;base64,${result.audioBase64}`;
+        const audio = new Audio(audioDataUrl);
         setCurrentAudio(audio);
 
         audio.onended = () => {
@@ -30,13 +31,40 @@ export function useTextToSpeech() {
           setCurrentAudio(null);
         };
 
-        audio.onerror = () => {
-          setIsSpeaking(false);
-          setCurrentAudio(null);
-          console.error("Failed to play audio");
+        audio.onerror = async () => {
+          // Fallback to AudioContext for raw PCM 24kHz
+          console.log("Audio element failed, trying AudioContext for PCM...");
+          try {
+            const ctx = new AudioContext();
+            const binaryString = atob(result.audioBase64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            const audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            source.onended = () => {
+              setIsSpeaking(false);
+              setCurrentAudio(null);
+            };
+            source.start(0);
+          } catch (pcmError) {
+            console.error("PCM decoding failed:", pcmError);
+            setIsSpeaking(false);
+            setCurrentAudio(null);
+            throw pcmError;
+          }
         };
 
-        await audio.play();
+        try {
+          await audio.play();
+        } catch (playError) {
+          // If play() fails, trigger the error handler
+          audio.onerror?.(new Event('error'));
+        }
       } catch (apiError: any) {
         // Fallback to browser TTS if Gemini API fails (rate limit, etc.)
         console.warn("Gemini TTS failed, falling back to browser TTS:", apiError.message);
