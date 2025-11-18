@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import SpeechRecorder from "@/components/SpeechRecorder";
+import SpeechRecorderWithPlayback from "@/components/SpeechRecorderWithPlayback";
 import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
 import { ArrowRight, RotateCcw, Trophy, Volume2 } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
@@ -295,7 +295,7 @@ export default function Practice() {
         </Card>
 
         {/* Speech Recorder */}
-        <SpeechRecorder 
+        <SpeechRecorderWithPlayback 
           targetWord={currentWord.word}
           onTranscript={handleTranscript}
         />

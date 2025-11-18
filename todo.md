@@ -219,3 +219,13 @@
 - [ ] Implement achievement sharing to social media (future enhancement)
 - [ ] Build study groups creation and management UI (future enhancement)
 - [ ] Connect leaderboard to real backend data
+
+## Phase 21: Voice Recording Playback Feature
+- [x] Create SpeechRecorderWithPlayback component with MediaRecorder API
+- [x] Implement audio blob storage (client-side)
+- [x] Add recording history display (last 5 recordings)
+- [x] Build playback UI with play/pause controls
+- [x] Add side-by-side comparison (user recording vs native TTS audio)
+- [x] Integrate into Practice page
+- [ ] Add waveform visualization for recordings (future enhancement)
+- [x] Test recording and playback interface
