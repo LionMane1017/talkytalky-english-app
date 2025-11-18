@@ -584,3 +584,10 @@
 - [ ] Test AI Coach functionality in browser
 - [ ] Verify fast response times
 - [ ] Save checkpoint with working solution
+
+## GitHub Repository Upload
+- [ ] Create first GitHub repo for published version (talkytalky-published)
+- [ ] Push published version code to first repo
+- [ ] Create second GitHub repo for latest version (talkytalky-latest)
+- [ ] Push latest version with Gemini Live API fix to second repo
+- [ ] Provide both repository URLs to user
