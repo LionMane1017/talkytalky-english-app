@@ -348,3 +348,11 @@
 - [x] Add Gemini speech-to-text backend endpoint
 - [x] Update GeminiVoiceRecorder to use MediaRecorder + Gemini API
 - [x] Test voice recording and transcription works reliably
+
+## CRITICAL FIXES - Practice Page
+- [x] Fix GEMINI_API_KEY environment variable loading
+- [x] Fix audio playback (generateSpeech API failing)
+- [x] Fix pronunciation analysis returning undefined scores
+- [x] Improve practice page design - better colors and readability
+- [x] Fix white text on light purple (hard to read)
+- [x] Make practice page more visually appealing

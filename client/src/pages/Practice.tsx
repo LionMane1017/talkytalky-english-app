@@ -259,10 +259,10 @@ export default function Practice() {
         )}
 
         {/* Current Word */}
-        <Card className="mb-6">
-          <CardHeader>
+        <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20">
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-center gap-4">
-              <CardTitle className="text-center text-4xl font-bold text-foreground">
+              <CardTitle className="text-center text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 {currentWord.word}
               </CardTitle>
               <Button
@@ -270,25 +270,23 @@ export default function Practice() {
                 size="icon"
                 onClick={() => speak(currentWord.word)}
                 disabled={isSpeaking}
-                className="rounded-full"
+                className="rounded-full hover:bg-primary/20"
               >
-                <Volume2 className={`h-6 w-6 ${isSpeaking ? 'text-primary animate-pulse' : ''}`} />
+                <Volume2 className={`h-6 w-6 ${isSpeaking ? 'text-primary animate-pulse' : 'text-primary'}`} />
               </Button>
             </div>
-            <CardDescription className="text-center text-lg">
+            <CardDescription className="text-center text-xl font-medium text-foreground/80 mt-2">
               {currentWord.phonetic}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Meaning:</p>
-                <p className="text-foreground">{currentWord.meaning}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Example:</p>
-                <p className="text-foreground italic">"{currentWord.example}"</p>
-              </div>
+          <CardContent className="space-y-6">
+            <div className="bg-background/80 p-4 rounded-lg border border-border">
+              <p className="text-sm font-semibold text-primary mb-2">Meaning:</p>
+              <p className="text-foreground text-lg">{currentWord.meaning}</p>
+            </div>
+            <div className="bg-background/80 p-4 rounded-lg border border-border">
+              <p className="text-sm font-semibold text-primary mb-2">Example:</p>
+              <p className="text-foreground text-lg italic">"{currentWord.example}"</p>
             </div>
           </CardContent>
         </Card>

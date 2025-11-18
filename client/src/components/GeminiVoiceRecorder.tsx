@@ -165,6 +165,13 @@ export default function GeminiVoiceRecorder({
             previousScore,
           });
 
+          // Check if result has valid scores
+          if (!result || !result.scores || typeof result.scores.overall !== 'number') {
+            toast.error("Failed to analyze pronunciation. Please try again.");
+            setIsAnalyzing(false);
+            return;
+          }
+
           onResult(result as PronunciationResult);
 
           // Show feedback toast
