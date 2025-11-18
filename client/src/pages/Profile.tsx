@@ -59,7 +59,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 pb-20">
-      <div className="container py-6 max-w-6xl">
+      <div className="container py-4 px-4 sm:py-6 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <TalkyLogo />
@@ -68,13 +68,13 @@ export default function Profile() {
         {/* Profile Header */}
         <Card className="mb-6 bg-white/15 backdrop-blur-lg border-2 border-white/30 shadow-2xl">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl">
                 {userStats.name.charAt(0)}
               </div>
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white mb-2">{userStats.name}</h1>
-                <div className="flex gap-3 mb-3">
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{userStats.name}</h1>
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 mb-3">
                   <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
                     {userStats.level}
                   </Badge>
@@ -85,7 +85,7 @@ export default function Profile() {
                     {userStats.streakDays} Day Streak 🔥
                   </Badge>
                 </div>
-                <div className="flex gap-6 text-sm text-white/80">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-6 text-xs sm:text-sm text-white/80">
                   <span>📊 {userStats.sessionsCompleted} Sessions</span>
                   <span>⭐ {userStats.wordsMastered} Words Mastered</span>
                   <span>⏱️ {formatTime(userStats.totalPracticeTime)} Practice Time</span>
@@ -100,7 +100,7 @@ export default function Profile() {
         </Card>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
           <Button
             variant={selectedTab === "stats" ? "default" : "outline"}
             onClick={() => setSelectedTab("stats")}

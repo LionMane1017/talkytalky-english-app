@@ -216,10 +216,10 @@ export default function Practice() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      <div className="container py-6 max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container py-4 px-4 sm:py-6 max-w-4xl">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
           <div>
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Practice Session</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">Practice Session</h1>
             <Badge className="mt-2 bg-white/20 text-white border-white/30 backdrop-blur-sm">
               {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
             </Badge>
@@ -262,7 +262,7 @@ export default function Practice() {
         <Card className="mb-6 bg-white/15 backdrop-blur-lg border-2 border-white/30 shadow-2xl">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-center gap-4">
-              <CardTitle className="text-center text-6xl font-bold text-white drop-shadow-2xl animate-pulse">
+              <CardTitle className="text-center text-4xl sm:text-5xl md:text-6xl font-bold text-white drop-shadow-2xl animate-pulse">
                 {currentWord.word}
               </CardTitle>
               <Button
@@ -275,7 +275,7 @@ export default function Practice() {
                 <Volume2 className={`h-6 w-6 text-white ${isSpeaking ? 'animate-pulse' : ''}`} />
               </Button>
             </div>
-            <CardDescription className="text-center text-2xl font-medium text-yellow-200 mt-3">
+            <CardDescription className="text-center text-xl sm:text-2xl font-medium text-yellow-200 mt-3">
               {currentWord.phonetic}
             </CardDescription>
           </CardHeader>
