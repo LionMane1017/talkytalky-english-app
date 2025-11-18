@@ -231,10 +231,22 @@ export default function EnhancedSpeechRecorder({
           if (event.error === "no-speech") {
             toast.error("No speech detected. Please speak louder and try again.");
           } else if (event.error === "not-allowed") {
-            toast.error("Microphone permission denied. Please allow microphone access.");
+            toast.error("Microphone permission denied. Please allow microphone access in your browser settings.");
             setPermissionGranted(false);
+          } else if (event.error === "network") {
+            toast.error("Network error. Speech recognition requires internet connection. Retrying...");
+            // Auto-retry after network error
+            setTimeout(() => {
+              if (recognitionRef.current && !isRecording) {
+                toast.info("Retrying speech recognition...");
+                startRecording();
+              }
+            }, 2000);
+            return; // Don't stop recording yet, will retry
+          } else if (event.error === "aborted") {
+            toast.info("Speech recognition was stopped. Please try again.");
           } else {
-            toast.error("Could not recognize speech. Please try again.");
+            toast.error(`Speech recognition error: ${event.error}. Please try again.`);
           }
           
           setIsRecording(false);

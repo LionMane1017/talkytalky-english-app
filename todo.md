@@ -293,3 +293,11 @@
 - [x] Update App.tsx to use Landing as homepage
 - [x] Make landing page fully responsive
 - [x] Test landing page design and layout
+
+## Phase 27: Fix Speech Recognition Network Errors
+- [x] Add better error handling for speech recognition network errors
+- [x] Implement auto-retry logic for network errors (2-second delay)
+- [x] Add browser compatibility detection and warnings
+- [x] Improve error messages to guide users
+- [x] Add specific handling for network, no-speech, and permission errors
+- [ ] Test speech recognition in production with real users
