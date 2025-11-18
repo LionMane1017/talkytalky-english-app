@@ -1,5 +1,6 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { ENV } from "./_core/env";
+import { geminiCache } from "./geminiCache";
 
 const ai = new GoogleGenAI({ apiKey: ENV.geminiApiKey });
 
@@ -27,6 +28,13 @@ export interface PronunciationAnalysis {
  * Generates speech from text using Gemini TTS.
  */
 export async function generateSpeech(text: string, accent: 'US' | 'UK' = 'US'): Promise<string> {
+  // Check cache first
+  const cached = geminiCache.getTTS(text, accent);
+  if (cached) {
+    console.log('✅ TTS cache hit:', text.substring(0, 30));
+    return cached;
+  }
+  
   try {
     const voice = accent === 'US' ? 'Kore' : 'Puck';
 
@@ -48,6 +56,9 @@ export async function generateSpeech(text: string, accent: 'US' | 'UK' = 'US'): 
       throw new Error("No audio data received from API.");
     }
 
+    // Cache the result
+    geminiCache.setTTS(text, accent, audioData);
+    
     return audioData;
   } catch (error) {
     console.error("Error in generateSpeech:", error);
@@ -122,6 +133,12 @@ export async function getPronunciationAnalysis(
   difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate',
   previousScore?: number
 ): Promise<PronunciationAnalysis> {
+  // Check cache first
+  const cached = geminiCache.getAnalysis(targetText, userTranscript, difficulty);
+  if (cached) {
+    console.log('✅ Analysis cache hit:', targetText);
+    return cached;
+  }
   const prompt = `
     You are an expert English pronunciation coach. Analyze the user's pronunciation of a target word.
     
@@ -165,6 +182,10 @@ export async function getPronunciationAnalysis(
 
     const jsonText = response.text || '{}';
     const result = JSON.parse(jsonText);
+    
+    // Cache the result
+    geminiCache.setAnalysis(targetText, userTranscript, difficulty, result);
+    
     return result;
   } catch (error) {
     console.error("Error in analyzePronunciation:", error);

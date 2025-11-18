@@ -435,3 +435,27 @@
 - [ ] Implement AI conversational live mode (continuous listening + voice responses)
 - [ ] Test Gemini TTS audio generation
 - [ ] Fix slow audio generation (optimize API calls)
+
+## CRITICAL: Fix Audio Decoding Error
+- [x] Fix base64 audio decoding in teacher feedback
+- [x] Use proper audio format (WAV/MP3) from Gemini TTS
+- [ ] Test audio playback works correctly
+
+## AI Live Conversational Mode
+- [x] Create LiveConversation component with continuous listening
+- [x] Implement real-time voice activity detection
+- [x] Add AI voice responses using Gemini TTS
+- [ ] Integrate across all modules (Practice, IELTS, Match Cards)
+- [x] Add toggle button to enable/disable live mode
+
+## Auto-Play Teacher Audio
+- [x] Auto-play native pronunciation when word loads
+- [x] Add settings toggle for auto-play
+- [ ] Store preference in localStorage
+
+## Performance Optimization
+- [x] Implement response caching for repeated words
+- [x] Cache TTS audio (1 hour TTL)
+- [x] Cache pronunciation analysis (30 min TTL)
+- [ ] Parallel API calls (transcription + TTS generation)
+- [ ] Reduce analysis time from 30-40s to under 10s

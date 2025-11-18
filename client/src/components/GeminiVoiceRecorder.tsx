@@ -224,21 +224,32 @@ export default function GeminiVoiceRecorder({
 
       // Generate AI voice feedback
       const feedbackText = `Your score is ${result.scores.overall} percent. ${result.feedback}`;
-      const feedbackAudio = await generateSpeech.mutateAsync({
-        text: feedbackText,
-        accent: 'US',
-      });
+      try {
+        const feedbackAudio = await generateSpeech.mutateAsync({
+          text: feedbackText,
+          accent: 'US',
+        });
 
-      // Play AI teacher voice feedback
-      if (feedbackAudio) {
-        const audioContext = new AudioContext();
-        const audioData = Uint8Array.from(atob(feedbackAudio), c => c.charCodeAt(0));
-        const audioBuffer = await audioContext.decodeAudioData(audioData.buffer);
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
-        source.start(0);
-        toast.success("🎤 Teacher feedback", { duration: 3000 });
+        // Play AI teacher voice feedback
+        if (feedbackAudio) {
+          // Convert base64 to blob
+          const binaryString = atob(feedbackAudio);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const audioBlob = new Blob([bytes], { type: 'audio/mp3' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+          toast.success("🎤 Teacher feedback", { duration: 3000 });
+          
+          // Cleanup
+          audio.onended = () => URL.revokeObjectURL(audioUrl);
+        }
+      } catch (audioError) {
+        console.error('Failed to play teacher feedback audio:', audioError);
+        // Continue without audio feedback
       }
 
       // Show feedback toast

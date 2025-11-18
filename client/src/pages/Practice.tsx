@@ -10,6 +10,9 @@ import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
+import LiveConversationMode from "@/components/LiveConversationMode";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function Practice() {
   const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
@@ -62,6 +65,16 @@ export default function Practice() {
     setSessionScore([]);
     setAttempts(0);
   };
+
+  // Auto-play teacher audio when word changes
+  useEffect(() => {
+    if (currentWord && autoPlayAudio) {
+      // Small delay to let UI render
+      setTimeout(() => {
+        speak(currentWord.word);
+      }, 500);
+    }
+  }, [currentWord, autoPlayAudio, speak]);
 
   const handleTranscript = useCallback((transcript: string, pronunciationScore: number) => {
     setScore(pronunciationScore);
@@ -230,6 +243,32 @@ export default function Practice() {
             Change Level
           </Button>
         </div>
+
+        {/* Live Conversation Mode */}
+        <div className="mb-6">
+          <LiveConversationMode context="pronunciation practice" />
+        </div>
+
+        {/* Auto-Play Toggle */}
+        <Card className="mb-6 bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-play" className="text-white font-medium">
+                  Auto-Play Teacher Audio
+                </Label>
+                <p className="text-sm text-white/70">
+                  Automatically hear native pronunciation when word appears
+                </p>
+              </div>
+              <Switch
+                id="auto-play"
+                checked={autoPlayAudio}
+                onCheckedChange={setAutoPlayAudio}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Session Stats */}
         {sessionScore.length > 0 && (
