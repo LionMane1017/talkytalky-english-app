@@ -528,3 +528,9 @@
 ## Button Visual Cleanup & Color Consistency
 - [x] Remove ugly dashed square box around circular glowing button (added outline-none)
 - [x] Match all AI page colors/effects to purple theme from other pages (changed pink to purple/indigo)
+
+## Mobile UX Optimization
+- [x] Implement auto-hiding header (hides on scroll down >50px, shows on scroll up)
+- [x] Optimize AI Coach page to fit on one mobile screen without scrolling
+- [x] Reduce spacing and padding for mobile viewport (py-3, smaller button 28x28)
+- [x] Make button and key elements visible above the fold (fixed header, mt-32)

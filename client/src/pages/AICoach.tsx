@@ -29,10 +29,13 @@ const backgroundImages = [
 ];
 
 export default function AICoach() {
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "welcome",
-      role: "assistant",
+      id: '1',
+      role: 'assistant',
       content: "Hi there! I'm TalkyTalky, your personal English pronunciation coach! 🎤✨ Click 'Start Live Chat' and we can have a real conversation. I'll listen and respond to you naturally!",
       timestamp: new Date(),
     },
@@ -57,7 +60,27 @@ export default function AICoach() {
   const generateSpeech = trpc.practice.generateSpeech.useMutation();
   const getAIResponse = trpc.aiCoach.getResponse.useMutation();
 
-  // Rotate background images
+   // Auto-hide header on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down & past threshold
+        setHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Cycle background images
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
@@ -415,10 +438,12 @@ export default function AICoach() {
 
       {/* Content with Glassmorphism */}
       <div className="relative z-10">
-        {/* Header with Heavy Glass Effect */}
-        <div className="backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl py-6 px-4">
+        {/* Header with Heavy Glass Effect - Auto-hiding */}
+        <div className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-3xl bg-white/10 border-b border-white/20 shadow-2xl py-3 sm:py-4 px-4 transition-transform duration-300 ${
+          headerVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}>
           <div className="container max-w-4xl">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
               <div className={`backdrop-blur-xl bg-white/20 rounded-2xl px-4 py-2 border border-white/30 transition-all duration-300 ${
               isSpeaking ? 'animate-[glow-pulse_1.5s_ease-in-out_infinite]' : ''
             }`}>
@@ -435,14 +460,14 @@ export default function AICoach() {
               </Link>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
-                <h1 className="text-3xl sm:text-4xl font-bold text-purple-900 drop-shadow-md">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 drop-shadow-md">
                   AI Coach
                 </h1>
-                <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 animate-pulse drop-shadow-lg" />
               </div>
-              <p className="text-purple-800 text-sm sm:text-base font-medium drop-shadow">
+              <p className="text-purple-800 text-xs sm:text-sm font-medium drop-shadow">
                 Live conversation with your personal English coach
               </p>
             </div>
@@ -450,11 +475,11 @@ export default function AICoach() {
         </div>
 
         {/* Chat Container with Frosted Glass */}
-        <div className="container max-w-4xl px-4 py-6">
+        <div className="container max-w-4xl px-4 py-3 sm:py-4 mt-32 sm:mt-36">
           <Card className={`backdrop-blur-3xl bg-white/15 border-white/30 shadow-2xl border-2 transition-all duration-300 ${
             isSpeaking ? 'animate-[border-glow_1.5s_ease-in-out_infinite]' : ''
           }`}>
-            <CardHeader className="border-b border-white/20 backdrop-blur-xl bg-white/10">
+            <CardHeader className="border-b border-white/20 backdrop-blur-xl bg-white/10 py-3 sm:py-4">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-purple-900 flex items-center gap-2 font-bold">
@@ -486,9 +511,9 @@ export default function AICoach() {
               </div>
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-4">
               {/* Messages */}
-              <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
+              <div className="space-y-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto p-2 sm:p-3 mb-4">
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -538,7 +563,7 @@ export default function AICoach() {
                     isLiveMode ? '' : 'animate-[button-glow_2s_ease-in-out_infinite]'
                   }`}
                 >
-                  <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  <div className={`w-28 h-28 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isLiveMode
                       ? "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105"
                       : "bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 hover:scale-110"
