@@ -37,6 +37,12 @@ export const practiceSessions = mysqlTable("practiceSessions", {
   duration: int("duration"), // in seconds
   wordsCompleted: int("wordsCompleted"),
   accuracy: int("accuracy"), // 0-100
+  // RAG fields for contextual memory
+  context: text("context"), // What the user was practicing (words, topics, etc.)
+  feedback: text("feedback"), // AI feedback given during session
+  userStrengths: text("userStrengths"), // JSON array of strengths identified
+  userWeaknesses: text("userWeaknesses"), // JSON array of weaknesses identified
+  embedding: text("embedding"), // Vector embedding for semantic search (stored as JSON array)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

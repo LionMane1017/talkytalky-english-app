@@ -10,7 +10,6 @@ import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
-import LiveConversationMode from "@/components/LiveConversationMode";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 

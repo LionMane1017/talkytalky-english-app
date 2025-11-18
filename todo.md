@@ -586,8 +586,50 @@
 - [ ] Save checkpoint with working solution
 
 ## GitHub Repository Upload
-- [ ] Create first GitHub repo for published version (talkytalky-published)
-- [ ] Push published version code to first repo
-- [ ] Create second GitHub repo for latest version (talkytalky-latest)
-- [ ] Push latest version with Gemini Live API fix to second repo
-- [ ] Provide both repository URLs to user
+- [x] Create first GitHub repo for published version (talkytalky-published)
+- [x] Push published version code to first repo
+- [x] Create second GitHub repo for latest version (talkytalky-latest)
+- [x] Push latest version with Gemini Live API fix to second repo
+- [x] Provide both repository URLs to user
+
+## Complete Backend Replacement with NEWAPP Live Streaming
+- [ ] Extract and analyze NEWAPP.zip architecture
+- [ ] Remove ALL old TTS code (geminiService.ts TTS functions)
+- [ ] Remove ALL old analysis code (pronunciation analysis endpoints)
+- [ ] Implement single persistent Gemini Live session manager
+- [ ] Connect Practice page to live session with context
+- [ ] Connect IELTS page to live session with context
+- [ ] Connect AI Coach page to live session with context
+- [ ] Add context injection (current page, user stats, practice history)
+- [ ] Implement instant scoring from live responses
+- [ ] Add real-time database updates for scores
+- [ ] Test lightning-fast responses across all pages
+
+## Phase 30: Google OAuth Authentication & Branded Login
+- [ ] Create branded login page matching purple glassmorphism theme
+- [ ] Implement Google OAuth authentication flow
+- [ ] Update navigation to show login/logout based on auth state
+- [ ] Add user profile display in header
+- [ ] Test authentication flow end-to-end
+
+## Phase 31: Mini RAG System for Contextual Awareness
+- [ ] Add vector embeddings column to practice_sessions table
+- [ ] Create semantic search function for retrieving relevant past sessions
+- [ ] Implement context injection system for TalkyTalky
+- [ ] Build memory retrieval service (top 3-5 relevant sessions)
+- [ ] Integrate RAG memory into AI Coach conversations
+- [ ] Test personalized coaching with user history
+
+## Phase 32: Live Animated Dashboard
+- [x] Replace dummy data with live animated graphs
+- [x] Add neon purple glow effects (thin, modern)
+- [x] Implement periodic animation updates for graphs
+- [x] Add smooth transitions and pulsing effects
+- [x] Remove dummy data banner and warnings
+- [x] Test all animations and performance
+
+## Bug Fix: Blank Screen on Dashboard
+- [ ] Debug console errors causing blank screen
+- [ ] Fix TypeScript errors preventing page load
+- [ ] Verify all imports and dependencies
+- [ ] Test Dashboard loads correctly
