@@ -30,6 +30,41 @@ interface PronunciationResult {
   streakBonus?: boolean;
 }
 
+// Helper function to create WAV file from PCM data
+const createWavBlob = (pcmData: Uint8Array, sampleRate: number, numChannels: number, bitsPerSample: number): Blob => {
+  const dataLength = pcmData.length;
+  const buffer = new ArrayBuffer(44 + dataLength);
+  const view = new DataView(buffer);
+
+  // WAV header
+  const writeString = (offset: number, string: string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataLength, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // fmt chunk size
+  view.setUint16(20, 1, true); // audio format (1 = PCM)
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); // byte rate
+  view.setUint16(32, numChannels * (bitsPerSample / 8), true); // block align
+  view.setUint16(34, bitsPerSample, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataLength, true);
+
+  // Copy PCM data
+  for (let i = 0; i < dataLength; i++) {
+    view.setUint8(44 + i, pcmData[i]);
+  }
+
+  return new Blob([buffer], { type: 'audio/wav' });
+};
+
 export default function GeminiVoiceRecorder({
   targetWord,
   difficulty = "beginner",
@@ -232,20 +267,27 @@ export default function GeminiVoiceRecorder({
 
         // Play AI teacher voice feedback
         if (feedbackAudio) {
-          // Convert base64 to blob
+          // Convert base64 to PCM data
           const binaryString = atob(feedbackAudio);
-          const bytes = new Uint8Array(binaryString.length);
+          const pcmData = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
+            pcmData[i] = binaryString.charCodeAt(i);
           }
-          const audioBlob = new Blob([bytes], { type: 'audio/mp3' });
-          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Create WAV file from PCM data (24000 Hz, 16-bit, mono)
+          const wavBlob = createWavBlob(pcmData, 24000, 1, 16);
+          const audioUrl = URL.createObjectURL(wavBlob);
           const audio = new Audio(audioUrl);
+          
+          audio.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            URL.revokeObjectURL(audioUrl);
+          };
+          
+          audio.onended = () => URL.revokeObjectURL(audioUrl);
+          
           audio.play();
           toast.success("🎤 Teacher feedback", { duration: 3000 });
-          
-          // Cleanup
-          audio.onended = () => URL.revokeObjectURL(audioUrl);
         }
       } catch (audioError) {
         console.error('Failed to play teacher feedback audio:', audioError);

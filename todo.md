@@ -459,3 +459,9 @@
 - [x] Cache pronunciation analysis (30 min TTL)
 - [ ] Parallel API calls (transcription + TTS generation)
 - [ ] Reduce analysis time from 30-40s to under 10s
+
+## CRITICAL BUG FIXES - Audio Playback
+- [x] Fix "Failed to load because no supported source was found" error in LiveConversationMode
+- [x] Fix audio decoding for Gemini TTS responses
+- [x] Ensure proper base64 to audio blob conversion
+- [x] Convert raw PCM data from Gemini to WAV format with proper headers
