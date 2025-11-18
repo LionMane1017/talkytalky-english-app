@@ -270,3 +270,38 @@ Return only a JSON array of 5 words.
   const recommendations: string[] = JSON.parse(response.text || '[]');
   return recommendations;
 }
+
+/**
+ * Transcribe audio to text using Gemini AI
+ * @param audioBase64 - Base64 encoded audio data (webm, mp3, wav, etc.)
+ * @param mimeType - Audio MIME type (e.g., "audio/webm")
+ * @returns Transcribed text
+ */
+export async function transcribeAudio(
+  audioBase64: string,
+  mimeType: string = "audio/webm"
+): Promise<string> {
+  const ai = getGeminiClient();
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash-exp",
+    contents: [
+      {
+        parts: [
+          {
+            inlineData: {
+              data: audioBase64,
+              mimeType,
+            },
+          },
+          {
+            text: "Transcribe this audio exactly as spoken. Return only the transcribed text, nothing else.",
+          },
+        ],
+      },
+    ],
+  });
+
+  const transcription = response.text?.trim() || "";
+  return transcription;
+}

@@ -342,3 +342,9 @@
 - [x] Change all backend API procedures from protectedProcedure to publicProcedure
 - [x] Allow guest access to all endpoints
 - [x] Test API endpoints work without authentication
+
+## CRITICAL: Fix Speech Recognition Network Errors
+- [x] Remove Web Speech API from GeminiVoiceRecorder (causes network errors)
+- [x] Add Gemini speech-to-text backend endpoint
+- [x] Update GeminiVoiceRecorder to use MediaRecorder + Gemini API
+- [x] Test voice recording and transcription works reliably

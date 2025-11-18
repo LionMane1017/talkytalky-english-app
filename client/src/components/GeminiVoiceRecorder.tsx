@@ -42,59 +42,16 @@ export default function GeminiVoiceRecorder({
   const [audioLevel, setAudioLevel] = useState(0);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recognitionRef = useRef<any>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // tRPC mutations
   const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation({});
   const generateSpeech = trpc.practice.generateSpeech.useMutation({});
-
-  // Initialize Web Speech API
-  useEffect(() => {
-    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setTranscript(transcript);
-        handleTranscriptReceivedInternal(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        if (event.error === "no-speech") {
-          toast.error("No speech detected. Please try again.");
-        } else if (event.error === "network") {
-          toast.error("Network error. Retrying...");
-          setTimeout(() => recognition.start(), 2000);
-        }
-      };
-
-      recognition.onend = () => {
-        stopRecording();
-      };
-
-      recognitionRef.current = recognition;
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
+  const transcribeAudio = trpc.practice.transcribeAudio.useMutation({});
 
   // Audio level visualization
   const updateAudioLevel = () => {
@@ -112,6 +69,7 @@ export default function GeminiVoiceRecorder({
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       
       // Set up audio visualization
       audioContextRef.current = new AudioContext();
@@ -132,15 +90,22 @@ export default function GeminiVoiceRecorder({
         }
       };
 
+      mediaRecorder.onstop = async () => {
+        // Process the recorded audio
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        await processAudio(audioBlob);
+      };
+
       mediaRecorder.start();
-
-      // Start speech recognition
-      if (recognitionRef.current) {
-        recognitionRef.current.start();
-      }
-
       setIsRecording(true);
       toast.info("🎤 Listening... Say the word clearly!");
+
+      // Auto-stop after 5 seconds
+      setTimeout(() => {
+        if (mediaRecorderRef.current?.state === "recording") {
+          stopRecording();
+        }
+      }, 5000);
     } catch (error) {
       console.error("Error starting recording:", error);
       toast.error("Microphone access denied. Please allow microphone access.");
@@ -152,8 +117,8 @@ export default function GeminiVoiceRecorder({
       mediaRecorderRef.current.stop();
     }
 
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
     }
 
     if (animationFrameRef.current) {
@@ -164,59 +129,78 @@ export default function GeminiVoiceRecorder({
     setAudioLevel(0);
   };
 
-  useEffect(() => {
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-
-  const handleTranscriptReceivedInternal = async (userTranscript: string) => {
+  const processAudio = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
-    toast.info("📊 Analyzing your pronunciation...");
+    toast.info("🔄 Transcribing your speech...");
 
     try {
-      const result = await analyzePronunciation.mutateAsync({
-        targetText: targetWord,
-        userTranscript,
-        difficulty,
-        previousScore,
-      });
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = (reader.result as string).split(",")[1];
+        
+        try {
+          // Transcribe audio using Gemini
+          const userTranscript = await transcribeAudio.mutateAsync({
+            audioBase64: base64Audio,
+            mimeType: audioBlob.type,
+          });
 
-      onResult(result as PronunciationResult);
+          setTranscript(userTranscript);
+          
+          if (!userTranscript || userTranscript.trim().length === 0) {
+            toast.error("No speech detected. Please try again.");
+            setIsAnalyzing(false);
+            return;
+          }
 
-      // Show feedback toast
-      if (result.scores.overall >= 90) {
-        toast.success(result.feedback, { duration: 5000 });
-      } else if (result.scores.overall >= 70) {
-        toast.success(result.feedback, { duration: 4000 });
-      } else {
-        toast.info(result.feedback, { duration: 4000 });
-      }
+          // Analyze pronunciation
+          toast.info("📊 Analyzing your pronunciation...");
+          const result = await analyzePronunciation.mutateAsync({
+            targetText: targetWord,
+            userTranscript,
+            difficulty,
+            previousScore,
+          });
 
-      // Show motivational message
-      if (result.motivationalMessage) {
-        setTimeout(() => {
-          toast(result.motivationalMessage, { duration: 3000 });
-        }, 1000);
-      }
+          onResult(result as PronunciationResult);
 
-      // Streak bonus celebration
-      if (result.streakBonus) {
-        setTimeout(() => {
-          toast.success("🔥 STREAK BONUS! You're on fire!", { duration: 3000 });
-        }, 2000);
-      }
+          // Show feedback toast
+          if (result.scores.overall >= 90) {
+            toast.success(result.feedback, { duration: 5000 });
+          } else if (result.scores.overall >= 70) {
+            toast.success(result.feedback, { duration: 4000 });
+          } else {
+            toast.info(result.feedback, { duration: 4000 });
+          }
+
+          // Show motivational message
+          if (result.motivationalMessage) {
+            setTimeout(() => {
+              toast(result.motivationalMessage, { duration: 3000 });
+            }, 1000);
+          }
+
+          // Streak bonus celebration
+          if (result.streakBonus) {
+            setTimeout(() => {
+              toast.success("🔥 STREAK BONUS! You're on fire!", { duration: 3000 });
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Error processing audio:", error);
+          toast.error("Failed to process audio. Please try again.");
+        } finally {
+          setIsAnalyzing(false);
+          setTranscript("");
+        }
+      };
     } catch (error) {
-      console.error("Error analyzing pronunciation:", error);
-      toast.error("Failed to analyze pronunciation. Please try again.");
-    } finally {
+      console.error("Error reading audio blob:", error);
+      toast.error("Failed to process recording. Please try again.");
       setIsAnalyzing(false);
-      setTranscript("");
     }
   };
 
@@ -237,6 +221,17 @@ export default function GeminiVoiceRecorder({
       toast.error("Failed to generate audio. Please try again.");
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -298,7 +293,7 @@ export default function GeminiVoiceRecorder({
       {/* Status Text */}
       <p className="text-sm text-muted-foreground text-center">
         {isRecording
-          ? "🎤 Listening... Speak clearly!"
+          ? "🎤 Recording... (auto-stops in 5s)"
           : isAnalyzing
           ? "📊 Analyzing pronunciation..."
           : "Click microphone to record, speaker to hear native pronunciation"}

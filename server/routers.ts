@@ -103,6 +103,19 @@ export const appRouter = router({
         );
       }),
 
+    // Transcribe audio to text using Gemini
+    transcribeAudio: publicProcedure
+      .input(z.object({
+        audioBase64: z.string(),
+        mimeType: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await gemini.transcribeAudio(
+          input.audioBase64,
+          input.mimeType || "audio/webm"
+        );
+      }),
+
     // Get personalized recommendations
     getRecommendations: publicProcedure
       .input(z.object({
