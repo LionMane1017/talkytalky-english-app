@@ -524,3 +524,7 @@
 ## AI Page Gradient Overlay Adjustment
 - [x] Reduce gradient overlay opacity by 70% (from 5% to 1.5%) for better background visibility
 - [x] Remove gradient overlay completely - too saturated, can't see backgrounds
+
+## Button Visual Cleanup & Color Consistency
+- [x] Remove ugly dashed square box around circular glowing button (added outline-none)
+- [x] Match all AI page colors/effects to purple theme from other pages (changed pink to purple/indigo)

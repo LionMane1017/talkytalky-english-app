@@ -534,14 +534,14 @@ export default function AICoach() {
                 {/* Start/Stop Button - Big Sexy Glowing Circle */}
                 <button
                   onClick={isLiveMode ? stopLiveMode : startLiveMode}
-                  className={`relative group transition-all duration-300 ${
+                  className={`relative group transition-all duration-300 outline-none focus:outline-none ${
                     isLiveMode ? '' : 'animate-[button-glow_2s_ease-in-out_infinite]'
                   }`}
                 >
                   <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isLiveMode
                       ? "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105"
-                      : "bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 hover:scale-110"
+                      : "bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 hover:scale-110"
                   } border-4 border-white/50 shadow-2xl group-hover:border-white/70`}
                   >
                     {isLiveMode ? (
