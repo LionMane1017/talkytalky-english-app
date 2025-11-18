@@ -125,6 +125,11 @@ export default function SpeechRecorderWithPlayback({
           const transcript = event.results[0][0].transcript;
           const score = calculateScore(transcript, targetWord);
           
+          // Auto-stop recording when speech is detected
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+            mediaRecorderRef.current.stop();
+          }
+          
           // Create recording entry
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
           const audioUrl = URL.createObjectURL(audioBlob);
@@ -139,11 +144,30 @@ export default function SpeechRecorderWithPlayback({
 
           setRecordings(prev => [newRecording, ...prev].slice(0, 5)); // Keep last 5 recordings
           onTranscript(transcript, score);
+          
+          setIsRecording(false);
+          setIsProcessing(false);
+          
+          // Stop all audio tracks
+          stream.getTracks().forEach(track => track.stop());
         };
 
         recognitionRef.current.onerror = (event: any) => {
           console.error("Speech recognition error:", event.error);
           toast.error("Could not recognize speech. Please try again.");
+          setIsRecording(false);
+          setIsProcessing(false);
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        recognitionRef.current.onend = () => {
+          // If recognition ends without result, stop recording
+          if (isRecording && mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+            setIsProcessing(false);
+            stream.getTracks().forEach(track => track.stop());
+          }
         };
 
         recognitionRef.current.start();
@@ -226,29 +250,19 @@ export default function SpeechRecorderWithPlayback({
         <CardContent className="pt-6">
           <div className="flex flex-col items-center gap-4">
             <div className="flex gap-4">
-              {!isRecording ? (
-                <Button
-                  size="lg"
-                  onClick={startRecording}
-                  disabled={isProcessing}
-                  className="rounded-full h-16 w-16 p-0"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    <Mic className="h-6 w-6" />
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant="destructive"
-                  onClick={stopRecording}
-                  className="rounded-full h-16 w-16 p-0 animate-pulse"
-                >
-                  <Square className="h-6 w-6" />
-                </Button>
-              )}
+              <Button
+                size="lg"
+                onClick={startRecording}
+                disabled={isProcessing || isRecording}
+                className={`rounded-full h-16 w-16 p-0 ${isRecording ? 'animate-pulse bg-red-500 hover:bg-red-600' : ''}`}
+                variant={isRecording ? "destructive" : "default"}
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <Mic className="h-6 w-6" />
+                )}
+              </Button>
 
               <Button
                 size="lg"
@@ -264,10 +278,10 @@ export default function SpeechRecorderWithPlayback({
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 {isRecording
-                  ? "🎤 Recording... Click stop when done"
+                  ? "🎤 Recording... Speak now, it will auto-stop when you finish"
                   : isProcessing
                   ? "Processing your recording..."
-                  : "Click microphone to record, speaker to hear native pronunciation"}
+                  : "Click microphone to record (auto-stops when you finish speaking)"}
               </p>
             </div>
           </div>

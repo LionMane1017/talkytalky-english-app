@@ -61,18 +61,28 @@ export default function LearningPathDetail() {
       return;
     }
 
-    // Navigate to practice page with lesson context
-    toast.success("Starting lesson...");
-    // TODO: Navigate to practice page with lesson words
-    // For now, just mark as completed for demo
-    setTimeout(() => {
-      setCompletedLessons(prev => {
-        const newSet = new Set(prev);
-        newSet.add(lessonId);
-        return newSet;
-      });
-      toast.success("Lesson completed!");
-    }, 1000);
+    // Get the lesson vocabulary words
+    const lesson = path.lessons[lessonIndex];
+    
+    // Navigate to practice page with lesson-specific vocabulary
+    // Store lesson context in sessionStorage for practice page to use
+    sessionStorage.setItem('currentLesson', JSON.stringify({
+      pathId: path.id,
+      lessonId: lessonId,
+      lessonTitle: lesson.title,
+      wordIds: lesson.wordIds
+    }));
+    
+    toast.success(`Starting: ${lesson.title}`);
+    setLocation("/practice");
+  };
+
+  const markLessonComplete = (lessonId: string) => {
+    setCompletedLessons(prev => {
+      const newSet = new Set(prev);
+      newSet.add(lessonId);
+      return newSet;
+    });
   };
 
   const getDifficultyColor = (difficulty: string) => {

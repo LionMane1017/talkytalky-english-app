@@ -248,3 +248,24 @@
 - [x] Show popular vocabulary words
 - [x] Add time range filters (Today, Week, Month, All Time)
 - [ ] Connect to real backend data (currently using mock data)
+
+## Phase 23: CRITICAL BUG FIXES
+- [ ] Fix navigation crashes to login screen
+- [x] Fix learning paths lessons auto-completing without showing content
+- [x] Restore auto-stop voice recording (remove manual stop button)
+- [x] Test all navigation flows
+- [x] Test learning paths lesson flow
+- [x] Test voice recording auto-stop functionality
+
+## Phase 24: Custom Authentication & Pricing System
+- [ ] Design pricing tiers (Free, Pro $9.99/mo, Premium $19.99/mo)
+- [ ] Create subscription database schema
+- [ ] Remove Manus OAuth dependency
+- [ ] Build custom login/signup pages
+- [ ] Implement email/password authentication backend
+- [ ] Add JWT session management
+- [ ] Create professional marketing landing page
+- [ ] Build pricing page with tier comparison
+- [ ] Add password reset functionality
+- [ ] Implement subscription management
+- [ ] Test complete authentication and payment flow
