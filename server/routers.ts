@@ -8,6 +8,7 @@ import { achievements } from "@shared/achievements";
 import { assessPronunciation } from "./pronunciationAssessment";
 import * as gemini from "./geminiService";
 import { aiCoachRouter } from "./routers/aiCoach";
+import { configRouter } from "./routers/config";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -183,6 +184,7 @@ export const appRouter = router({
   }),
 
   aiCoach: aiCoachRouter,
+  config: configRouter,
 
   achievements: router({
     getAll: publicProcedure

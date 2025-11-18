@@ -555,3 +555,9 @@
 - [ ] The dashed square is STILL showing - CSS fixes didn't work
 - [ ] Find the actual source (might be SVG, canvas, or parent element)
 - [ ] Completely remove it
+
+## Gemini API Key Error Fix
+- [x] Fix "Gemini API key not found" error in AI Coach
+- [x] Created config router to expose API key from server-side ENV
+- [x] Updated AICoach to fetch API key via trpc endpoint
+- [x] Use correct environment variable name (GEMINI_API_KEY from server)

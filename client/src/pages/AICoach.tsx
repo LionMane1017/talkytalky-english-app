@@ -6,6 +6,8 @@ import { Mic, MicOff, MessageCircle, Sparkles, User, ChevronDown, ChevronUp, Pau
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { useQueryClient } from "@tanstack/react-query";
 import { GoogleGenAI, LiveServerMessage, Modality, Blob as GenAIBlob } from '@google/genai';
 
 // TalkyTalky System Prompt
@@ -194,9 +196,15 @@ export default function AICoach() {
     toast.info("Connecting to TalkyTalky...");
     
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      // Get API key from server-side environment via fetch (trpc hooks don't work in callbacks)
+      const response = await fetch('/api/trpc/config.getGeminiKey');
+      if (!response.ok) {
+        throw new Error("Failed to get Gemini API key");
+      }
+      const json = await response.json();
+      const apiKey = json.result?.data?.apiKey;
       if (!apiKey) {
-        throw new Error("Gemini API key not found");
+        throw new Error("Gemini API key not configured");
       }
 
       const ai = new GoogleGenAI({ apiKey });
