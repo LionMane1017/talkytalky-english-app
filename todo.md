@@ -520,3 +520,6 @@
 - [x] Add constant pulsing glow animation to button (button-glow keyframe)
 - [x] Make button visually irresistible with gradient and shadows
 - [x] Add hover effects with scale (110%) and extra glow
+
+## AI Page Gradient Overlay Adjustment
+- [x] Reduce gradient overlay opacity by 70% (from 5% to 1.5%) for better background visibility
