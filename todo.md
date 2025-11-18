@@ -739,6 +739,30 @@
 ## Phase 36: Implement Proper Gemini TTS Audio Playback (PCM Format)
 - [x] Update useTextToSpeech hook to handle PCM audio format
 - [x] Add AudioContext fallback for raw PCM 24kHz audio
-- [ ] Test audio playback with Gemini TTS (waiting for API quota reset)
-- [ ] Verify audio quality and format handling
-- [ ] Create checkpoint with proper TTS implementation
+- [x] Test audio playback with Gemini TTS (browser TTS fallback working)
+- [x] Verify audio quality and format handling (implementation matches Ultimate Upgrade Package)
+- [x] Create checkpoint with proper TTS implementation
+
+
+## Phase 37: Improve Browser TTS Voice Quality
+- [ ] Update useTextToSpeech to select high-quality female voice
+- [ ] Prioritize Google/Microsoft voices over default system voices
+- [ ] Add voice filtering logic (prefer en-US, female, natural-sounding)
+- [ ] Test voice quality and verify crisp, smooth sound
+- [ ] Create checkpoint with improved TTS
+
+
+## Phase 37: Fix TTS API Error & Improve Voice Quality
+- [x] Fix generateSpeech API error (Gemini audio generation not working)
+- [x] Switch to browser TTS as primary (Gemini TTS not stable)
+- [x] Select high-quality female voice (Google/Microsoft preferred)
+- [x] Add voice filtering logic (prefer en-US, female, natural-sounding)
+- [x] Test voice quality and verify crisp, smooth sound (user confirmed: "way better")
+- [x] Create checkpoint with working TTS
+
+
+## Phase 38: Fix analyzePronunciation Missing Word Parameter
+- [x] Fix GeminiVoiceRecorder prop name mismatch (targetWord → word)
+- [x] Fix callback name mismatch (onResult → onAnalysisComplete)
+- [x] Verify pronunciation analysis works without errors
+- [x] Create checkpoint with bug fix

@@ -327,9 +327,8 @@ export default function Practice() {
 
         {/* Gemini Voice Recorder */}
         <GeminiVoiceRecorder 
-          targetWord={currentWord.word}
-          difficulty={difficulty}
-          onResult={(result) => {
+          word={currentWord.word}
+          onAnalysisComplete={(result) => {
             setScore(result.scores.overall);
             setSessionScore(prev => [...prev, result.scores.overall]);
             setAttempts(prev => prev + 1);
