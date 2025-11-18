@@ -10,6 +10,7 @@ import Modules from "@/pages/Modules";
 import LearningPaths from "@/pages/LearningPaths";
 import LearningPathDetail from "@/pages/LearningPathDetail";
 import Leaderboard from "@/pages/Leaderboard";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { Route, Switch, useLocation } from "wouter";
 import { useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
@@ -40,6 +41,7 @@ function Router() {
           <Route path={"/learning-paths"} component={LearningPaths} />
           <Route path={"/learning-paths/:pathId"} component={LearningPathDetail} />
           <Route path={"/leaderboard"} component={Leaderboard} />
+          <Route path={"/admin"} component={AdminDashboard} />
           <Route path={"/404"} component={NotFound} />
           {/* Final fallback route */}
           <Route component={NotFound} />
