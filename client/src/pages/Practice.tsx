@@ -243,11 +243,6 @@ export default function Practice() {
           </Button>
         </div>
 
-        {/* Live Conversation Mode */}
-        <div className="mb-6">
-          <LiveConversationMode context="pronunciation practice" />
-        </div>
-
         {/* Auto-Play Toggle */}
         <Card className="mb-6 bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
           <CardContent className="pt-6">

@@ -4,7 +4,7 @@
  * TalkyTalky stays live and guides users through all pages
  */
 
-import { GoogleGenerativeAI, LiveSession } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { TALKY_TALKY_SYSTEM_PROMPT } from "../constants/talkyTalky";
 
 class GeminiLiveSessionManager {
@@ -36,7 +36,10 @@ class GeminiLiveSessionManager {
 
       this.session = await model.startChat({
         generationConfig: {
-          responseModalities: "audio",
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 1000,
         },
         systemInstruction: TALKY_TALKY_SYSTEM_PROMPT,
       });

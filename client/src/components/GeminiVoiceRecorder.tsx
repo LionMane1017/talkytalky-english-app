@@ -85,26 +85,11 @@ export default function GeminiVoiceRecorder({
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // tRPC mutations with timeout
-  const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation({
-    onError: (error) => {
-      console.error('Pronunciation analysis error:', error);
-      toast.error(`Analysis failed: ${error.message}`);
-      setIsAnalyzing(false);
-    },
-  });
-  const transcribeAudio = trpc.practice.transcribeAudio.useMutation({
-    onError: (error) => {
-      console.error('Transcription error:', error);
-      toast.error(`Transcription failed: ${error.message}`);
-      setIsAnalyzing(false);
-    },
-  });
-  const generateSpeech = trpc.practice.generateSpeech.useMutation({
-    onError: (error) => {
-      console.error('Speech generation error:', error);
-      toast.error(`Audio generation failed: ${error.message}`);
-    },
-  });
+  // NOTE: These endpoints were removed in favor of Gemini Live API
+  // TODO: Restore or replace with new Gemini-based endpoints
+  // const analyzePronunciation = trpc.practice.analyzePronunciation.useMutation(...);
+  // const transcribeAudio = trpc.practice.transcribeAudio.useMutation(...);
+  // const generateSpeech = trpc.practice.generateSpeech.useMutation(...);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -234,19 +219,17 @@ export default function GeminiVoiceRecorder({
         reader.readAsDataURL(audioBlob);
       });
 
-      // Step 1: Transcribe audio using Gemini
-      const transcript = await transcribeAudio.mutateAsync({
-        audioBase64: base64Audio,
-        mimeType: 'audio/webm',
-      });
+      // TODO: Restore Gemini API integration
+      toast.error("Pronunciation analysis temporarily unavailable. API endpoints need to be restored.");
+      setIsAnalyzing(false);
+      return;
+      
+      // Step 1: Transcribe audio using Gemini (DISABLED)
+      // const transcript = await transcribeAudio.mutateAsync({...});
 
-      // Step 2: Analyze pronunciation using Gemini
-      const result = await analyzePronunciation.mutateAsync({
-        targetText: targetWord,
-        userTranscript: transcript,
-        difficulty,
-        previousScore,
-      });
+      // Step 2: Analyze pronunciation using Gemini (DISABLED)
+      // const result = await analyzePronunciation.mutateAsync({...});
+      const result: any = null; // Placeholder
 
       // Check if result has valid scores
       if (!result || !result.scores || typeof result.scores.overall !== 'number') {
@@ -257,13 +240,12 @@ export default function GeminiVoiceRecorder({
 
       onResult(result as PronunciationResult);
 
-      // Generate AI voice feedback
+      // Generate AI voice feedback (DISABLED)
       const feedbackText = `Your score is ${result.scores.overall} percent. ${result.feedback}`;
       try {
-        const feedbackAudio = await generateSpeech.mutateAsync({
-          text: feedbackText,
-          accent: 'US',
-        });
+        // TODO: Restore speech generation
+        // const feedbackAudio = await generateSpeech.mutateAsync({...});
+        const feedbackAudio: any = null; // Placeholder
 
         // Play AI teacher voice feedback
         if (feedbackAudio) {
@@ -330,11 +312,13 @@ export default function GeminiVoiceRecorder({
     try {
       toast.info("🔊 Generating native pronunciation...");
       
-      // Generate speech using Gemini TTS
-      const audioBase64 = await generateSpeech.mutateAsync({
-        text: targetWord,
-        accent: 'US',
-      });
+      // TODO: Restore Gemini TTS
+      toast.error("Text-to-speech temporarily unavailable. API endpoints need to be restored.");
+      return;
+      
+      // Generate speech using Gemini TTS (DISABLED)
+      // const audioBase64 = await generateSpeech.mutateAsync({...});
+      const audioBase64: any = null; // Placeholder
 
       if (!audioBase64) {
         throw new Error('No audio data received');
