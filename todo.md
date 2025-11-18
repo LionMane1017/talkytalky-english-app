@@ -356,3 +356,11 @@
 - [x] Improve practice page design - better colors and readability
 - [x] Fix white text on light purple (hard to read)
 - [x] Make practice page more visually appealing
+
+## MAJOR REFACTOR - Clean Skeleton Backend
+- [x] Remove ALL Gemini API code and imports
+- [x] Remove old broken API implementations
+- [x] Create clean skeleton geminiService.ts with mock responses
+- [x] Update voice recorder to use browser Web Speech API (no backend)
+- [x] Ensure all features work with mock data
+- [x] Test entire app works without errors
