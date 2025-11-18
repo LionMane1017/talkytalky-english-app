@@ -11,6 +11,7 @@ import LearningPaths from "@/pages/LearningPaths";
 import LearningPathDetail from "@/pages/LearningPathDetail";
 import Leaderboard from "@/pages/Leaderboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AICoach from "@/pages/AICoach";
 import { Route, Switch, useLocation } from "wouter";
 import { useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
@@ -32,6 +33,7 @@ function Router() {
         <Switch>
           <Route path={"/"} component={Dashboard} />
           <Route path={"/practice"} component={Practice} />
+          <Route path={"/ai-coach"} component={AICoach} />
           <Route path={"/match"} component={MatchCards} />
           <Route path={"/dashboard"} component={Dashboard} />
           <Route path={"/profile"} component={Profile} />
