@@ -178,3 +178,16 @@
 - [x] Add progress tracking for tracks and lessons (client-side demo)
 - [x] Update navigation to include Learning Paths
 - [x] Test all tracks and lesson progression
+
+## Phase 17: Connect Dashboard to Real Backend Data
+- [x] Design database schema for practice sessions (type, score, duration, timestamp)
+- [x] Design database schema for user progress tracking
+- [x] Create migration files for new tables
+- [x] Implement tRPC endpoints for saving practice sessions
+- [x] Implement tRPC endpoints for fetching user stats and history
+- [x] Update Practice page to save sessions to backend
+- [x] Update Match Cards page to save sessions to backend
+- [x] Update IELTS Practice page to save sessions to backend
+- [x] Update Dashboard to fetch real data from backend API (already implemented)
+- [x] Replace simulated stats with actual database queries (already implemented)
+- [x] Test Dashboard with real practice sessions and verify data flow

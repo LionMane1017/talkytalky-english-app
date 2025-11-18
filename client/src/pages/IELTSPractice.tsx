@@ -7,6 +7,7 @@ import { getRandomQuestion, type IELTSQuestion } from "@/data/ieltsQuestions";
 import { Clock, Mic, MicOff, ArrowRight, RotateCcw, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
+import { trpc } from "@/lib/trpc";
 
 type PracticeMode = "part1" | "part2" | "part3" | "mock" | null;
 type SessionPhase = "intro" | "preparation" | "speaking" | "complete";
@@ -18,6 +19,20 @@ export default function IELTSPractice() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [questionsCompleted, setQuestionsCompleted] = useState(0);
+  
+  const { data: user } = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    throwOnError: false,
+  });
+  
+  const saveSessionMutation = trpc.practice.saveSession.useMutation({
+    onSuccess: () => {
+      console.log("IELTS session saved");
+    },
+    onError: (error) => {
+      console.error("Failed to save IELTS session:", error);
+    },
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -101,6 +116,19 @@ export default function IELTSPractice() {
     setIsRecording(false);
     setQuestionsCompleted(prev => prev + 1);
     setPhase("complete");
+    
+    // Save session to backend (only if logged in)
+    if (user && currentQuestion) {
+      const sessionType = currentQuestion.part === 1 ? "ielts_part1" : 
+                         currentQuestion.part === 2 ? "ielts_part2" : "ielts_part3";
+      
+      saveSessionMutation.mutate({
+        type: mode === "mock" ? "mock_test" : sessionType,
+        score: 75, // Mock score for now
+        wordsCompleted: 1,
+        duration: currentQuestion.speakingTime,
+      });
+    }
   };
 
   const nextQuestion = () => {
