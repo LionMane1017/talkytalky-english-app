@@ -781,3 +781,20 @@
 - [ ] Test conversational flow (intro → record with animation → feedback → next word)
 - [ ] Verify coaching feels natural and encouraging
 - [ ] Create checkpoint with Gemini Live coaching
+
+
+## Phase 40: Unified Gemini Live Assistant for Practice (Replace Separate APIs)
+- [x] Create new PracticeLive.tsx with Gemini Live session
+- [x] Fetch Smart Context (RAG) with current word/difficulty for assistant
+- [x] Create pronunciation coach system prompt (page-aware, uses KB)
+- [x] Send initial context message (word, difficulty, IELTS criteria)
+- [x] Implement Live Audio streaming (replaces GeminiVoiceRecorder)
+- [x] Remove analyzePronunciation API call (use Live session instead)
+- [x] Implement word introduction (assistant speaks when new word appears)
+- [x] Implement live pronunciation analysis (assistant listens and responds)
+- [x] Add congratulations and feedback after recording
+- [x] Add voice waveform animation during recording
+- [x] Add 5-second countdown with auto-stop
+- [x] Update routing to use PracticeLive instead of Practice
+- [ ] Test unified experience (one assistant, full context, RAG-powered)
+- [ ] Create checkpoint with unified Gemini Live assistant

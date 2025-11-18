@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import Practice from "@/pages/Practice";
+import PracticeLive from "@/pages/PracticeLive";
 import MatchCards from "@/pages/MatchCards";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
@@ -33,7 +33,7 @@ function Router() {
       <div className="pb-16">
         <Switch>
           <Route path={"/"} component={Dashboard} />
-          <Route path={"/practice"} component={Practice} />
+          <Route path={"/practice"} component={PracticeLive} />
           <Route path={"/ai-coach"} component={AICoach} />
           <Route path={"/match"} component={MatchCards} />
           <Route path={"/dashboard"} component={Dashboard} />

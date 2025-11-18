@@ -1,0 +1,523 @@
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { GoogleGenAI, LiveServerMessage, Blob as GenAIBlob } from '@google/genai';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
+import { ArrowRight, RotateCcw, Trophy, Mic, Square } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import TalkyLogo from "@/components/TalkyLogo";
+import { VoiceWaveform } from "@/components/VoiceWaveform";
+import { decode, encode, decodeAudioData } from '../utils/audio';
+import { AppStatus } from "@/types";
+import type { Message } from "@/types";
+
+export default function PracticeLive() {
+  // Practice state
+  const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
+  const [difficulty, setDifficulty] = useState<"beginner" | "intermediate" | "advanced" | null>(null);
+  const [score, setScore] = useState<number | null>(null);
+  const [sessionScore, setSessionScore] = useState<number[]>([]);
+  const [attempts, setAttempts] = useState(0);
+  const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
+  
+  // Gemini Live state
+  const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
+  const [transcripts, setTranscripts] = useState<Message[]>([]);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  
+  // Refs
+  const sessionPromiseRef = useRef<Promise<any> | null>(null);
+  const inputAudioContextRef = useRef<AudioContext | null>(null);
+  const outputAudioContextRef = useRef<AudioContext | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioProcessorNodeRef = useRef<ScriptProcessorNode | null>(null);
+  const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const analyserNodeRef = useRef<AnalyserNode | null>(null);
+  const currentInputTranscriptionRef = useRef('');
+  const currentOutputTranscriptionRef = useRef('');
+  const nextAudioStartTimeRef = useRef(0);
+  const audioSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const { data: user } = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    throwOnError: false,
+  });
+  
+  // Get Smart Context (RAG) for current word
+  const { data: smartContextData } = trpc.rag.getSmartContext.useQuery(
+    { currentTopic: currentWord ? `Pronunciation practice: ${currentWord.word} (${difficulty} level)` : "IELTS Pronunciation Practice" },
+    { enabled: !!currentWord, refetchOnWindowFocus: false, staleTime: 300000 }
+  );
+  const smartContext = smartContextData?.context || null;
+  
+  const saveSessionMutation = trpc.practice.saveSession.useMutation({
+    onSuccess: () => {
+      toast.success("Practice session saved!");
+    },
+  });
+  
+  // Available words
+  const availableWords = useMemo(() => {
+    if (!difficulty) return [];
+    return vocabularyData.filter(
+      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+    );
+  }, [difficulty, usedWordIds]);
+  
+  const wordsRemaining = availableWords.length;
+  const totalWords = vocabularyData.filter(w => w.difficulty === difficulty).length;
+  
+  // Cleanup audio
+  const cleanUpAudio = useCallback(() => {
+    if (mediaStreamSourceRef.current) {
+      mediaStreamSourceRef.current.disconnect();
+      mediaStreamSourceRef.current = null;
+    }
+    if (audioProcessorNodeRef.current) {
+      audioProcessorNodeRef.current.disconnect();
+      audioProcessorNodeRef.current = null;
+    }
+    if (analyserNodeRef.current) {
+      analyserNodeRef.current.disconnect();
+      analyserNodeRef.current = null;
+    }
+    mediaStreamRef.current?.getTracks().forEach(track => track.stop());
+    mediaStreamRef.current = null;
+    
+    if (inputAudioContextRef.current && inputAudioContextRef.current.state !== 'closed') {
+      inputAudioContextRef.current.close();
+      inputAudioContextRef.current = null;
+    }
+    if (outputAudioContextRef.current && outputAudioContextRef.current.state !== 'closed') {
+      outputAudioContextRef.current.close();
+      outputAudioContextRef.current = null;
+    }
+    
+    audioSourcesRef.current.forEach(source => source.stop());
+    audioSourcesRef.current.clear();
+    nextAudioStartTimeRef.current = 0;
+    setAudioLevel(0);
+  }, []);
+  
+  // Stop session
+  const stopSession = useCallback(async () => {
+    setStatus(AppStatus.IDLE);
+    setIsRecording(false);
+    
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    
+    if (sessionPromiseRef.current) {
+      const session = await sessionPromiseRef.current;
+      session.close();
+      sessionPromiseRef.current = null;
+    }
+    
+    cleanUpAudio();
+  }, [cleanUpAudio]);
+  
+  // Start Gemini Live session
+  const startSession = useCallback(async () => {
+    if (!currentWord) {
+      toast.error("Please select a difficulty level first");
+      return;
+    }
+    
+    setStatus(AppStatus.CONNECTING);
+    setTranscripts([]);
+    
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('Gemini API key not found');
+      }
+      
+      const ai = new GoogleGenAI({ apiKey });
+      
+      inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+      outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      
+      // Create system prompt with full context
+      const systemPrompt = `You are TalkyTalky, an enthusiastic IELTS pronunciation coach. 
+
+**Current Practice Session:**
+- Word/Phrase: "${currentWord.word}"
+- Difficulty Level: ${difficulty}
+- Meaning: ${currentWord.meaning}
+- Example: ${currentWord.example}
+
+**Your Role:**
+1. When the session starts, introduce the word enthusiastically and explain how to pronounce it
+2. Give specific pronunciation tips (stress, sounds, common mistakes)
+3. When the user records, listen carefully to their pronunciation
+4. After they finish, congratulate them warmly and provide specific feedback
+5. Suggest what to improve and encourage them to try again or move to the next word
+
+**Knowledge Base Context:**
+${smartContext || 'No additional context available'}
+
+**Guidelines:**
+- Be encouraging and positive
+- Give specific, actionable feedback
+- Reference IELTS pronunciation criteria when relevant
+- Keep responses concise (2-3 sentences)
+- Use a warm, friendly tone
+
+Start by introducing the word "${currentWord.word}" and explaining how to pronounce it!`;
+      
+      sessionPromiseRef.current = ai.live.connect({
+        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        config: {
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+        },
+        callbacks: {
+          onopen: async () => {
+            console.log('Gemini Live session opened');
+            setStatus(AppStatus.CONNECTED);
+            
+            // Start streaming microphone audio
+            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaStreamSourceRef.current = inputAudioContextRef.current!.createMediaStreamSource(mediaStreamRef.current);
+            
+            analyserNodeRef.current = inputAudioContextRef.current!.createAnalyser();
+            analyserNodeRef.current.fftSize = 256;
+            
+            audioProcessorNodeRef.current = inputAudioContextRef.current!.createScriptProcessor(4096, 1, 1);
+            
+            audioProcessorNodeRef.current.onaudioprocess = (audioProcessingEvent) => {
+              const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+              const pcmBlob: GenAIBlob = {
+                data: encode(new Uint8Array(new Int16Array(inputData.map(f => f * 32768)).buffer)),
+                mimeType: 'audio/pcm;rate=16000',
+              };
+              
+              if (sessionPromiseRef.current && isRecording) {
+                sessionPromiseRef.current.then((session) => {
+                  session.sendRealtimeInput({ media: pcmBlob });
+                });
+              }
+              
+              const dataArray = new Uint8Array(analyserNodeRef.current!.frequencyBinCount);
+              analyserNodeRef.current!.getByteFrequencyData(dataArray);
+              const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+              setAudioLevel(average / 255);
+            };
+            
+            mediaStreamSourceRef.current.connect(analyserNodeRef.current);
+            mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
+            audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
+          },
+          onmessage: async (message: LiveServerMessage) => {
+            if (message.serverContent?.outputTranscription) {
+              currentOutputTranscriptionRef.current += message.serverContent.outputTranscription.text;
+            } else if (message.serverContent?.inputTranscription) {
+              currentInputTranscriptionRef.current += message.serverContent.inputTranscription.text;
+            }
+            
+            if (message.serverContent?.turnComplete) {
+              const userInput = currentInputTranscriptionRef.current.trim();
+              const modelOutput = currentOutputTranscriptionRef.current.trim();
+              
+              if (userInput) setTranscripts(prev => [...prev, { role: 'user', text: userInput }]);
+              if (modelOutput) setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
+              
+              currentInputTranscriptionRef.current = '';
+              currentOutputTranscriptionRef.current = '';
+              setIsSpeaking(false);
+            }
+            
+            const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+            if (base64Audio && outputAudioContextRef.current) {
+              setIsSpeaking(true);
+              const audioBuffer = await decodeAudioData(decode(base64Audio), outputAudioContextRef.current, 24000, 1);
+              const source = outputAudioContextRef.current.createBufferSource();
+              source.buffer = audioBuffer;
+              source.connect(outputAudioContextRef.current.destination);
+              
+              const currentTime = outputAudioContextRef.current.currentTime;
+              const startTime = Math.max(currentTime, nextAudioStartTimeRef.current);
+              
+              source.start(startTime);
+              nextAudioStartTimeRef.current = startTime + audioBuffer.duration;
+              
+              audioSourcesRef.current.add(source);
+              source.onended = () => {
+                audioSourcesRef.current.delete(source);
+                if (audioSourcesRef.current.size === 0) {
+                  setIsSpeaking(false);
+                }
+              };
+            }
+            
+            if (message.serverContent?.interrupted) {
+              audioSourcesRef.current.forEach(source => source.stop());
+              audioSourcesRef.current.clear();
+              nextAudioStartTimeRef.current = 0;
+            }
+          },
+          onerror: (error: any) => {
+            console.error('Gemini Live error:', error);
+            toast.error('Connection error. Please try again.');
+            stopSession();
+          },
+        },
+      });
+    } catch (err: any) {
+      console.error('Failed to start session:', err);
+      toast.error(err.message || 'Failed to start practice session');
+      setStatus(AppStatus.IDLE);
+    }
+  }, [currentWord, difficulty, smartContext, isRecording, stopSession]);
+  
+  // Start recording (user speaks)
+  const startRecording = useCallback(() => {
+    setIsRecording(true);
+    setCountdown(5);
+    
+    // Auto-stop after 5 seconds
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          setIsRecording(false);
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+  
+  // Stop recording manually
+  const stopRecording = useCallback(() => {
+    setIsRecording(false);
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+  }, []);
+  
+  // Start practice
+  const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
+    setDifficulty(level);
+    setUsedWordIds(new Set());
+    const words = vocabularyData.filter(w => w.difficulty === level);
+    if (words.length > 0) {
+      const randomWord = words[Math.floor(Math.random() * words.length)];
+      setCurrentWord(randomWord);
+      setUsedWordIds(new Set([randomWord.id]));
+    }
+    setScore(null);
+    setSessionScore([]);
+    setAttempts(0);
+  };
+  
+  // Next word
+  const nextWord = () => {
+    if (!difficulty) return;
+    
+    const available = vocabularyData.filter(
+      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+    );
+    
+    if (available.length === 0) {
+      toast.success("You've completed all words in this level!");
+      return;
+    }
+    
+    const randomWord = available[Math.floor(Math.random() * available.length)];
+    setCurrentWord(randomWord);
+      setUsedWordIds(prev => new Set(Array.from(prev).concat(randomWord.id)));
+    setScore(null);
+    
+    // Restart session with new word
+    if (status === AppStatus.CONNECTED) {
+      stopSession().then(() => startSession());
+    }
+  };
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopSession();
+    };
+  }, [stopSession]);
+  
+  if (!difficulty) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
+            <TalkyLogo />
+            <div>
+              <h1 className="text-4xl font-bold text-white">Practice Speaking</h1>
+              <p className="text-purple-200">Choose a difficulty level to start practicing pronunciation</p>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { level: "beginner" as const, title: "Beginner", subtitle: "Basic Words", description: "Start with simple, everyday vocabulary" },
+              { level: "intermediate" as const, title: "Intermediate", subtitle: "Common Words", description: "Practice frequently used vocabulary" },
+              { level: "advanced" as const, title: "Advanced", subtitle: "IELTS Words", description: "Master academic and complex vocabulary" },
+            ].map(({ level, title, subtitle, description }) => (
+              <Card key={level} className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/20 transition-all cursor-pointer" onClick={() => startPractice(level)}>
+                <CardHeader>
+                  <Badge className="w-fit mb-2">{title}</Badge>
+                  <CardTitle className="text-white">{subtitle}</CardTitle>
+                  <CardDescription className="text-purple-200">{description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Start Practice</Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <TalkyLogo />
+            <div>
+              <h1 className="text-2xl font-bold text-white capitalize">{difficulty} Level</h1>
+              <p className="text-purple-200">Practice with TalkyTalky</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={() => { stopSession(); setDifficulty(null); }}>
+            Change Level
+          </Button>
+        </div>
+        
+        {/* Progress */}
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
+          <CardContent className="pt-6">
+            <div className="flex justify-between text-white mb-2">
+              <span>Progress</span>
+              <span>{totalWords - wordsRemaining} / {totalWords} words</span>
+            </div>
+            <Progress value={((totalWords - wordsRemaining) / totalWords) * 100} className="h-2" />
+          </CardContent>
+        </Card>
+        
+        {/* Current Word */}
+        {currentWord && (
+          <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-3xl text-white">{currentWord.word}</CardTitle>
+                <Badge variant="secondary">{currentWord.difficulty}</Badge>
+              </div>
+              <CardDescription className="text-purple-200 text-lg">{currentWord.meaning}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-white/80 italic">"{currentWord.example}"</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Gemini Live Assistant */}
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
+          <CardHeader>
+            <CardTitle className="text-white">TalkyTalky Coach</CardTitle>
+            <CardDescription className="text-purple-200">
+              {status === AppStatus.IDLE && "Start the session to practice with your AI coach"}
+              {status === AppStatus.CONNECTING && "Connecting to TalkyTalky..."}
+              {status === AppStatus.CONNECTED && !isRecording && "Click Record to practice pronunciation"}
+              {status === AppStatus.CONNECTED && isRecording && `Recording... ${countdown}s remaining`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Waveform */}
+            {status === AppStatus.CONNECTED && isRecording && (
+              <VoiceWaveform audioLevel={audioLevel} isActive={isRecording} isSpeaking={isSpeaking} />
+            )}
+            
+            {/* Conversation History */}
+            {transcripts.length > 0 && (
+              <div className="max-h-60 overflow-y-auto space-y-3 bg-black/20 rounded-lg p-4">
+                {transcripts.map((msg, idx) => (
+                  <div key={idx} className={`${msg.role === 'user' ? 'text-blue-300' : 'text-purple-300'}`}>
+                    <strong>{msg.role === 'user' ? 'You' : 'TalkyTalky'}:</strong> {msg.text}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Controls */}
+            <div className="flex gap-4 justify-center">
+              {status === AppStatus.IDLE && (
+                <Button size="lg" onClick={startSession} className="w-48">
+                  <Mic className="mr-2" /> Start Session
+                </Button>
+              )}
+              
+              {status === AppStatus.CONNECTED && (
+                <>
+                  <div className="relative">
+                    <Button
+                      size="lg"
+                      variant={isRecording ? "destructive" : "default"}
+                      onClick={isRecording ? stopRecording : startRecording}
+                      className="w-32 h-32 rounded-full"
+                    >
+                      {isRecording ? (
+                        <div className="flex flex-col items-center">
+                          <Square size={32} />
+                          <span className="text-3xl font-bold mt-2">{countdown}</span>
+                        </div>
+                      ) : (
+                        <Mic size={48} />
+                      )}
+                    </Button>
+                    
+                    {/* Countdown Ring */}
+                    {isRecording && (
+                      <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 128 128">
+                        <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/30" />
+                        <circle
+                          cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="4" className="text-white"
+                          strokeDasharray={`${2 * Math.PI * 60}`}
+                          strokeDashoffset={`${2 * Math.PI * 60 * (1 - countdown / 5)}`}
+                          style={{ transition: 'stroke-dashoffset 1s linear' }}
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  
+                  <Button size="lg" variant="outline" onClick={stopSession}>
+                    End Session
+                  </Button>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Actions */}
+        <div className="flex gap-4">
+          <Button onClick={nextWord} disabled={wordsRemaining === 0} className="flex-1">
+            <ArrowRight className="mr-2" /> Next Word
+          </Button>
+          <Button variant="outline" onClick={() => startPractice(difficulty)}>
+            <RotateCcw className="mr-2" /> Restart
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
