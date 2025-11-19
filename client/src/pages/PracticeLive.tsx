@@ -238,26 +238,25 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               if (modelOutput) {
                 setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
                 
-                // Auto-advance detection
+                // UX FIX: Expanded auto-advance detection
                 const lowerOutput = modelOutput.toLowerCase();
                 const advanceKeywords = [
-                  'next word',
-                  'move on',
-                  'ready for',
-                  'try another',
-                  'practice another',
-                  "let's move",
-                  'move to the next',
-                  'ready to move'
+                  // Questions asking if user is ready
+                  'ready for', 'move on', 'try another', 'next word',
+                  // Statements confirming the move (CRITICAL ADDITION)
+                  "let's practice", "let's try", "next word is", 
+                  "move on to", "okay,", "alright,", "how about"
                 ];
                 
                 const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));
                 
-                if (shouldAdvance && wordsRemaining > 0) {
-                  console.log('🎯 Auto-advancing to next word...');
+                // Prevent auto-advance if we just started or no words remaining
+                if (shouldAdvance && wordsRemaining > 0 && status === AppStatus.CONNECTED) {
+                  console.log('🎯 Gemini triggering auto-advance based on phrase:', modelOutput);
+                  // Shorter delay since AI is introducing the word
                   setTimeout(() => {
                     nextWord();
-                  }, 2000); // 2 second delay before auto-advance
+                  }, 1000);
                 }
               }
               
@@ -482,11 +481,9 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             </div>
           )}
           
-          {/* Record Button and Pause Button */}
+          {/* Single Toggle Button - UX FIX */}
             <div className="flex flex-col items-center justify-center">
-              <div className="flex items-center gap-3">
-                {/* Main Record Button */}
-                <div className="relative flex items-center justify-center">
+              <div className="relative flex items-center justify-center">
                 {animate && (
                   <div 
                     className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-purple-500/50 transition-transform duration-300" 
@@ -497,44 +494,15 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                   onClick={action}
                   disabled={disabled}
                   className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    status === AppStatus.CONNECTED ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'
+                    status === AppStatus.CONNECTED ? 'bg-red-600 hover:bg-red-700 shadow-xl shadow-red-200' : 'bg-purple-600 hover:bg-purple-700 shadow-xl shadow-purple-200'
                   } ${animate ? 'animate-pulse' : ''}`}
                 >
                   {icon}
                 </button>
-                </div>
-                
-                {/* Pause/Stop Button - Only show when connected */}
-                {status === AppStatus.CONNECTED && (
-                  <button
-                    onClick={() => {
-                      // Stop all playing audio
-                      audioSourcesRef.current.forEach(source => {
-                        try {
-                          source.stop();
-                        } catch (e) {
-                          // Already stopped
-                        }
-                      });
-                      audioSourcesRef.current.clear();
-                      nextAudioStartTimeRef.current = 0;
-                      setIsSpeaking(false);
-                      
-                      // Send interrupt signal to Gemini
-                      sessionPromiseRef.current?.then(session => {
-                        if (session) {
-                          session.send({ text: "[User interrupted - please pause and wait for user input]", endOfTurn: true });
-                        }
-                      });
-                    }}
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                    title="Pause/Stop Gemini"
-                  >
-                    <StopIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </button>
-                )}
               </div>
-              <p className="text-xs sm:text-sm text-gray-300 mt-2">{text}</p>
+              <p className="text-xs sm:text-sm text-gray-300 mt-2 font-medium">
+                {status === AppStatus.CONNECTED ? 'Tap to Stop Session' : text}
+              </p>
             </div>
         </div>
         
