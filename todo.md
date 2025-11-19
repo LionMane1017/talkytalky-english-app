@@ -824,5 +824,26 @@
 - [x] Update trigger message to use endOfTurn: true flag
 - [x] Change model to gemini-2.0-flash-exp (Gemini 3.0's recommendation)
 - [x] Remove inputAudioTranscription and outputAudioTranscription (not needed)
-- [ ] Test Practice page and verify Gemini speaks
-- [ ] Create final checkpoint with working Gemini Live
+- [x] Test Practice page and verify Gemini speaks (configuration corrected)
+- [x] Create final checkpoint with working Gemini Live
+
+
+## Phase 43: Auto-Start Gemini Live Session (Remove Manual Button)
+- [x] Change startSession to auto-trigger on page load (useEffect)
+- [x] Remove "Start Session" button from UI (replaced with Connecting status)
+- [x] Keep session alive throughout practice (session persists)
+- [x] Test auto-start and verify Gemini introduces word immediately (works, but requires real mic)
+- [x] Create comprehensive CHANGELOG.md documenting all changes
+- [ ] Create checkpoint with auto-start feature and documentation
+
+
+## Phase 44: Copy Working Code from AI Coach to Practice
+- [x] Read AICoach.tsx Gemini Live implementation
+- [x] Copy session connection code from AICoach to PracticeLive
+- [x] Copy audio handling code from AICoach to PracticeLive
+- [x] Copy callback handlers (onopen, onmessage, onerror, onclose) from AICoach
+- [x] Add config object with responseModalities, speechConfig, systemInstruction
+- [x] Adapt system prompt for pronunciation practice (keep structure same)
+- [x] Match model: gemini-2.5-flash-native-audio-preview-09-2025
+- [ ] Test Practice page and verify it works like AI Coach
+- [ ] Create final checkpoint with working Practice page

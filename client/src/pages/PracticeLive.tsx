@@ -172,39 +172,17 @@ ${smartContext || 'No additional context available'}
 
 Start by introducing the word "${currentWord.word}" and explaining how to pronounce it!`;
       
+      outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      
       sessionPromiseRef.current = ai.live.connect({
-        model: 'gemini-2.0-flash-exp',
-        config: {
-          generationConfig: {
-            responseModalities: 'audio' as any,
-            speechConfig: {
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
-            },
-          },
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-        },
+        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
         callbacks: {
           onopen: async () => {
             console.log('✅ Gemini Live session opened');
             setStatus(AppStatus.CONNECTED);
             
-            // Initialize Output Audio Context with low latency
-            outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
-              sampleRate: 24000,
-              latencyHint: 'interactive',
-            });
-            
             // Start streaming microphone audio
-            try {
-              mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                  sampleRate: 16000,
-                  channelCount: 1,
-                  echoCancellation: true,
-                  autoGainControl: true,
-                  noiseSuppression: true,
-                },
-              });
+            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaStreamSourceRef.current = inputAudioContextRef.current!.createMediaStreamSource(mediaStreamRef.current);
             
             analyserNodeRef.current = inputAudioContextRef.current!.createAnalyser();
@@ -219,7 +197,7 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                 mimeType: 'audio/pcm;rate=16000',
               };
               
-              if (sessionPromiseRef.current && isRecording) {
+              if (sessionPromiseRef.current) {
                 sessionPromiseRef.current.then((session) => {
                   session.sendRealtimeInput({ media: pcmBlob });
                 });
@@ -234,21 +212,6 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(analyserNodeRef.current);
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
-            
-            // Trigger introduction after setup
-            setTimeout(async () => {
-              const session = await sessionPromiseRef.current;
-              if (session && currentWord) {
-                console.log('🚀 Triggering introduction for word:', currentWord.word);
-                session.send({ text: `Start the lesson now. Introduce the word "${currentWord.word}".`, endOfTurn: true });
-              }
-            }, 500);
-            
-            } catch (err) {
-              console.error('❌ Error accessing microphone:', err);
-              setStatus(AppStatus.IDLE);
-              toast.error('Failed to access microphone');
-            }
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {
@@ -298,10 +261,26 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               nextAudioStartTimeRef.current = 0;
             }
           },
-          onerror: (error: any) => {
-            console.error('Gemini Live error:', error);
+          onerror: (e: ErrorEvent) => {
+            console.error('Gemini Live error:', e);
             toast.error('Connection error. Please try again.');
             stopSession();
+          },
+          onclose: (e: CloseEvent) => {
+            console.log('Session closed.');
+            if (status !== AppStatus.IDLE) {
+              setStatus(AppStatus.IDLE);
+              stopSession();
+            }
+          },
+        },
+        config: {
+          responseModalities: ['audio' as any],
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+          },
+          systemInstruction: { 
+            parts: [{ text: systemPrompt }] 
           },
         },
       });
@@ -339,6 +318,14 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
       clearInterval(countdownIntervalRef.current);
     }
   }, []);
+  
+  // Auto-start session when difficulty changes
+  useEffect(() => {
+    if (difficulty && currentWord && status === AppStatus.IDLE) {
+      console.log('Auto-starting Gemini Live session...');
+      startSession();
+    }
+  }, [difficulty, currentWord, status, startSession]);
   
   // Start practice
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
@@ -495,9 +482,9 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             
             {/* Controls */}
             <div className="flex gap-4 justify-center">
-              {status === AppStatus.IDLE && (
-                <Button size="lg" onClick={startSession} className="w-48">
-                  <Mic className="mr-2" /> Start Session
+              {status === AppStatus.CONNECTING && (
+                <Button size="lg" disabled className="w-48">
+                  Connecting...
                 </Button>
               )}
               
