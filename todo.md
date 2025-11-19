@@ -861,5 +861,15 @@
 - [x] Move VoiceWaveform above button (like AI Coach)
 - [x] Use same status indicators: "Listening...", "Connecting...", "Waiting..."
 - [x] Fix stopSession to match AI Coach (async with setStatus)
-- [ ] Test Practice page with unified UI
-- [ ] Create checkpoint with consistent recording UI across all modules
+- [x] Test Practice page with unified UI
+- [x] Create checkpoint with consistent recording UI across all modules
+
+
+## Phase 46: Auto-Introduce Word with Tips on Page Load
+- [x] Add trigger message in onopen callback to introduce word immediately
+- [x] Format trigger to request pronunciation tips and common mistakes
+- [x] Add 500ms delay for session initialization
+- [x] Use endOfTurn: true flag for clean message delivery
+- [ ] Test that Gemini speaks as soon as Practice page loads
+- [ ] Verify introduction includes word breakdown and helpful tips
+- [ ] Create checkpoint with auto-introduction feature

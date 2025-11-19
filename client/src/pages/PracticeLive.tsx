@@ -207,6 +207,18 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(analyserNodeRef.current);
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
+            
+            // Trigger immediate introduction
+            setTimeout(async () => {
+              const session = await sessionPromiseRef.current;
+              if (session) {
+                console.log('🚀 Triggering word introduction...');
+                session.send({ 
+                  text: `Please introduce the word "${currentWord.word}" now. Explain how to pronounce it, break down the sounds, and give helpful tips for common mistakes.`,
+                  endOfTurn: true 
+                });
+              }
+            }, 500);
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {
