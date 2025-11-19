@@ -1079,3 +1079,10 @@
 - [x] Add option to enable simulated IELTS scoring and timing framework
 - [x] Add option to enable simulated CELPIP scoring and timing framework
 - [x] Test AI Coach behavior with new prompt
+
+## AI Coach Task Framework Explanations
+- [x] Add detailed IELTS task structure explanations (Part 1, 2, 3)
+- [x] Add detailed CELPIP task structure explanations (Tasks 1-8)
+- [x] Include example questions for each task type
+- [x] Explain scoring criteria with specific examples
+- [x] Test AI Coach with enhanced explanations
