@@ -1066,3 +1066,16 @@
 - [x] Test word sequence across multiple practice sessions
 - [x] Verify no word repetition occurs
 - [x] Document exact word order for each difficulty level
+
+## Header Consistency Fix
+- [ ] Audit all page headers (Home, Paths, AI Coach, Practice, Ranks)
+- [ ] Standardize header design across all pages except Practice lesson view
+- [ ] Remove header from Practice lesson word pages for better UX
+- [ ] Create unified header component for consistent styling
+
+## AI Coach Prompt Enhancements
+- [x] Add 3-4 second wait time after asking exam-type questions
+- [x] Include explanation of why waiting (prevents interrupting student replies)
+- [x] Add option to enable simulated IELTS scoring and timing framework
+- [x] Add option to enable simulated CELPIP scoring and timing framework
+- [x] Test AI Coach behavior with new prompt
