@@ -691,15 +691,15 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
               Welcome to TalkyTalky!
             </DialogTitle>
             <DialogDescription className="text-base text-gray-700 space-y-3 pt-2">
-              <p className="font-semibold text-purple-800">
+              <div className="font-semibold text-purple-800">
                 👋 Say "Hello" to start your pronunciation practice!
-              </p>
-              <p>
+              </div>
+              <div>
                 TalkyTalky is listening and ready to coach you. Just speak naturally and she'll guide you through each word.
-              </p>
-              <p className="text-sm text-gray-600 italic">
+              </div>
+              <div className="text-sm text-gray-600 italic">
                 Tip: You can say "next word" anytime to move forward, or practice the same word multiple times.
-              </p>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <Button onClick={() => setShowInstructions(false)} className="w-full bg-purple-600 hover:bg-purple-700">

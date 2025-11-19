@@ -1051,3 +1051,6 @@
 - [x] Implement animated gradient backgrounds cycling through
 - [x] Add frosted glass cards with backdrop-blur effects
 - [x] Test visual improvements across both pages
+
+## Bug Fix: HTML Validation Error
+- [x] Fix nested <p> tags in Practice page instruction dialog (DialogDescription contains nested <p> elements)
