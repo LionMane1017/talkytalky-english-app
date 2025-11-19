@@ -482,9 +482,11 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             </div>
           )}
           
-          {/* Record Button */}
+          {/* Record Button and Pause Button */}
             <div className="flex flex-col items-center justify-center">
-              <div className="relative flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                {/* Main Record Button */}
+                <div className="relative flex items-center justify-center">
                 {animate && (
                   <div 
                     className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-purple-500/50 transition-transform duration-300" 
@@ -500,6 +502,37 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                 >
                   {icon}
                 </button>
+                </div>
+                
+                {/* Pause/Stop Button - Only show when connected */}
+                {status === AppStatus.CONNECTED && (
+                  <button
+                    onClick={() => {
+                      // Stop all playing audio
+                      audioSourcesRef.current.forEach(source => {
+                        try {
+                          source.stop();
+                        } catch (e) {
+                          // Already stopped
+                        }
+                      });
+                      audioSourcesRef.current.clear();
+                      nextAudioStartTimeRef.current = 0;
+                      setIsSpeaking(false);
+                      
+                      // Send interrupt signal to Gemini
+                      sessionPromiseRef.current?.then(session => {
+                        if (session) {
+                          session.send({ text: "[User interrupted - please pause and wait for user input]", endOfTurn: true });
+                        }
+                      });
+                    }}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    title="Pause/Stop Gemini"
+                  >
+                    <StopIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </button>
+                )}
               </div>
               <p className="text-xs sm:text-sm text-gray-300 mt-2">{text}</p>
             </div>
