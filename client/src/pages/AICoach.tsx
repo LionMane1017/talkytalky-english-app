@@ -16,6 +16,16 @@ export default function App() {
   const [transcripts, setTranscripts] = useState<Message[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  
+  // Background images for animated cycling
+  const backgroundImages = [
+    'https://images.unsplash.com/photo-1499002238440-d264edd596ec?w=1920&q=80', // Lavender fields
+    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80', // Mountain lake
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', // Ocean sunset
+    'https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?w=1920&q=80', // Cherry blossoms
+    'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&q=80', // Wildflower meadow
+  ];
 
   // Connect to global TalkyTalky context for cross-page animations
   const talkyTalkyContext = useTalkyTalky();
@@ -269,9 +279,34 @@ export default function App() {
   const globalStatus = status === AppStatus.IDLE ? 'idle' : 
                        isSpeaking ? 'speaking' : 
                        audioLevel > 0.1 ? 'listening' : 'thinking';
+  
+  // Cycle background images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 8000); // Change every 8 seconds
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
 
   return (
-    <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white font-sans overflow-hidden">
+    <div className="flex flex-col h-screen w-full relative overflow-hidden text-white font-sans">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        {backgroundImages.map((img, idx) => (
+          <div
+            key={img}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
+              idx === currentBgIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url(${img})`,
+              filter: 'blur(20px)', // Moderate blur for AI Coach
+            }}
+          />
+        ))}
+        {/* Gradient overlay for better contrast */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-indigo-900/30 to-pink-900/30" />
+      </div>
       <GlobalStatusIndicator status={globalStatus} />
       <header className="p-2 border-b border-gray-700 shadow-lg bg-gray-900/50 backdrop-blur-sm">
         <div className="flex justify-between items-center mb-1">

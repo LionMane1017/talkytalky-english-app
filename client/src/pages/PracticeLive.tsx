@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { GoogleGenAI, LiveServerMessage, Blob as GenAIBlob } from '@google/genai';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
@@ -28,6 +29,17 @@ export default function PracticeLive() {
   const [transcripts, setTranscripts] = useState<Message[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  
+  // Background images for animated cycling
+  const backgroundImages = [
+    'https://images.unsplash.com/photo--1499002238440-d264edd596ec?w=1920&q=80', // Lavender fields
+    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80', // Mountain lake
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', // Ocean sunset
+    'https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?w=1920&q=80', // Cherry blossoms
+    'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&q=80', // Wildflower meadow
+  ];
 
   
   // Refs
@@ -126,18 +138,29 @@ export default function PracticeLive() {
       return;
     }
     
+
+    
     setStatus(AppStatus.CONNECTING);
     setTranscripts([]);
     
     try {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
+        console.error('Gemini API key not found');
         throw new Error('Gemini API key not found');
       }
       
       const ai = new GoogleGenAI({ apiKey });
       
+      // Initialize audio contexts
       inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+      outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      
+      // CRITICAL FIX: Force resume audio context (fixes suspended state)
+      if (outputAudioContextRef.current.state === 'suspended') {
+
+        await outputAudioContextRef.current.resume();
+      }
       
       // Create system prompt with full context
       // Get all words for this difficulty level (sorted alphabetically)
@@ -146,6 +169,7 @@ export default function PracticeLive() {
         .sort((a, b) => a.word.localeCompare(b.word));
       const vocabularyList = allWordsInLevel.map(w => `- ${w.word}: ${w.meaning}`).join('\n');
       
+      // Create system prompt
       const systemPrompt = `You are TalkyTalky, an enthusiastic IELTS pronunciation coach. 
 
 **Current Practice Session:**
@@ -176,9 +200,9 @@ ${smartContext || 'No additional context available'}
 
 Start by introducing the word "${currentWord.word}" and explaining how to pronounce it!`;
       
-      outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      
-      sessionPromiseRef.current = ai.live.connect({
+      // CRITICAL FIX: Await connection instead of storing promise
+
+      const session = await ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
         callbacks: {
           onopen: async () => {
@@ -220,17 +244,15 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
             
-            // Trigger welcoming greeting and first word introduction
-            setTimeout(async () => {
-              const session = await sessionPromiseRef.current;
-              if (session) {
-                console.log('🚀 Sending welcoming greeting and word introduction...');
-                session.send({ 
-                  text: `Welcome! I'm excited to help you practice pronunciation today. Let's start with our first word: "${currentWord.word}". ${currentWord.meaning}. Now, let me show you how to pronounce it correctly. Listen carefully...`,
-                  endOfTurn: true 
-                });
-              }
-            }, 500);
+            // Send welcoming greeting
+            const greetingText = `Welcome! I'm excited to help you practice pronunciation today. Let's start with our first word: "${currentWord.word}". ${currentWord.meaning}. Now, let me show you how to pronounce it correctly. Listen carefully...`;
+            
+            sessionPromiseRef.current!.then((sess) => {
+              sess.send({ 
+                text: greetingText,
+                endOfTurn: true 
+              });
+            });
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {
@@ -368,6 +390,10 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
           },
         },
       });
+      
+      // Store session promise in ref for other functions
+      sessionPromiseRef.current = Promise.resolve(session);
+      
     } catch (err: any) {
       console.error('Failed to start session:', err);
       toast.error(err.message || 'Failed to start practice session');
@@ -405,6 +431,16 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
       startSession();
     }
   }, [difficulty, currentWord, status, startSession]);
+  
+  // Show instructions when session connects
+  useEffect(() => {
+    if (status === AppStatus.CONNECTED && !showInstructions) {
+      setShowInstructions(true);
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => setShowInstructions(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, showInstructions]);
   
   // Start practice
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
@@ -463,9 +499,34 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
     };
   }, [stopSession]);
   
+  // Cycle background images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 8000); // Change every 8 seconds
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
+  
   if (!difficulty) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-8">
+      <div className="min-h-screen relative overflow-hidden p-8">
+        {/* Animated Background */}
+        <div className="fixed inset-0 -z-10">
+          {backgroundImages.map((img, idx) => (
+            <div
+              key={img}
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
+                idx === currentBgIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                backgroundImage: `url(${img})`,
+                filter: 'blur(40px)', // Heavy blur for legibility
+              }}
+            />
+          ))}
+          {/* Gradient overlay for better contrast */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-indigo-900/40 to-pink-900/40" />
+        </div>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
             <TalkyLogo />
@@ -499,7 +560,24 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-4 sm:p-8">
+    <div className="min-h-screen relative overflow-hidden p-4 sm:p-8">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        {backgroundImages.map((img, idx) => (
+          <div
+            key={img}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
+              idx === currentBgIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url(${img})`,
+              filter: 'blur(60px)', // Extra heavy blur for word card legibility
+            }}
+          />
+        ))}
+        {/* Gradient overlay for better contrast */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-indigo-900/50 to-pink-900/50" />
+      </div>
       <div className="max-w-4xl mx-auto">
         {/* Compact Header */}
         <div className="flex items-center justify-between mb-2">
@@ -603,6 +681,32 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
           </Button>
         </div>
       </div>
+      
+      {/* Instruction Dialog */}
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
+        <DialogContent className="bg-white/95 backdrop-blur-xl border-2 border-purple-500/50 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-purple-900 flex items-center gap-2">
+              <MicrophoneIcon className="h-6 w-6 text-purple-600" />
+              Welcome to TalkyTalky!
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-700 space-y-3 pt-2">
+              <p className="font-semibold text-purple-800">
+                👋 Say "Hello" to start your pronunciation practice!
+              </p>
+              <p>
+                TalkyTalky is listening and ready to coach you. Just speak naturally and she'll guide you through each word.
+              </p>
+              <p className="text-sm text-gray-600 italic">
+                Tip: You can say "next word" anytime to move forward, or practice the same word multiple times.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setShowInstructions(false)} className="w-full bg-purple-600 hover:bg-purple-700">
+            Got it! Let's Practice
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

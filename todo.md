@@ -1025,3 +1025,29 @@
 - [x] 500ms delay after session connect
 - [x] Test greeting triggers immediately after "Start Practice"
 - [x] Create checkpoint with greeting feature
+
+
+## Phase 63: Debug Greeting Not Working
+- [ ] Check browser console for session connection errors
+- [ ] Verify console.log for greeting trigger appears
+- [ ] Check if session.send() is being called
+- [ ] Test if Gemini API key is valid
+- [ ] Fix greeting trigger issue
+- [ ] Create checkpoint with working greeting
+
+
+## Phase 64: Emergency Greeting Fix (User Solution)
+- [ ] Move greeting AFTER await ai.live.connect() (not in onopen)
+- [ ] Force AudioContext.resume() to fix suspended audio
+- [ ] Change console.log to console.error for visibility
+- [ ] Test greeting actually plays in browser
+- [ ] Verify console.error logs appear
+- [ ] Create checkpoint with working greeting
+
+## Phase 63: Glassmorphism UI Enhancement
+- [x] Add "Say Hello" instruction popup on Practice page start
+- [x] Add glassmorphism background to Practice page (heavy blur for legibility)
+- [x] Add glassmorphism background to AI Coach page
+- [x] Implement animated gradient backgrounds cycling through
+- [x] Add frosted glass cards with backdrop-blur effects
+- [x] Test visual improvements across both pages
