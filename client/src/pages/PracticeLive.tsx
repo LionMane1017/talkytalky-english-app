@@ -250,11 +250,11 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                 // UX FIX: Expanded auto-advance detection
                 const lowerOutput = modelOutput.toLowerCase();
                 const advanceKeywords = [
-                  // Questions asking if user is ready
+                  // Direct questions/statements about moving on
                   'ready for', 'move on', 'try another', 'next word',
-                  // Statements confirming the move (CRITICAL ADDITION)
                   "let's practice", "let's try", "next word is", 
-                  "move on to", "okay,", "alright,", "how about"
+                  "move on to", "shall we", "want to try", "should we move",
+                  "would you like to", "how about we"
                 ];
                 
                 const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));

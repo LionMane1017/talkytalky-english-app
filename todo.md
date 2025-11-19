@@ -988,3 +988,11 @@
 - [x] Added to system prompt under "Available Vocabulary" section
 - [x] Test that Gemini can reference other words in conversation
 - [x] Create checkpoint with vocabulary awareness
+
+
+## Phase 59: Enhance Auto-Advance - Detect When Gemini is Done
+- [x] Add suggestion phrases ("shall we", "want to try", "should we move", "would you like to", "how about we")
+- [x] Refined logic to avoid false triggers on praise alone
+- [x] Focus on direct move-on suggestions, not general praise
+- [x] Test auto-advance triggers after feedback completion
+- [x] Create checkpoint with enhanced auto-advance
