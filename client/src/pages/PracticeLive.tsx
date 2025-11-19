@@ -385,12 +385,23 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
     
     const randomWord = available[Math.floor(Math.random() * available.length)];
     setCurrentWord(randomWord);
-      setUsedWordIds(prev => new Set(Array.from(prev).concat(randomWord.id)));
+    setUsedWordIds(prev => new Set(Array.from(prev).concat(randomWord.id)));
     setScore(null);
     
-    // Restart session with new word
-    if (status === AppStatus.CONNECTED) {
-      stopSession().then(() => startSession());
+    // Send new word context to existing session (FIX: avoid race condition)
+    if (status === AppStatus.CONNECTED && sessionPromiseRef.current) {
+      const newWordContext = `
+**NEW WORD SELECTED:**
+- Word/Phrase: "${randomWord.word}"
+- Difficulty: ${difficulty}
+- Meaning: ${randomWord.meaning}
+- Example: ${randomWord.example}
+
+Please introduce this new word enthusiastically and explain how to pronounce it. Focus on pronunciation tips and encourage the user to practice it!`;
+      
+      sessionPromiseRef.current.then(session => {
+        session.send({ text: newWordContext, endOfTurn: true });
+      });
     }
   };
   

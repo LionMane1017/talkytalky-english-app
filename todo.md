@@ -968,3 +968,13 @@
 - [x] Test auto-advance when Gemini introduces new word
 - [x] Test single button toggle behavior
 - [x] Create checkpoint with UX fixes
+
+
+## Phase 57: Fix Gemini Context Awareness Bug
+- [x] Investigate where system prompt is set in PracticeLive
+- [x] Find where session is initialized with config
+- [x] Identified race condition in nextWord() function
+- [x] Fixed: Send new word context to existing session instead of restarting
+- [x] Include word, difficulty, meaning, and example in new word message
+- [x] Test that Gemini knows which word to practice
+- [x] Create checkpoint with context fix
