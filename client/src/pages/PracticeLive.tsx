@@ -275,15 +275,39 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               if (modelOutput) {
                 setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
                 
-                // Check if GEMINI is suggesting to move on
                 const lowerOutput = modelOutput.toLowerCase();
-                const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));
                 
-                if (shouldAdvance && wordsRemaining > 0 && status === AppStatus.CONNECTED) {
-                  console.log('🎯 Gemini triggering auto-advance based on phrase:', modelOutput);
+                // INTELLIGENT WORD DETECTION: Check if Gemini mentioned a different vocabulary word
+                const availableWords = vocabularyData.filter(
+                  word => word.difficulty === difficulty && !usedWordIds.has(word.id)
+                );
+                
+                // Find if Gemini mentioned any vocabulary word (excluding current word)
+                const mentionedWord = availableWords.find(word => {
+                  const wordLower = word.word.toLowerCase();
+                  // Check if the word appears in the output (with word boundaries)
+                  const regex = new RegExp(`\\b${wordLower}\\b`, 'i');
+                  return regex.test(modelOutput) && wordLower !== currentWord?.word.toLowerCase();
+                });
+                
+                if (mentionedWord && status === AppStatus.CONNECTED) {
+                  console.log('🎯 Gemini mentioned new word:', mentionedWord.word);
+                  // Switch to the mentioned word immediately
                   setTimeout(() => {
-                    nextWord();
-                  }, 1000);
+                    setCurrentWord(mentionedWord);
+                    setUsedWordIds(prev => new Set(Array.from(prev).concat(mentionedWord.id)));
+                    setScore(null);
+                  }, 800);
+                } else {
+                  // Fallback: Check if GEMINI is suggesting to move on with keywords
+                  const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));
+                  
+                  if (shouldAdvance && wordsRemaining > 0 && status === AppStatus.CONNECTED) {
+                    console.log('🎯 Gemini triggering auto-advance based on phrase:', modelOutput);
+                    setTimeout(() => {
+                      nextWord();
+                    }, 1000);
+                  }
                 }
               }
               
@@ -542,6 +566,17 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
                 {status === AppStatus.CONNECTED ? 'Tap to Stop Session' : text}
               </p>
             </div>
+            
+            {/* Next Word Button - Manual Control */}
+            {status === AppStatus.CONNECTED && wordsRemaining > 0 && (
+              <button
+                onClick={() => nextWord()}
+                className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2"
+              >
+                Next Word →
+                <span className="text-xs opacity-75">({wordsRemaining} left)</span>
+              </button>
+            )}
         </div>
         
         {/* Conversation History - Below Record Button */}

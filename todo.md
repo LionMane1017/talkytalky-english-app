@@ -1004,3 +1004,14 @@
 - [x] Faster response time (500ms) for user confirmations vs 1000ms for Gemini
 - [x] Test auto-advance when user confirms they want next word
 - [x] Create checkpoint with bidirectional auto-advance
+
+
+## Phase 61: Debug Auto-Advance Not Working
+- [x] Check console logs for auto-advance triggers
+- [x] Verify user input is being captured correctly
+- [x] Add manual "Next Word" button as fallback (blue button with words remaining count)
+- [x] Implement intelligent word detection (detect ANY vocab word in Gemini's response)
+- [x] Auto-switch to detected word using regex with word boundaries
+- [x] Exclude current word from detection to avoid false triggers
+- [x] 800ms delay for smooth transition
+- [x] Create checkpoint with fix
