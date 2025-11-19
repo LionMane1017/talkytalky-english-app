@@ -143,7 +143,6 @@ export default function PracticeLive() {
       const ai = new GoogleGenAI({ apiKey });
       
       inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
-      outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       
       // Create system prompt with full context
       const systemPrompt = `You are TalkyTalky, an enthusiastic IELTS pronunciation coach. 
@@ -176,15 +175,35 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
       sessionPromiseRef.current = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
         config: {
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+          },
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
           systemInstruction: { parts: [{ text: systemPrompt }] },
         },
         callbacks: {
           onopen: async () => {
-            console.log('Gemini Live session opened');
+            console.log('✅ Gemini Live session opened');
             setStatus(AppStatus.CONNECTED);
             
+            // Initialize Output Audio Context with low latency
+            outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
+              sampleRate: 24000,
+              latencyHint: 'interactive',
+            });
+            
             // Start streaming microphone audio
-            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+            try {
+              mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                  sampleRate: 16000,
+                  channelCount: 1,
+                  echoCancellation: true,
+                  autoGainControl: true,
+                  noiseSuppression: true,
+                },
+              });
             mediaStreamSourceRef.current = inputAudioContextRef.current!.createMediaStreamSource(mediaStreamRef.current);
             
             analyserNodeRef.current = inputAudioContextRef.current!.createAnalyser();
@@ -214,6 +233,21 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(analyserNodeRef.current);
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
+            
+            // Trigger introduction after setup
+            setTimeout(async () => {
+              const session = await sessionPromiseRef.current;
+              if (session && currentWord) {
+                console.log('🚀 Triggering introduction for word:', currentWord.word);
+                session.send({ text: `Please introduce the word "${currentWord.word}" now.` });
+              }
+            }, 500);
+            
+            } catch (err) {
+              console.error('❌ Error accessing microphone:', err);
+              setStatus(AppStatus.IDLE);
+              toast.error('Failed to access microphone');
+            }
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {
