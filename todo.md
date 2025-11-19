@@ -1057,3 +1057,12 @@
 
 ## Bug Fix: Instruction Popup Reopening
 - [x] Fix instruction popup closing and immediately reopening (useEffect dependency issue)
+
+## CRITICAL: Word Ordering System Verification
+- [x] Analyze current word selection logic (random vs deterministic)
+- [x] Implement exact, predictable word ordering (alphabetical or fixed sequence)
+- [x] Remove randomization to ensure consistent word order
+- [x] Add comprehensive logging to track word selection
+- [x] Test word sequence across multiple practice sessions
+- [x] Verify no word repetition occurs
+- [x] Document exact word order for each difficulty level

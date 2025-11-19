@@ -23,6 +23,7 @@ export default function PracticeLive() {
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
   const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   
   // Gemini Live state
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -453,11 +454,18 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {
     setDifficulty(level);
     setUsedWordIds(new Set());
-    const words = vocabularyData.filter(w => w.difficulty === level);
+    setCurrentWordIndex(0);
+    
+    // Get words sorted alphabetically for deterministic order
+    const words = vocabularyData
+      .filter(w => w.difficulty === level)
+      .sort((a, b) => a.word.localeCompare(b.word));
+    
     if (words.length > 0) {
-      const randomWord = words[Math.floor(Math.random() * words.length)];
-      setCurrentWord(randomWord);
-      setUsedWordIds(new Set([randomWord.id]));
+      const firstWord = words[0];
+      console.log(`🎯 Starting ${level} practice with word 1/${words.length}: "${firstWord.word}"`);
+      setCurrentWord(firstWord);
+      setUsedWordIds(new Set([firstWord.id]));
     }
     setScore(null);
     setSessionScore([]);
@@ -468,28 +476,36 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
   const nextWord = () => {
     if (!difficulty) return;
     
-    const available = vocabularyData.filter(
-      word => word.difficulty === difficulty && !usedWordIds.has(word.id)
-    );
+    // Get all words for this difficulty sorted alphabetically
+    const allWords = vocabularyData
+      .filter(w => w.difficulty === difficulty)
+      .sort((a, b) => a.word.localeCompare(b.word));
     
-    if (available.length === 0) {
+    // Move to next index
+    const nextIndex = currentWordIndex + 1;
+    
+    if (nextIndex >= allWords.length) {
       toast.success("You've completed all words in this level!");
+      console.log(`✅ Completed all ${allWords.length} words in ${difficulty} level`);
       return;
     }
     
-    const randomWord = available[Math.floor(Math.random() * available.length)];
-    setCurrentWord(randomWord);
-    setUsedWordIds(prev => new Set(Array.from(prev).concat(randomWord.id)));
+    const nextWordData = allWords[nextIndex];
+    console.log(`🎯 Moving to word ${nextIndex + 1}/${allWords.length}: "${nextWordData.word}"`);
+    
+    setCurrentWordIndex(nextIndex);
+    setCurrentWord(nextWordData);
+    setUsedWordIds(prev => new Set(Array.from(prev).concat(nextWordData.id)));
     setScore(null);
     
     // Send new word context to existing session (FIX: avoid race condition)
     if (status === AppStatus.CONNECTED && sessionPromiseRef.current) {
       const newWordContext = `
 **NEW WORD SELECTED:**
-- Word/Phrase: "${randomWord.word}"
+- Word/Phrase: "${nextWordData.word}"
 - Difficulty: ${difficulty}
-- Meaning: ${randomWord.meaning}
-- Example: ${randomWord.example}
+- Meaning: ${nextWordData.meaning}
+- Example: ${nextWordData.example}
 
 Please introduce this new word enthusiastically and explain how to pronounce it. Focus on pronunciation tips and encourage the user to practice it!`;
       

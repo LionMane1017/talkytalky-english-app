@@ -1,0 +1,168 @@
+🔍 WORD ORDER VERIFICATION SCRIPT
+
+================================================================================
+
+📚 BEGINNER LEVEL (40 words)
+--------------------------------------------------------------------------------
+  1. Beautiful            | Pleasing to the senses or mind aesthetically
+  2. Big                  | Of considerable size or extent
+  3. Book                 | A written or printed work consisting of pages
+  4. Cold                 | Of a low temperature
+  5. Delicious            | Highly pleasant to the taste
+  6. Drink                | To take liquid into the mouth and swallow it
+  7. Easy                 | Achieved without great effort
+  8. Eat                  | To put food into the mouth and swallow it
+  9. Family               | A group of people related by blood or marriage
+ 10. Family               | A group of people related by blood or marriage
+ 11. Fast                 | Moving or capable of moving at high speed
+ 12. Food                 | Any substance consumed to provide nutritional support
+ 13. Friend               | A person with whom one has a bond of mutual affection
+ 14. Friend               | A person you know well and like
+ 15. Good                 | To be desired or approved of
+ 16. Happy                | Feeling or showing pleasure or contentment
+ 17. Happy                | Feeling or showing pleasure or contentment
+ 18. Hard                 | Requiring a great deal of effort
+ 19. Hello                | A greeting used when meeting someone
+ 20. Hot                  | Having a high temperature
+ 21. House                | A building for people to live in
+ 22. Important            | Of great significance or value
+ 23. Listen               | To give attention with the ear
+ 24. New                  | Not existing before; recently made
+ 25. Old                  | Having lived for a long time
+ 26. Play                 | To engage in activity for enjoyment
+ 27. Read                 | To look at and comprehend written words
+ 28. Run                  | To move at a speed faster than walking
+ 29. School               | An institution for educating children
+ 30. Sleep                | To rest with eyes closed and mind inactive
+ 31. Slow                 | Moving at a low speed
+ 32. Small                | Of a size that is less than normal
+ 33. Study                | To devote time and attention to gaining knowledge
+ 34. Thank you            | An expression of gratitude
+ 35. Time                 | The indefinite continued progress of existence
+ 36. Walk                 | To move at a regular pace by lifting and setting down each foot
+ 37. Water                | A clear liquid essential for life
+ 38. Weather              | The state of the atmosphere at a particular time and place
+ 39. Work                 | Activity involving mental or physical effort
+ 40. Write                | To mark letters or words on a surface
+
+📚 INTERMEDIATE LEVEL (50 words)
+--------------------------------------------------------------------------------
+  1. Accomplish           | To achieve or complete successfully
+  2. Achieve              | To successfully reach a goal
+  3. Analyze              | To examine something in detail to understand it better
+  4. Beneficial           | Favorable or advantageous; resulting in good
+  5. Benefit              | An advantage or profit gained from something
+  6. Challenge            | A task that tests someone's abilities
+  7. Communicate          | To share or exchange information
+  8. Compare              | To estimate similarities or differences
+  9. Consider             | To think carefully about something
+ 10. Contribute           | To give something in order to help achieve or provide something
+ 11. Contribute           | To give something to help achieve a purpose
+ 12. Demonstrate          | To show or make evident
+ 13. Demonstrate          | To clearly show something exists or is true
+ 14. Determine            | To cause something to occur in a particular way
+ 15. Develop              | To grow or cause to grow gradually
+ 16. Diverse              | Showing a great deal of variety; very different
+ 17. Efficient            | Achieving maximum productivity with minimum wasted effort
+ 18. Environment          | The surroundings or conditions in which a person, animal, or plant lives
+ 19. Environment          | The surroundings or conditions in which a person lives
+ 20. Establish            | To set up or create something
+ 21. Experience           | Practical contact with events or facts
+ 22. Identify             | To recognize or establish who or what something is
+ 23. Indicate             | To point out or show something
+ 24. Influence            | The capacity to have an effect on someone or something
+ 25. Investigate          | To carry out research or study into something
+ 26. Knowledge            | Facts, information, and skills acquired through experience
+ 27. Maintain             | To cause something to continue in the same state
+ 28. Obtain               | To get or acquire something
+ 29. Occur                | To happen or take place
+ 30. Opportunity          | A favorable time or occasion
+ 31. Opportunity          | A favorable time or occasion
+ 32. Participate          | To take part in an activity
+ 33. Predict              | To say what will happen in the future
+ 34. Prevent              | To stop something from happening
+ 35. Progress             | Forward movement toward a goal
+ 36. Promote              | To support or encourage something
+ 37. Recognize            | To identify someone or something from previous knowledge
+ 38. Require              | To need something for a purpose
+ 39. Resource             | A supply of something that can be used
+ 40. Respond              | To say or do something as a reaction
+ 41. Select               | To carefully choose from a group
+ 42. Significant          | Important or notable
+ 43. Significant          | Sufficiently great or important to be worthy of attention
+ 44. Similar              | Having a resemblance in appearance or nature
+ 45. Specific             | Clearly defined or identified
+ 46. Strategy             | A plan of action designed to achieve a goal
+ 47. Technology           | The application of scientific knowledge for practical purposes
+ 48. Tradition            | A custom or belief passed down through generations
+ 49. Valuable             | Worth a great deal of money or very useful
+ 50. Variety              | A number of different types of things
+
+📚 ADVANCED LEVEL (60 words)
+--------------------------------------------------------------------------------
+  1. Accommodate          | To provide lodging or sufficient space for
+  2. Accommodate          | To provide lodging or sufficient space for
+  3. Ambiguous            | Open to more than one interpretation; not having one obvious meaning
+  4. Ambiguous            | Open to more than one interpretation; unclear
+  5. Arbitrary            | Based on random choice rather than reason
+  6. Articulate           | To express an idea or feeling fluently and coherently
+  7. Coherent             | Logical and consistent
+  8. Comprehensive        | Complete and including everything that is necessary
+  9. Comprehensive        | Complete and including everything necessary
+ 10. Conscientious        | Wishing to do what is right, especially to do one's work properly
+ 11. Constitute           | To be a part of a whole
+ 12. Contemplate          | To think about something carefully and for a long time
+ 13. Contemporary         | Living or occurring at the same time
+ 14. Controversy          | Disagreement or argument about something important
+ 15. Criteria             | Standards by which something is judged
+ 16. Deteriorate          | To become progressively worse
+ 17. Diligent             | Having or showing care and conscientiousness in one's work
+ 18. Diminish             | To make or become less
+ 19. Elaborate            | Involving many carefully arranged parts
+ 20. Eloquent             | Fluent or persuasive in speaking or writing
+ 21. Emphasize            | To give special importance to something
+ 22. Enhance              | To improve the quality or value of something
+ 23. Equivalent           | Equal in value, amount, or meaning
+ 24. Facilitate           | To make an action or process easy or easier
+ 25. Facilitate           | To make an action or process easier
+ 26. Hypothesis           | A proposed explanation made on the basis of limited evidence
+ 27. Hypothesis           | A proposed explanation for a phenomenon
+ 28. Implement            | To put a decision or plan into effect
+ 29. Inevitable           | Certain to happen; unavoidable
+ 30. Inevitable           | Certain to happen; unavoidable
+ 31. Inherent             | Existing as a natural or essential part
+ 32. Integrate            | To combine parts into a whole
+ 33. Justify              | To show or prove to be right or reasonable
+ 34. Legitimate           | Conforming to the law or rules
+ 35. Manipulate           | To control or influence skillfully
+ 36. Meticulous           | Showing great attention to detail; very careful
+ 37. Negligible           | So small as to be not worth considering
+ 38. Objective            | Not influenced by personal feelings
+ 39. Paradigm             | A typical example or pattern of something
+ 40. Perceive             | To become aware of through the senses
+ 41. Perseverance         | Persistence in doing something despite difficulty
+ 42. Persistent           | Continuing firmly despite difficulties
+ 43. Phenomenon           | A remarkable or exceptional occurrence
+ 44. Phenomenon           | A fact or situation that is observed to exist
+ 45. Pragmatic            | Dealing with things sensibly and realistically
+ 46. Preliminary          | Coming before the main part
+ 47. Prevalent            | Widespread in a particular area
+ 48. Profound             | Very great or intense
+ 49. Redundant            | Not needed; superfluous
+ 50. Reinforce            | To strengthen or support
+ 51. Reluctant            | Unwilling and hesitant
+ 52. Resilient            | Able to withstand or recover quickly from difficult conditions
+ 53. Simulate             | To imitate the appearance or character of
+ 54. Sophisticated        | Having a great deal of worldly experience and knowledge
+ 55. Subsequent           | Coming after something in time
+ 56. Substantial          | Of considerable importance, size, or worth
+ 57. Substantial          | Of considerable importance, size, or worth
+ 58. Suppress             | To forcibly put an end to something
+ 59. Sustainable          | Able to be maintained at a certain level
+ 60. Unprecedented        | Never done or known before
+
+================================================================================
+✅ Word order is DETERMINISTIC and ALPHABETICAL
+✅ Same order every time - no randomization
+✅ Sequential progression from index 0 to N-1
+================================================================================
