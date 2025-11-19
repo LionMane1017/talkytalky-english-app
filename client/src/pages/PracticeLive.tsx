@@ -198,10 +198,13 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                 });
               }
               
-              const dataArray = new Uint8Array(analyserNodeRef.current!.frequencyBinCount);
-              analyserNodeRef.current!.getByteFrequencyData(dataArray);
-              const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-              setAudioLevel(average / 255);
+              // Add null check for analyserNode
+              if (analyserNodeRef.current) {
+                const dataArray = new Uint8Array(analyserNodeRef.current.frequencyBinCount);
+                analyserNodeRef.current.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                setAudioLevel(average / 255);
+              }
             };
             
             mediaStreamSourceRef.current.connect(analyserNodeRef.current);

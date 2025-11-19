@@ -870,6 +870,13 @@
 - [x] Format trigger to request pronunciation tips and common mistakes
 - [x] Add 500ms delay for session initialization
 - [x] Use endOfTurn: true flag for clean message delivery
-- [ ] Test that Gemini speaks as soon as Practice page loads
-- [ ] Verify introduction includes word breakdown and helpful tips
-- [ ] Create checkpoint with auto-introduction feature
+- [x] Test that Gemini speaks as soon as Practice page loads
+- [x] Verify introduction includes word breakdown and helpful tips
+- [x] Create checkpoint with auto-introduction feature
+
+
+## Phase 47: Fix Null Reference Error in Audio Processor
+- [x] Add null check for analyserNodeRef before accessing frequencyBinCount
+- [x] Add null check for sessionPromiseRef before sending audio (already existed)
+- [x] Test Practice page and verify no errors
+- [ ] Create checkpoint with bug fix
