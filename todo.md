@@ -845,5 +845,21 @@
 - [x] Add config object with responseModalities, speechConfig, systemInstruction
 - [x] Adapt system prompt for pronunciation practice (keep structure same)
 - [x] Match model: gemini-2.5-flash-native-audio-preview-09-2025
-- [ ] Test Practice page and verify it works like AI Coach
-- [ ] Create final checkpoint with working Practice page
+- [x] Test Practice page and verify it works like AI Coach
+- [x] Create final checkpoint with working Practice page
+
+
+## Phase 45: Unify Recording UI - Use AI Coach Button Everywhere
+- [x] Read AI Coach recording button and status indicator UI
+- [x] Copy exact button design from AI Coach to PracticeLive
+- [x] Replace old recording controls with AI Coach style
+- [x] Remove old countdown timer and circular ring animation
+- [x] Remove separate Record/Stop buttons
+- [x] Remove isRecording state and countdown logic
+- [x] Add getButtonState() function (like AI Coach)
+- [x] Add animated audio level ring (scales with voice volume)
+- [x] Move VoiceWaveform above button (like AI Coach)
+- [x] Use same status indicators: "Listening...", "Connecting...", "Waiting..."
+- [x] Fix stopSession to match AI Coach (async with setStatus)
+- [ ] Test Practice page with unified UI
+- [ ] Create checkpoint with consistent recording UI across all modules

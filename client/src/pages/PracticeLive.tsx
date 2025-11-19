@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { vocabularyData, type VocabularyWord } from "@/data/vocabulary";
-import { ArrowRight, RotateCcw, Trophy, Mic, Square } from "lucide-react";
+import { ArrowRight, RotateCcw, Trophy, Mic as MicrophoneIcon, Square as StopIcon } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import TalkyLogo from "@/components/TalkyLogo";
@@ -28,8 +28,7 @@ export default function PracticeLive() {
   const [transcripts, setTranscripts] = useState<Message[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+
   
   // Refs
   const sessionPromiseRef = useRef<Promise<any> | null>(null);
@@ -43,7 +42,7 @@ export default function PracticeLive() {
   const currentOutputTranscriptionRef = useRef('');
   const nextAudioStartTimeRef = useRef(0);
   const audioSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   
   const { data: user } = trpc.auth.me.useQuery(undefined, {
     retry: false,
@@ -109,11 +108,6 @@ export default function PracticeLive() {
   // Stop session
   const stopSession = useCallback(async () => {
     setStatus(AppStatus.IDLE);
-    setIsRecording(false);
-    
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
     
     if (sessionPromiseRef.current) {
       const session = await sessionPromiseRef.current;
@@ -122,6 +116,7 @@ export default function PracticeLive() {
     }
     
     cleanUpAudio();
+    console.log('Session stopped and resources cleaned up.');
   }, [cleanUpAudio]);
   
   // Start Gemini Live session
@@ -289,35 +284,30 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
       toast.error(err.message || 'Failed to start practice session');
       setStatus(AppStatus.IDLE);
     }
-  }, [currentWord, difficulty, smartContext, isRecording, stopSession]);
+  }, [currentWord, difficulty, smartContext, stopSession]);
   
-  // Start recording (user speaks)
-  const startRecording = useCallback(() => {
-    setIsRecording(true);
-    setCountdown(5);
-    
-    // Auto-stop after 5 seconds
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          setIsRecording(false);
-          if (countdownIntervalRef.current) {
-            clearInterval(countdownIntervalRef.current);
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
+
   
-  // Stop recording manually
-  const stopRecording = useCallback(() => {
-    setIsRecording(false);
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
+  // Get button state (like AI Coach)
+  const getButtonState = () => {
+    switch (status) {
+      case AppStatus.IDLE:
+        return { text: 'Waiting...', action: () => {}, icon: <MicrophoneIcon />, disabled: true, animate: false };
+      case AppStatus.CONNECTING:
+        return { text: 'Connecting...', action: () => {}, icon: <MicrophoneIcon />, disabled: true, animate: true };
+      case AppStatus.CONNECTED:
+        return { text: 'Listening...', action: stopSession, icon: <StopIcon />, disabled: false, animate: true };
+      default:
+        return { text: 'Offline', action: () => {}, icon: <MicrophoneIcon />, disabled: true, animate: false };
     }
-  }, []);
+  };
+
+  const { text, action, icon, disabled, animate } = getButtonState();
+
+  // Determine global status
+  const globalStatus = status === AppStatus.IDLE ? 'idle' : 
+                       isSpeaking ? 'speaking' : 
+                       audioLevel > 0.1 ? 'listening' : 'thinking';
   
   // Auto-start session when difficulty changes
   useEffect(() => {
@@ -452,23 +442,15 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
           </Card>
         )}
         
-        {/* Gemini Live Assistant */}
+        {/* Gemini Live Assistant - AI Coach Style */}
         <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
           <CardHeader>
             <CardTitle className="text-white">TalkyTalky Coach</CardTitle>
             <CardDescription className="text-purple-200">
-              {status === AppStatus.IDLE && "Start the session to practice with your AI coach"}
-              {status === AppStatus.CONNECTING && "Connecting to TalkyTalky..."}
-              {status === AppStatus.CONNECTED && !isRecording && "Click Record to practice pronunciation"}
-              {status === AppStatus.CONNECTED && isRecording && `Recording... ${countdown}s remaining`}
+              Practice pronunciation with live AI feedback
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Waveform */}
-            {status === AppStatus.CONNECTED && isRecording && (
-              <VoiceWaveform audioLevel={audioLevel} isActive={isRecording} isSpeaking={isSpeaking} />
-            )}
-            
             {/* Conversation History */}
             {transcripts.length > 0 && (
               <div className="max-h-60 overflow-y-auto space-y-3 bg-black/20 rounded-lg p-4">
@@ -480,51 +462,39 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               </div>
             )}
             
-            {/* Controls */}
-            <div className="flex gap-4 justify-center">
-              {status === AppStatus.CONNECTING && (
-                <Button size="lg" disabled className="w-48">
-                  Connecting...
-                </Button>
-              )}
-              
-              {status === AppStatus.CONNECTED && (
-                <>
-                  <div className="relative">
-                    <Button
-                      size="lg"
-                      variant={isRecording ? "destructive" : "default"}
-                      onClick={isRecording ? stopRecording : startRecording}
-                      className="w-32 h-32 rounded-full"
-                    >
-                      {isRecording ? (
-                        <div className="flex flex-col items-center">
-                          <Square size={32} />
-                          <span className="text-3xl font-bold mt-2">{countdown}</span>
-                        </div>
-                      ) : (
-                        <Mic size={48} />
-                      )}
-                    </Button>
-                    
-                    {/* Countdown Ring */}
-                    {isRecording && (
-                      <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 128 128">
-                        <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/30" />
-                        <circle
-                          cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="4" className="text-white"
-                          strokeDasharray={`${2 * Math.PI * 60}`}
-                          strokeDashoffset={`${2 * Math.PI * 60 * (1 - countdown / 5)}`}
-                          style={{ transition: 'stroke-dashoffset 1s linear' }}
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  
-                  <Button size="lg" variant="outline" onClick={stopSession}>
-                    End Session
-                  </Button>
-                </>
+            {/* Voice Waveform (like AI Coach) */}
+            {status === AppStatus.CONNECTED && (
+              <div className="mt-8">
+                <VoiceWaveform 
+                  audioLevel={audioLevel} 
+                  isActive={status === AppStatus.CONNECTED}
+                  isSpeaking={isSpeaking}
+                />
+              </div>
+            )}
+            
+            {/* AI Coach Style Button */}
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative flex items-center justify-center">
+                {animate && (
+                  <div 
+                    className="absolute w-28 h-28 rounded-full bg-purple-500/50 transition-transform duration-300" 
+                    style={{ transform: `scale(${0.5 + audioLevel * 1.5})` }}
+                  />
+                )}
+                <button
+                  onClick={action}
+                  disabled={disabled}
+                  className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    status === AppStatus.CONNECTED ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'
+                  } ${animate ? 'animate-pulse' : ''}`}
+                >
+                  {icon}
+                </button>
+              </div>
+              <p className="text-sm text-gray-300 mt-3">{text}</p>
+              {transcripts.length > 0 && status === AppStatus.CONNECTED && (
+                <p className="text-xs text-gray-400 mt-1">{transcripts.length} messages</p>
               )}
             </div>
           </CardContent>
