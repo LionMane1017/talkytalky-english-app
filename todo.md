@@ -815,4 +815,14 @@
 - [x] Improve microphone settings (echo cancellation, noise suppression)
 - [x] Add error handling for microphone access
 - [x] Test and verify fix works (implementation complete, needs user testing)
-- [ ] Create checkpoint with Gemini Live fix
+- [x] Create checkpoint with Gemini Live fix
+
+
+## Phase 42: CRITICAL FIX - Correct Gemini Live Configuration Structure
+- [x] Move speechConfig from config to generationConfig (wrong nesting level)
+- [x] Add responseModalities: "audio" to generationConfig (forces audio output)
+- [x] Update trigger message to use endOfTurn: true flag
+- [x] Change model to gemini-2.0-flash-exp (Gemini 3.0's recommendation)
+- [x] Remove inputAudioTranscription and outputAudioTranscription (not needed)
+- [ ] Test Practice page and verify Gemini speaks
+- [ ] Create final checkpoint with working Gemini Live

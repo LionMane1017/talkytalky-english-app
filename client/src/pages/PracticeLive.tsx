@@ -173,13 +173,14 @@ ${smartContext || 'No additional context available'}
 Start by introducing the word "${currentWord.word}" and explaining how to pronounce it!`;
       
       sessionPromiseRef.current = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        model: 'gemini-2.0-flash-exp',
         config: {
-          speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+          generationConfig: {
+            responseModalities: 'audio' as any,
+            speechConfig: {
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+            },
           },
-          inputAudioTranscription: {},
-          outputAudioTranscription: {},
           systemInstruction: { parts: [{ text: systemPrompt }] },
         },
         callbacks: {
@@ -239,7 +240,7 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               const session = await sessionPromiseRef.current;
               if (session && currentWord) {
                 console.log('🚀 Triggering introduction for word:', currentWord.word);
-                session.send({ text: `Please introduce the word "${currentWord.word}" now.` });
+                session.send({ text: `Start the lesson now. Introduce the word "${currentWord.word}".`, endOfTurn: true });
               }
             }, 500);
             
