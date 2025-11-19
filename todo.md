@@ -879,4 +879,27 @@
 - [x] Add null check for analyserNodeRef before accessing frequencyBinCount
 - [x] Add null check for sessionPromiseRef before sending audio (already existed)
 - [x] Test Practice page and verify no errors
-- [ ] Create checkpoint with bug fix
+- [x] Create checkpoint with bug fix
+
+
+
+## Phase 48: Fix Mobile UI/UX for Practice Page
+- [x] Review current Practice page layout and identify mobile issues
+- [x] Research mobile-first UI/UX best practices (Duolingo, language learning apps)
+- [x] Redesign to fit entire practice interface on one mobile screen
+- [x] Reduce padding from p-8 to p-4 on mobile
+- [x] Make header compact (smaller logo, text)
+- [x] Reduce word card text sizes (text-3xl → text-xl on mobile)
+- [x] Make conversation history shorter (max-h-32 on mobile)
+- [x] Shrink button sizes and spacing
+- [x] Remove unnecessary margins and gaps
+- [x] Fix JSX syntax errors
+
+## Phase 49: Implement Auto-Advance to Next Word
+- [x] Add keyword detection in Gemini responses ("next word", "ready for", "move on")
+- [x] Detect 8 different advance keywords in model output
+- [x] Add 2-second delay before auto-advance for smooth transition
+- [x] Update onmessage callback to detect advance triggers
+- [x] Check wordsRemaining > 0 before advancing
+- [x] Test auto-advance flow in conversation
+- [x] Create checkpoint with both fixes

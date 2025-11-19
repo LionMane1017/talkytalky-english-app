@@ -235,7 +235,31 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               const modelOutput = currentOutputTranscriptionRef.current.trim();
               
               if (userInput) setTranscripts(prev => [...prev, { role: 'user', text: userInput }]);
-              if (modelOutput) setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
+              if (modelOutput) {
+                setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
+                
+                // Auto-advance detection
+                const lowerOutput = modelOutput.toLowerCase();
+                const advanceKeywords = [
+                  'next word',
+                  'move on',
+                  'ready for',
+                  'try another',
+                  'practice another',
+                  "let's move",
+                  'move to the next',
+                  'ready to move'
+                ];
+                
+                const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));
+                
+                if (shouldAdvance && wordsRemaining > 0) {
+                  console.log('🎯 Auto-advancing to next word...');
+                  setTimeout(() => {
+                    nextWord();
+                  }, 2000); // 2 second delay before auto-advance
+                }
+              }
               
               currentInputTranscriptionRef.current = '';
               currentOutputTranscriptionRef.current = '';
@@ -414,63 +438,65 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <TalkyLogo />
+        <div className="flex items-center justify-between mb-3 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="scale-75 sm:scale-100">
+              <TalkyLogo />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-white capitalize">{difficulty} Level</h1>
-              <p className="text-purple-200">Practice with TalkyTalky</p>
+              <h1 className="text-lg sm:text-2xl font-bold text-white capitalize">{difficulty} Level</h1>
+              <p className="text-xs sm:text-sm text-purple-200 hidden sm:block">Practice with TalkyTalky</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => { stopSession(); setDifficulty(null); }}>
-            Change Level
+          <Button variant="outline" size="sm" onClick={() => { stopSession(); setDifficulty(null); }} className="text-xs sm:text-sm">
+            Change
           </Button>
         </div>
         
         {/* Progress */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
-          <CardContent className="pt-6">
-            <div className="flex justify-between text-white mb-2">
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
+          <CardContent className="pt-3 sm:pt-4 pb-3 sm:pb-4">
+            <div className="flex justify-between text-white text-xs sm:text-sm mb-1 sm:mb-2">
               <span>Progress</span>
-              <span>{totalWords - wordsRemaining} / {totalWords} words</span>
+              <span>{totalWords - wordsRemaining} / {totalWords}</span>
             </div>
-            <Progress value={((totalWords - wordsRemaining) / totalWords) * 100} className="h-2" />
+            <Progress value={((totalWords - wordsRemaining) / totalWords) * 100} className="h-1.5 sm:h-2" />
           </CardContent>
         </Card>
         
         {/* Current Word */}
         {currentWord && (
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
-            <CardHeader>
+          <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
+            <CardHeader className="pb-2 sm:pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-3xl text-white">{currentWord.word}</CardTitle>
-                <Badge variant="secondary">{currentWord.difficulty}</Badge>
+                <CardTitle className="text-xl sm:text-3xl text-white">{currentWord.word}</CardTitle>
+                <Badge variant="secondary" className="text-xs">{currentWord.difficulty}</Badge>
               </div>
-              <CardDescription className="text-purple-200 text-lg">{currentWord.meaning}</CardDescription>
+              <CardDescription className="text-purple-200 text-sm sm:text-base">{currentWord.meaning}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-white/80 italic">"{currentWord.example}"</p>
+            <CardContent className="pt-0">
+              <p className="text-white/80 italic text-xs sm:text-sm line-clamp-2">"{currentWord.example}"</p>
             </CardContent>
           </Card>
         )}
         
         {/* Gemini Live Assistant - AI Coach Style */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
-          <CardHeader>
-            <CardTitle className="text-white">TalkyTalky Coach</CardTitle>
-            <CardDescription className="text-purple-200">
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="text-white text-base sm:text-lg">TalkyTalky Coach</CardTitle>
+            <CardDescription className="text-purple-200 text-xs sm:text-sm hidden sm:block">
               Practice pronunciation with live AI feedback
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-3 sm:space-y-4">
             {/* Conversation History */}
             {transcripts.length > 0 && (
-              <div className="max-h-60 overflow-y-auto space-y-3 bg-black/20 rounded-lg p-4">
+              <div className="max-h-32 sm:max-h-48 overflow-y-auto space-y-2 bg-black/20 rounded-lg p-2 sm:p-3">
                 {transcripts.map((msg, idx) => (
-                  <div key={idx} className={`${msg.role === 'user' ? 'text-blue-300' : 'text-purple-300'}`}>
+                  <div key={idx} className={`text-xs sm:text-sm ${msg.role === 'user' ? 'text-blue-300' : 'text-purple-300'}`}>
                     <strong>{msg.role === 'user' ? 'You' : 'TalkyTalky'}:</strong> {msg.text}
                   </div>
                 ))}
@@ -479,7 +505,7 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             
             {/* Voice Waveform (like AI Coach) */}
             {status === AppStatus.CONNECTED && (
-              <div className="mt-8">
+              <div className="mt-3 sm:mt-4">
                 <VoiceWaveform 
                   audioLevel={audioLevel} 
                   isActive={status === AppStatus.CONNECTED}
@@ -493,35 +519,35 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               <div className="relative flex items-center justify-center">
                 {animate && (
                   <div 
-                    className="absolute w-28 h-28 rounded-full bg-purple-500/50 transition-transform duration-300" 
+                    className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-purple-500/50 transition-transform duration-300" 
                     style={{ transform: `scale(${0.5 + audioLevel * 1.5})` }}
                   />
                 )}
                 <button
                   onClick={action}
                   disabled={disabled}
-                  className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed ${
                     status === AppStatus.CONNECTED ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'
                   } ${animate ? 'animate-pulse' : ''}`}
                 >
                   {icon}
                 </button>
               </div>
-              <p className="text-sm text-gray-300 mt-3">{text}</p>
+              <p className="text-xs sm:text-sm text-gray-300 mt-2">{text}</p>
               {transcripts.length > 0 && status === AppStatus.CONNECTED && (
-                <p className="text-xs text-gray-400 mt-1">{transcripts.length} messages</p>
+                <p className="text-xs text-gray-400 mt-1 hidden sm:block">{transcripts.length} messages</p>
               )}
             </div>
           </CardContent>
         </Card>
         
         {/* Actions */}
-        <div className="flex gap-4">
-          <Button onClick={nextWord} disabled={wordsRemaining === 0} className="flex-1">
-            <ArrowRight className="mr-2" /> Next Word
+        <div className="flex gap-2 sm:gap-4">
+          <Button onClick={nextWord} disabled={wordsRemaining === 0} className="flex-1 text-xs sm:text-sm h-9 sm:h-10">
+            <ArrowRight className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Next Word
           </Button>
-          <Button variant="outline" onClick={() => startPractice(difficulty)}>
-            <RotateCcw className="mr-2" /> Restart
+          <Button variant="outline" onClick={() => startPractice(difficulty)} className="text-xs sm:text-sm h-9 sm:h-10">
+            <RotateCcw className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Restart
           </Button>
         </div>
       </div>
