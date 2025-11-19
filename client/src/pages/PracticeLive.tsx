@@ -243,26 +243,44 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
               const userInput = currentInputTranscriptionRef.current.trim();
               const modelOutput = currentOutputTranscriptionRef.current.trim();
               
-              if (userInput) setTranscripts(prev => [...prev, { role: 'user', text: userInput }]);
+              // Auto-advance keywords (used for both user and model)
+              const advanceKeywords = [
+                // Direct questions/statements about moving on
+                'ready for', 'move on', 'try another', 'next word',
+                "let's practice", "let's try", "next word is", 
+                "move on to", "shall we", "want to try", "should we move",
+                "would you like to", "how about we"
+              ];
+              
+              // User confirmation keywords (when user says yes to moving on)
+              const userConfirmKeywords = [
+                'yes', 'yeah', 'sure', 'okay', 'ok', 'next', 'ready', 'go ahead'
+              ];
+              
+              if (userInput) {
+                setTranscripts(prev => [...prev, { role: 'user', text: userInput }]);
+                
+                // Check if USER is confirming they want to move on
+                const lowerUserInput = userInput.toLowerCase();
+                const userWantsNext = userConfirmKeywords.some(keyword => lowerUserInput.includes(keyword));
+                
+                if (userWantsNext && wordsRemaining > 0 && status === AppStatus.CONNECTED) {
+                  console.log('🎯 User confirmed next word:', userInput);
+                  setTimeout(() => {
+                    nextWord();
+                  }, 500); // Quick response to user confirmation
+                }
+              }
+              
               if (modelOutput) {
                 setTranscripts(prev => [...prev, { role: 'model', text: modelOutput }]);
                 
-                // UX FIX: Expanded auto-advance detection
+                // Check if GEMINI is suggesting to move on
                 const lowerOutput = modelOutput.toLowerCase();
-                const advanceKeywords = [
-                  // Direct questions/statements about moving on
-                  'ready for', 'move on', 'try another', 'next word',
-                  "let's practice", "let's try", "next word is", 
-                  "move on to", "shall we", "want to try", "should we move",
-                  "would you like to", "how about we"
-                ];
-                
                 const shouldAdvance = advanceKeywords.some(keyword => lowerOutput.includes(keyword));
                 
-                // Prevent auto-advance if we just started or no words remaining
                 if (shouldAdvance && wordsRemaining > 0 && status === AppStatus.CONNECTED) {
                   console.log('🎯 Gemini triggering auto-advance based on phrase:', modelOutput);
-                  // Shorter delay since AI is introducing the word
                   setTimeout(() => {
                     nextWord();
                   }, 1000);

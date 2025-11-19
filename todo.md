@@ -996,3 +996,11 @@
 - [x] Focus on direct move-on suggestions, not general praise
 - [x] Test auto-advance triggers after feedback completion
 - [x] Create checkpoint with enhanced auto-advance
+
+
+## Phase 60: Auto-Advance on User Confirmation
+- [x] Detect when USER says "yes", "yeah", "sure", "okay", "ok", "next", "ready", "go ahead"
+- [x] Add user input detection alongside model output detection
+- [x] Faster response time (500ms) for user confirmations vs 1000ms for Gemini
+- [x] Test auto-advance when user confirms they want next word
+- [x] Create checkpoint with bidirectional auto-advance
