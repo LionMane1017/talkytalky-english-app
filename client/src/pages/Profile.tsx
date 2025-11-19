@@ -73,7 +73,7 @@ export default function Profile() {
                 {userStats.name.charAt(0)}
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{userStats.name}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">{userStats.name}</h1>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 mb-3">
                   <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
                     {userStats.level}

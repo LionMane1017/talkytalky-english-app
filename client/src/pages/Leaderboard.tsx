@@ -71,7 +71,7 @@ export default function Leaderboard() {
 
       <div className="container py-6 max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Leaderboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">Leaderboard</h1>
           <p className="text-muted-foreground">
             Compete with learners worldwide and track your progress
           </p>

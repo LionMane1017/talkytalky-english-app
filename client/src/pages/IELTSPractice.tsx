@@ -177,8 +177,8 @@ export default function IELTSPractice() {
           <div className="mb-8">
             <TalkyLogo />
           </div>
-          <h1 className="text-3xl font-bold mb-2 text-foreground">IELTS Practice</h1>
-          <p className="text-muted-foreground mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold mb-1 text-foreground">IELTS Practice</h1>
+          <p className="text-muted-foreground text-sm mb-4 sm:mb-6">
             Practice for IELTS Speaking test with realistic questions and timing
           </p>
 
@@ -300,7 +300,7 @@ export default function IELTSPractice() {
       <div className="container py-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               {mode === "mock" ? "Mock Test" : `Part ${currentQuestion?.part} Practice`}
             </h1>
             <Badge className="mt-2">

@@ -74,12 +74,14 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pb-20">
-      {/* Header with logo and theme toggle */}
+      {/* Compact Header */}
       <div className="border-b bg-card">
-        <div className="container py-4">
+        <div className="container py-2">
           <div className="flex items-center justify-between">
-            <TalkyLogo />
-            <div className="flex items-center gap-2">
+            <div className="scale-75 origin-left">
+              <TalkyLogo />
+            </div>
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"

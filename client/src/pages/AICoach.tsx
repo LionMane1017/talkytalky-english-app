@@ -273,10 +273,10 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white font-sans overflow-hidden">
       <GlobalStatusIndicator status={globalStatus} />
-      <header className="p-4 border-b border-gray-700 shadow-lg bg-gray-900/50 backdrop-blur-sm">
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-            TalkyTalky AI English Coach
+      <header className="p-2 border-b border-gray-700 shadow-lg bg-gray-900/50 backdrop-blur-sm">
+        <div className="flex justify-between items-center mb-1">
+          <h1 className="text-base sm:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+            TalkyTalky Coach
           </h1>
           {status === AppStatus.CONNECTED && transcripts.length > 0 && (
             <button
@@ -291,15 +291,15 @@ export default function App() {
                 });
               }}
               disabled={saveSessionMutation.isPending}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saveSessionMutation.isPending ? "Saving..." : "💾 Save Session"}
             </button>
           )}
         </div>
-        <p className="text-center text-gray-400 text-sm">Real-time pronunciation and fluency practice</p>
+        <p className="text-center text-gray-400 text-xs hidden sm:block">Real-time pronunciation and fluency practice</p>
         {smartContext && (
-          <p className="text-center text-green-400 text-xs mt-1">✅ Smart Context Active (IELTS + Personal History)</p>
+          <p className="text-center text-green-400 text-xs mt-0.5 hidden sm:block">✅ Smart Context Active</p>
         )}
       </header>
       

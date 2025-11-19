@@ -58,8 +58,8 @@ export default function Modules() {
           <div className="mb-6">
             <TalkyLogo />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Learning Modules</h1>
-          <p className="text-muted-foreground">Choose a module to start practicing</p>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">Learning Modules</h1>
+          <p className="text-muted-foreground text-sm">Choose a module to start practicing</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -204,8 +204,8 @@ export default function MatchCards() {
           <div className="mb-8">
             <TalkyLogo />
           </div>
-          <h1 className="text-3xl font-bold mb-2 text-foreground">Match Cards</h1>
-          <p className="text-muted-foreground mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold mb-1 text-foreground">Match Cards</h1>
+          <p className="text-muted-foreground text-sm mb-4 sm:mb-6">
             Match English words with their meanings to build your vocabulary
           </p>
 
@@ -283,7 +283,7 @@ export default function MatchCards() {
       <div className="container py-6 max-w-6xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Match Cards</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Match Cards</h1>
             <Badge className="mt-2" variant="secondary">
               {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
             </Badge>

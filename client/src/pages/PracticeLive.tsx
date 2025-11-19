@@ -440,81 +440,49 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-900 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3 sm:mb-6">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="scale-75 sm:scale-100">
-              <TalkyLogo />
-            </div>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-white capitalize">{difficulty} Level</h1>
-              <p className="text-xs sm:text-sm text-purple-200 hidden sm:block">Practice with TalkyTalky</p>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => { stopSession(); setDifficulty(null); }} className="text-xs sm:text-sm">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-base sm:text-lg font-bold text-white capitalize">{difficulty} Level</h1>
+          <Button variant="outline" size="sm" onClick={() => { stopSession(); setDifficulty(null); }} className="text-xs h-7">
             Change
           </Button>
         </div>
         
         {/* Progress */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
-          <CardContent className="pt-3 sm:pt-4 pb-3 sm:pb-4">
-            <div className="flex justify-between text-white text-xs sm:text-sm mb-1 sm:mb-2">
-              <span>Progress</span>
-              <span>{totalWords - wordsRemaining} / {totalWords}</span>
-            </div>
-            <Progress value={((totalWords - wordsRemaining) / totalWords) * 100} className="h-1.5 sm:h-2" />
-          </CardContent>
-        </Card>
+        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-2 mb-2">
+          <div className="flex justify-between text-white text-xs mb-1">
+            <span>Progress</span>
+            <span>{totalWords - wordsRemaining}/{totalWords}</span>
+          </div>
+          <Progress value={((totalWords - wordsRemaining) / totalWords) * 100} className="h-1" />
+        </div>
         
-        {/* Current Word */}
+        {/* Current Word - Compact */}
         {currentWord && (
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
-            <CardHeader className="pb-2 sm:pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl sm:text-3xl text-white">{currentWord.word}</CardTitle>
-                <Badge variant="secondary" className="text-xs">{currentWord.difficulty}</Badge>
-              </div>
-              <CardDescription className="text-purple-200 text-sm sm:text-base">{currentWord.meaning}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-white/80 italic text-xs sm:text-sm line-clamp-2">"{currentWord.example}"</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-3 mb-2">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">{currentWord.word}</h2>
+              <Badge variant="secondary" className="text-xs">{currentWord.difficulty}</Badge>
+            </div>
+            <p className="text-purple-200 text-sm mb-1">{currentWord.meaning}</p>
+            <p className="text-white/70 italic text-xs line-clamp-1">"{currentWord.example}"</p>
+          </div>
         )}
         
-        {/* Gemini Live Assistant - AI Coach Style */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-3 sm:mb-4">
-          <CardHeader className="pb-3 sm:pb-4">
-            <CardTitle className="text-white text-base sm:text-lg">TalkyTalky Coach</CardTitle>
-            <CardDescription className="text-purple-200 text-xs sm:text-sm hidden sm:block">
-              Practice pronunciation with live AI feedback
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-4">
-            {/* Conversation History */}
-            {transcripts.length > 0 && (
-              <div className="max-h-32 sm:max-h-48 overflow-y-auto space-y-2 bg-black/20 rounded-lg p-2 sm:p-3">
-                {transcripts.map((msg, idx) => (
-                  <div key={idx} className={`text-xs sm:text-sm ${msg.role === 'user' ? 'text-blue-300' : 'text-purple-300'}`}>
-                    <strong>{msg.role === 'user' ? 'You' : 'TalkyTalky'}:</strong> {msg.text}
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {/* Voice Waveform (like AI Coach) */}
-            {status === AppStatus.CONNECTED && (
-              <div className="mt-3 sm:mt-4">
-                <VoiceWaveform 
-                  audioLevel={audioLevel} 
-                  isActive={status === AppStatus.CONNECTED}
-                  isSpeaking={isSpeaking}
-                />
-              </div>
-            )}
-            
-            {/* AI Coach Style Button */}
+        {/* Record Button - Above the Fold */}
+        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-3 mb-2">
+          {/* Voice Waveform */}
+          {status === AppStatus.CONNECTED && (
+            <div className="mb-2">
+              <VoiceWaveform 
+                audioLevel={audioLevel} 
+                isActive={status === AppStatus.CONNECTED}
+                isSpeaking={isSpeaking}
+              />
+            </div>
+          )}
+          
+          {/* Record Button */}
             <div className="flex flex-col items-center justify-center">
               <div className="relative flex items-center justify-center">
                 {animate && (
@@ -534,12 +502,22 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
                 </button>
               </div>
               <p className="text-xs sm:text-sm text-gray-300 mt-2">{text}</p>
-              {transcripts.length > 0 && status === AppStatus.CONNECTED && (
-                <p className="text-xs text-gray-400 mt-1 hidden sm:block">{transcripts.length} messages</p>
-              )}
             </div>
-          </CardContent>
-        </Card>
+        </div>
+        
+        {/* Conversation History - Below Record Button */}
+        {transcripts.length > 0 && (
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-2 mb-2">
+            <p className="text-white text-xs font-semibold mb-1">Conversation</p>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {transcripts.map((msg, idx) => (
+                <div key={idx} className={`text-xs ${msg.role === 'user' ? 'text-blue-300' : 'text-purple-300'}`}>
+                  <strong>{msg.role === 'user' ? 'You' : 'TalkyTalky'}:</strong> {msg.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Actions */}
         <div className="flex gap-2 sm:gap-4">
