@@ -31,6 +31,7 @@ export default function PracticeLive() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  const instructionsShownRef = useRef(false);
   
   // Background images for animated cycling
   const backgroundImages = [
@@ -432,15 +433,21 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
     }
   }, [difficulty, currentWord, status, startSession]);
   
-  // Show instructions when session connects
+  // Show instructions when session connects (only once per difficulty selection)
   useEffect(() => {
-    if (status === AppStatus.CONNECTED && !showInstructions) {
+    if (status === AppStatus.CONNECTED && !instructionsShownRef.current) {
+      instructionsShownRef.current = true;
       setShowInstructions(true);
       // Auto-hide after 5 seconds
       const timer = setTimeout(() => setShowInstructions(false), 5000);
       return () => clearTimeout(timer);
     }
-  }, [status, showInstructions]);
+  }, [status]);
+  
+  // Reset instructions shown flag when difficulty changes
+  useEffect(() => {
+    instructionsShownRef.current = false;
+  }, [difficulty]);
   
   // Start practice
   const startPractice = (level: "beginner" | "intermediate" | "advanced") => {

@@ -1054,3 +1054,6 @@
 
 ## Bug Fix: HTML Validation Error
 - [x] Fix nested <p> tags in Practice page instruction dialog (DialogDescription contains nested <p> elements)
+
+## Bug Fix: Instruction Popup Reopening
+- [x] Fix instruction popup closing and immediately reopening (useEffect dependency issue)
