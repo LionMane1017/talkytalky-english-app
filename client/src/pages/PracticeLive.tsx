@@ -158,10 +158,10 @@ export default function PracticeLive() {
       inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       
-      // CRITICAL FIX: Force resume audio context (fixes suspended state)
+      // 🔊 CRITICAL: Resume audio context if suspended (browsers auto-suspend)
       if (outputAudioContextRef.current.state === 'suspended') {
-
         await outputAudioContextRef.current.resume();
+        console.log("🔊 AudioContext Resumed");
       }
       
       // Create system prompt with full context
@@ -246,15 +246,17 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
             
-            // Send welcoming greeting
-            const greetingText = `Welcome! I'm excited to help you practice pronunciation today. Let's start with our first word: "${currentWord.word}". ${currentWord.meaning}. Now, let me show you how to pronounce it correctly. Listen carefully...`;
-            
-            sessionPromiseRef.current!.then((sess) => {
-              sess.send({ 
-                text: greetingText,
-                endOfTurn: true 
+            // 4. TRIGGER GREETING (Explicitly send a message to force AI to speak)
+            // We await a small delay to ensure socket is ready for data frames
+            setTimeout(() => {
+              console.log("📨 Sending Greeting Trigger");
+              sessionPromiseRef.current!.then((sess) => {
+                sess.send({ 
+                  text: `Please introduce the word "${currentWord.word}" now.`,
+                  endOfTurn: true 
+                });
               });
-            });
+            }, 500);
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {

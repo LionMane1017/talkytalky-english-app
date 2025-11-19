@@ -151,6 +151,8 @@ export default function App() {
 
             audioProcessorNodeRef.current = inputAudioContextRef.current!.createScriptProcessor(4096, 1, 1);
             
+            // FIX 2: Throttle audio level updates to prevent "Maximum update depth exceeded"
+            let lastUpdate = 0;
             audioProcessorNodeRef.current.onaudioprocess = (audioProcessingEvent) => {
               const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
               const pcmBlob: GenAIBlob = {
@@ -159,17 +161,20 @@ export default function App() {
               };
               
               if(sessionPromiseRef.current) {
-                // Fix: Removed `session.isOpen()` check as it's not a supported method.
-                // Data should be sent once the session promise resolves.
                 sessionPromiseRef.current.then((session) => {
                    session.sendRealtimeInput({ media: pcmBlob });
                 });
               }
 
-              const dataArray = new Uint8Array(analyserNodeRef.current!.frequencyBinCount);
-              analyserNodeRef.current!.getByteFrequencyData(dataArray);
-              const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-              setAudioLevel(average / 255);
+              // FIX 2: Add null check before accessing frequencyBinCount
+              const now = Date.now();
+              if (analyserNodeRef.current && now - lastUpdate > 50) { // Only update React state every 50ms
+                const dataArray = new Uint8Array(analyserNodeRef.current.frequencyBinCount);
+                analyserNodeRef.current.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                setAudioLevel(average / 255);
+                lastUpdate = now;
+              }
             };
 
             mediaStreamSourceRef.current.connect(analyserNodeRef.current);

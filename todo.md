@@ -1086,3 +1086,12 @@
 - [x] Include example questions for each task type
 - [x] Explain scoring criteria with specific examples
 - [x] Test AI Coach with enhanced explanations
+
+
+## Gemini 3.0 Handoff - Bug Fixes & Framework Updates
+- [x] Fix PracticeLive greeting issue - add AudioContext resume and explicit greeting trigger
+- [x] Fix AICoach crash - add null checks for analyserRef and throttle audio level updates
+- [x] Update AI Coach system prompt with CELPIP framework structure
+- [x] Add CELPIP module explanations (Listening, Reading, Writing, Speaking)
+- [x] Add CELPIP high-score benchmarks and model examples
+- [x] Test all fixes and verify no crashes or silent greetings
