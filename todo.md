@@ -978,3 +978,13 @@
 - [x] Include word, difficulty, meaning, and example in new word message
 - [x] Test that Gemini knows which word to practice
 - [x] Create checkpoint with context fix
+
+
+## Phase 58: Add Full Vocabulary List to Gemini Context
+- [x] Add list of all words in current difficulty level to system prompt
+- [x] Sort words alphabetically for consistent ordering
+- [x] Include word and meaning for each entry
+- [x] Format as structured list ("- word: meaning")
+- [x] Added to system prompt under "Available Vocabulary" section
+- [x] Test that Gemini can reference other words in conversation
+- [x] Create checkpoint with vocabulary awareness

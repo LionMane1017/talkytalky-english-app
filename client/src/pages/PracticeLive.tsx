@@ -140,6 +140,12 @@ export default function PracticeLive() {
       inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       
       // Create system prompt with full context
+      // Get all words for this difficulty level (sorted alphabetically)
+      const allWordsInLevel = vocabularyData
+        .filter(w => w.difficulty === difficulty)
+        .sort((a, b) => a.word.localeCompare(b.word));
+      const vocabularyList = allWordsInLevel.map(w => `- ${w.word}: ${w.meaning}`).join('\n');
+      
       const systemPrompt = `You are TalkyTalky, an enthusiastic IELTS pronunciation coach. 
 
 **Current Practice Session:**
@@ -147,6 +153,9 @@ export default function PracticeLive() {
 - Difficulty Level: ${difficulty}
 - Meaning: ${currentWord.meaning}
 - Example: ${currentWord.example}
+
+**Available Vocabulary (${difficulty} level):**
+${vocabularyList}
 
 **Your Role:**
 1. When the session starts, introduce the word enthusiastically and explain how to pronounce it
