@@ -17,6 +17,8 @@ import { trpc } from "@/lib/trpc";
 import { achievements } from "@shared/achievements";
 import { useAchievementChecker } from "@/hooks/useAchievementChecker";
 import TalkyLogo from "@/components/TalkyLogo";
+import SoundToggle from "@/components/SoundToggle";
+import MascotToggle from "@/components/MascotToggle";
 import { Link } from "wouter";
 
 export default function Dashboard() {
@@ -82,6 +84,8 @@ export default function Dashboard() {
               <TalkyLogo />
             </div>
             <div className="flex items-center gap-1">
+              <MascotToggle />
+              <SoundToggle />
               <Button
                 variant="ghost"
                 size="icon"

@@ -20,7 +20,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { TalkyTalkyProvider } from "./contexts/TalkyTalkyContext";
 import { TalkyMascot } from "@/components/mascot/TalkyMascot";
 import LoadingScreen from "@/components/LoadingScreen";
-import SoundToggle from "@/components/SoundToggle";
 import { useState, useEffect } from "react";
 
 
@@ -84,7 +83,6 @@ function App() {
         >
           <TooltipProvider>
             {showLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
-            <SoundToggle />
             <Toaster />
             <Router />
             {/* TalkyTalky Mascot - Lives at app root level */}

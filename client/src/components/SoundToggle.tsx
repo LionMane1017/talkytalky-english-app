@@ -18,7 +18,7 @@ export default function SoundToggle() {
       variant="ghost"
       size="icon"
       onClick={toggle}
-      className="fixed top-4 right-4 z-40"
+      className="rounded-full"
       title={enabled ? 'Mute sounds' : 'Enable sounds'}
     >
       {enabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}

@@ -1124,3 +1124,6 @@
 - [x] Add glassmorphism effects to mascot for softer, flowing appearance
 
 - [x] Add mascot visibility toggle in home header
+
+- [x] Fix menu icon overlap issue
+- [x] Make mascot toggle button visible in home header
