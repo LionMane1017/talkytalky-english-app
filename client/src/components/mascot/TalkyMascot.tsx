@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MascotSVG, Confetti, Sparkles, type MascotMood } from './MascotAssets';
 import { useLocation } from "wouter";
+import { sounds } from '@/lib/sounds';
 
 interface MascotMessage {
   text: string;
@@ -32,18 +33,23 @@ export function TalkyMascot() {
     if (location === '/practice' || location === '/practice-live') {
       setMood('listening');
       showMessage("I'm listening! Let's practice together! 🎤");
+      sounds.greeting();
     } else if (location === '/ai-coach') {
       setMood('excited');
       showMessage("Ready for your coaching session! 🎯");
+      sounds.encourage();
     } else if (location === '/leaderboard') {
       setMood('excited');
       showMessage("Look at those amazing scores! 🏆");
+      sounds.success();
     } else if (location === '/learning-paths') {
       setMood('thinking');
       showMessage("Time to learn something new! 📚");
+      sounds.thinking();
     } else if (location === '/') {
       setMood('happy');
       showMessage("Welcome back! Ready to practice? 😊", 4000);
+      sounds.greeting();
     } else {
       setMood('happy');
     }
@@ -74,10 +80,13 @@ export function TalkyMascot() {
 
       if (score >= 90) {
         showMessage("🎉 PERFECT! You're a pronunciation master!", 4000);
+        sounds.bigSuccess();
       } else if (score >= 80) {
         showMessage("Amazing job! Keep up the great work! ⭐", 3000);
+        sounds.success();
       } else {
         showMessage("Good progress! You're improving! 👍", 3000);
+        sounds.encourage();
       }
 
       setTimeout(() => {
@@ -91,6 +100,7 @@ export function TalkyMascot() {
     const handlePracticeStart = () => {
       setMood('listening');
       showMessage("I'm all ears! You got this! 👂", 2000);
+      sounds.greeting();
     };
 
     // Achievement unlock event
@@ -101,6 +111,7 @@ export function TalkyMascot() {
       setMood('celebrating');
       setShowConfetti(true);
       showMessage(`🏆 Achievement Unlocked: ${achievement}!`, 5000);
+      sounds.achievement();
 
       setTimeout(() => {
         setMood('happy');
@@ -120,6 +131,7 @@ export function TalkyMascot() {
           "Almost there! Keep going! 🎯"
         ];
         showMessage(messages[Math.floor(Math.random() * messages.length)], 3000);
+        sounds.encourage();
       } else {
         // Calm mode - more supportive
         setMood('encouraging');
@@ -129,6 +141,7 @@ export function TalkyMascot() {
           "Breathe. You've got this. 🌟"
         ];
         showMessage(messages[Math.floor(Math.random() * messages.length)], 4000);
+        sounds.encourage();
       }
 
       setTimeout(() => setMood('happy'), 3000);
@@ -142,6 +155,7 @@ export function TalkyMascot() {
       setMood('celebrating');
       setShowSparkles(true);
       showMessage(`🔥 ${days}-day streak! You're on fire!`, 4000);
+      sounds.streak();
 
       setTimeout(() => {
         setMood('happy');
@@ -173,6 +187,7 @@ export function TalkyMascot() {
     setMood('excited');
     setShowSparkles(true);
     showMessage("High Five! ✋ You're awesome!", 2000);
+    sounds.highFive();
     
     setTimeout(() => {
       setMood('happy');
