@@ -1120,3 +1120,5 @@
 - [x] Add mascot video as creative loading screen on app initialization
 
 - [x] Add efficient retro 8-bit sound system with Web Audio API for mascot interactions
+
+- [x] Add glassmorphism effects to mascot for softer, flowing appearance

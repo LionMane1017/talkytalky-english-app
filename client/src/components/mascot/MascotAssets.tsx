@@ -17,14 +17,27 @@ export const MascotSVG = ({ mood = 'happy' }: MascotSVGProps) => (
         <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
         <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
       </filter>
+      <filter id="softGlow">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
       <radialGradient id="pinkGradient" cx="50%" cy="50%">
         <stop offset="0%" stopColor="#FF66DD" />
-        <stop offset="100%" stopColor="#FF44CC" />
+        <stop offset="50%" stopColor="#FF44CC" />
+        <stop offset="100%" stopColor="#FF22AA" />
+      </radialGradient>
+      <radialGradient id="glassOverlay" cx="30%" cy="30%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
+        <stop offset="50%" stopColor="rgba(255,255,255,0.1)" />
+        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
       </radialGradient>
     </defs>
 
+    {/* Soft background glow */}
+    <circle cx="100" cy="100" r="90" fill="url(#pinkGradient)" opacity="0.2" filter="url(#softGlow)" />
+    
     {/* --- BASE CHARACTER GROUP --- */}
-    <g transform="translate(50, 20) scale(1.1)">
+    <g transform="translate(50, 20) scale(1.1)" filter="url(#softGlow)">
         
         {/* 1. EARS (Round, Hot Pink) */}
         <motion.circle 

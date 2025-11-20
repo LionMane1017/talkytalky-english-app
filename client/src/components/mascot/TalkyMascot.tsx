@@ -224,7 +224,7 @@ export function TalkyMascot() {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handleClick}
-      style={{ maxWidth: '120px', maxHeight: '120px' }}
+      style={{ maxWidth: '140px', maxHeight: '140px' }}
     >
       {/* Particle Effects */}
       {showConfetti && <Confetti />}
@@ -253,9 +253,16 @@ export function TalkyMascot() {
         )}
       </AnimatePresence>
 
-      {/* The Mascot Character */}
+      {/* The Mascot Character with Glassmorphism */}
       <motion.div 
-        className="w-24 h-24 md:w-28 md:h-28 drop-shadow-2xl filter relative"
+        className="w-28 h-28 md:w-32 md:h-32 relative rounded-full p-3"
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        }}
         animate={{
           y: [0, -8, 0],
         }}
