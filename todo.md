@@ -1127,3 +1127,6 @@
 
 - [x] Fix menu icon overlap issue
 - [x] Make mascot toggle button visible in home header
+
+- [x] Create Settings page with home page aesthetic
+- [x] Connect Profile settings button to Settings page

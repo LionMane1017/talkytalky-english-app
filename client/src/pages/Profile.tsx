@@ -8,6 +8,7 @@ import {
   Crown, Star, Zap, Flame, Settings 
 } from "lucide-react";
 import TalkyLogo from "@/components/TalkyLogo";
+import { Link } from "wouter";
 
 export default function Profile() {
   const [selectedTab, setSelectedTab] = useState<"stats" | "achievements" | "goals">("stats");
@@ -91,10 +92,12 @@ export default function Profile() {
                   <span>⏱️ {formatTime(userStats.totalPracticeTime)} Practice Time</span>
                 </div>
               </div>
-              <Button variant="outline" className="bg-white/10 text-white border-white/30 hover:bg-white/20">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+              <Link href="/settings">
+                <Button variant="outline" className="bg-white/10 text-white border-white/30 hover:bg-white/20">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -12,6 +12,7 @@ import LearningPathDetail from "@/pages/LearningPathDetail";
 import Leaderboard from "@/pages/Leaderboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AICoach from "@/pages/AICoach";
+import Settings from "@/pages/Settings";
 import { Route, Switch, useLocation } from "wouter";
 
 import BottomNav from "@/components/BottomNav";
@@ -46,6 +47,7 @@ function Router() {
           <Route path={"/learning-paths"} component={LearningPaths} />
           <Route path={"/learning-paths/:pathId"} component={LearningPathDetail} />
           <Route path={"/leaderboard"} component={Leaderboard} />
+          <Route path={"/settings"} component={Settings} />
           <Route path={"/admin"} component={AdminDashboard} />
           <Route path={"/404"} component={NotFound} />
           {/* Final fallback route */}
