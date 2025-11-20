@@ -1,11 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mic, Grid3x3, Trophy, BarChart3, Sparkles, ArrowRight } from "lucide-react";
+import { Mic, Grid3x3, Trophy, BarChart3, Sparkles, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link } from "wouter";
 import TalkyLogo from "@/components/TalkyLogo";
 
 export default function Home() {
+  const [mascotVisible, setMascotVisible] = useState(() => {
+    return localStorage.getItem('mascotVisible') !== 'false';
+  });
+
+  const toggleMascot = () => {
+    const newValue = !mascotVisible;
+    setMascotVisible(newValue);
+    localStorage.setItem('mascotVisible', String(newValue));
+    // Dispatch event to hide/show mascot
+    window.dispatchEvent(new CustomEvent('mascot:toggle', { detail: { visible: newValue } }));
+  };
+
   const features = [
     {
       icon: Mic,
@@ -49,9 +61,18 @@ export default function Home() {
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-primary/5 to-transparent py-16 px-4">
         <div className="container max-w-4xl text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
+          {/* Logo and Mascot Toggle */}
+          <div className="flex justify-center items-center gap-4 mb-8">
             <TalkyLogo />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMascot}
+              className="rounded-full"
+              title={mascotVisible ? 'Hide TalkyTalky' : 'Show TalkyTalky'}
+            >
+              {mascotVisible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+            </Button>
           </div>
           
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 mb-6">

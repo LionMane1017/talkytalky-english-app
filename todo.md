@@ -1122,3 +1122,5 @@
 - [x] Add efficient retro 8-bit sound system with Web Audio API for mascot interactions
 
 - [x] Add glassmorphism effects to mascot for softer, flowing appearance
+
+- [x] Add mascot visibility toggle in home header

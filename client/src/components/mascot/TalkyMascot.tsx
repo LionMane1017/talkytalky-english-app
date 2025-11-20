@@ -17,6 +17,9 @@ export function TalkyMascot() {
   const [showSparkles, setShowSparkles] = useState(false);
   const [failureCount, setFailureCount] = useState(0);
   const [personalityMode, setPersonalityMode] = useState<'energetic' | 'calm'>('energetic');
+  const [visible, setVisible] = useState(() => {
+    return localStorage.getItem('mascotVisible') !== 'false';
+  });
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Helper to show message
@@ -214,6 +217,20 @@ export function TalkyMascot() {
 
     return () => clearInterval(interval);
   }, [message]);
+
+  // Listen for mascot toggle event
+  useEffect(() => {
+    const handleToggle = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const isVisible = customEvent.detail?.visible ?? true;
+      setVisible(isVisible);
+    };
+
+    window.addEventListener('mascot:toggle', handleToggle);
+    return () => window.removeEventListener('mascot:toggle', handleToggle);
+  }, []);
+
+  if (!visible) return null;
 
   return (
     <motion.div 
