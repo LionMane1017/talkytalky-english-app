@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 
-// Simple SVG representation of TalkyTalky (Pink Character with book and sunglasses)
-// Based on the mascot video - vibrant, colorful, friendly character
-// In V2, replace these SVGs with Lottie JSON imports for more complex animations
+// V2: Precise recreation of the Retro Pink Bear from the mascot video
+// Character traits: Hot Pink Fur, Cyan Triangle Shades, 80s Brick Phone, Yellow/Blue Sash Top
 
 export type MascotMood = 'happy' | 'thinking' | 'excited' | 'listening' | 'celebrating' | 'encouraging';
 
@@ -11,184 +10,236 @@ interface MascotSVGProps {
 }
 
 export const MascotSVG = ({ mood = 'happy' }: MascotSVGProps) => (
-  <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
-    {/* Body - Pink character */}
-    <motion.ellipse
-      cx="50"
-      cy="60"
-      rx="25"
-      ry="30"
-      fill="#ec4899"
-      animate={{ scaleY: [1, 1.05, 1] }}
-      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-    />
-    
-    {/* Ears - Pink with darker inner */}
-    <motion.path 
-      d="M25,35 L15,15 L35,30" 
-      fill="#ec4899"
-      animate={mood === 'listening' ? { rotate: [-5, 5, -5] } : {}}
-      transition={{ duration: 0.5, repeat: Infinity }}
-      style={{ transformOrigin: "25px 35px" }}
-    />
-    <path d="M20,25 L18,20 L28,28" fill="#db2777" />
-    
-    <motion.path 
-      d="M75,35 L85,15 L65,30" 
-      fill="#ec4899"
-      animate={mood === 'listening' ? { rotate: [5, -5, 5] } : {}}
-      transition={{ duration: 0.5, repeat: Infinity }}
-      style={{ transformOrigin: "75px 35px" }}
-    />
-    <path d="M80,25 L82,20 L72,28" fill="#db2777" />
-    
-    {/* Head */}
-    <circle cx="50" cy="45" r="20" fill="#ec4899" />
-    
-    {/* Sunglasses */}
-    <rect x="35" y="42" width="12" height="8" rx="2" fill="#38bdf8" opacity="0.8" />
-    <rect x="53" y="42" width="12" height="8" rx="2" fill="#38bdf8" opacity="0.8" />
-    <line x1="47" y1="46" x2="53" y2="46" stroke="#1e293b" strokeWidth="2" />
-    
-    {/* Face based on Mood */}
-    {mood === 'happy' && (
-      <>
-        {/* Smile */}
-        <path d="M40,55 Q50,62 60,55" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      </>
-    )}
-    
-    {mood === 'excited' && (
-      <>
-        {/* Big smile */}
-        <motion.path 
-          d="M38,55 Q50,68 62,55" 
-          stroke="white" 
-          strokeWidth="3" 
-          fill="none"
-          strokeLinecap="round"
-          animate={{ d: ["M38,55 Q50,68 62,55", "M38,55 Q50,70 62,55", "M38,55 Q50,68 62,55"] }}
-          transition={{ duration: 0.3, repeat: Infinity }}
+  <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
+    {/* --- DEFINITIONS --- */}
+    <defs>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <radialGradient id="pinkGradient" cx="50%" cy="50%">
+        <stop offset="0%" stopColor="#FF66DD" />
+        <stop offset="100%" stopColor="#FF44CC" />
+      </radialGradient>
+    </defs>
+
+    {/* --- BASE CHARACTER GROUP --- */}
+    <g transform="translate(50, 20) scale(1.1)">
+        
+        {/* 1. EARS (Round, Hot Pink) */}
+        <motion.circle 
+          cx="25" cy="25" r="18" 
+          fill="url(#pinkGradient)"
+          animate={mood === 'listening' ? { scaleY: [1, 1.1, 1] } : {}}
+          transition={{ duration: 0.5, repeat: Infinity }}
         />
-        {/* Sparkles */}
-        <motion.circle
-          cx="70"
-          cy="35"
-          r="2"
-          fill="#fbbf24"
-          animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
-          transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+        <motion.circle 
+          cx="75" cy="25" r="18" 
+          fill="url(#pinkGradient)"
+          animate={mood === 'listening' ? { scaleY: [1, 1.1, 1] } : {}}
+          transition={{ duration: 0.5, repeat: Infinity, delay: 0.25 }}
         />
-        <motion.circle
-          cx="30"
-          cy="35"
-          r="2"
-          fill="#fbbf24"
-          animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
-          transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
-        />
-      </>
-    )}
-    
-    {mood === 'celebrating' && (
-      <>
-        {/* Open mouth celebration */}
-        <ellipse cx="50" cy="58" rx="8" ry="10" fill="#7f1d1d" />
-        <motion.path 
-          d="M38,52 Q50,65 62,52" 
-          stroke="white" 
-          strokeWidth="3" 
-          fill="none"
-          strokeLinecap="round"
-        />
-        {/* Confetti */}
-        <motion.rect
-          x="70"
-          y="30"
-          width="3"
-          height="3"
-          fill="#ec4899"
-          animate={{ y: [30, 70], rotate: [0, 360], opacity: [1, 0] }}
+        {/* Inner Ears */}
+        <circle cx="25" cy="25" r="8" fill="#FF99DD" />
+        <circle cx="75" cy="25" r="8" fill="#FF99DD" />
+
+        {/* 2. HEAD (Wide Oval, Hot Pink) */}
+        <ellipse cx="50" cy="55" rx="45" ry="40" fill="url(#pinkGradient)" />
+
+        {/* 3. BODY (Yellow Shirt, Blue Sash) */}
+        <g transform="translate(15, 90)">
+            {/* Torso - Yellow Shirt */}
+            <path d="M0,0 Q35,-5 70,0 L70,60 Q35,65 0,60 Z" fill="#FFFF00" stroke="#DDDD00" strokeWidth="1" />
+            {/* Blue Diagonal Sash */}
+            <path d="M0,0 L30,0 L70,60 L40,60 Z" fill="#4444FF" opacity="0.9" />
+            {/* Sash highlight */}
+            <path d="M5,5 L28,5 L65,55 L42,55 Z" fill="#6666FF" opacity="0.3" />
+        </g>
+
+        {/* 4. FACE DETAILS */}
+        {/* Snout Area */}
+        <ellipse cx="50" cy="70" rx="15" ry="10" fill="#FF77DD" />
+        {/* Nose */}
+        <path d="M46,68 L54,68 L50,74 Z" fill="#330033" />
+        
+        {/* Mouth (Changes based on mood) */}
+        {mood === 'happy' && (
+          <motion.path 
+            d="M45,78 Q50,85 55,78" 
+            stroke="#330033" 
+            strokeWidth="2.5" 
+            fill="none"
+            strokeLinecap="round"
+            animate={{ d: ["M45,78 Q50,85 55,78", "M45,78 Q50,82 55,78", "M45,78 Q50,85 55,78"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        )}
+        
+        {mood === 'excited' && (
+          <motion.path 
+            d="M42,78 Q50,90 58,78" 
+            stroke="#330033" 
+            strokeWidth="3" 
+            fill="none"
+            strokeLinecap="round"
+            animate={{ d: ["M42,78 Q50,90 58,78", "M42,78 Q50,92 58,78", "M42,78 Q50,90 58,78"] }}
+            transition={{ duration: 0.3, repeat: Infinity }}
+          />
+        )}
+        
+        {mood === 'celebrating' && (
+          <>
+            <ellipse cx="50" cy="82" rx="8" ry="10" fill="#7f1d1d" />
+            <motion.path 
+              d="M40,78 Q50,88 60,78" 
+              stroke="#330033" 
+              strokeWidth="3" 
+              fill="none"
+              strokeLinecap="round"
+            />
+          </>
+        )}
+        
+        {mood === 'listening' && (
+          <motion.path 
+            d="M45,78 Q50,85 55,78" 
+            stroke="#330033" 
+            strokeWidth="2" 
+            fill="none"
+            strokeLinecap="round"
+            animate={{ d: ["M45,78 Q50,85 55,78", "M45,80 Q50,83 55,80", "M45,78 Q50,85 55,78"] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+          />
+        )}
+        
+        {mood === 'encouraging' && (
+          <path 
+            d="M43,78 Q50,83 57,78" 
+            stroke="#330033" 
+            strokeWidth="2.5" 
+            fill="none"
+            strokeLinecap="round"
+          />
+        )}
+        
+        {mood === 'thinking' && (
+          <line x1="45" y1="78" x2="55" y2="78" stroke="#330033" strokeWidth="2" strokeLinecap="round" />
+        )}
+
+        {/* 5. ACCESSORIES */}
+        
+        {/* SUNGLASSES (Cyan Triangles - Signature Feature!) */}
+        <g transform="translate(0, -5)" filter="url(#glow)">
+            {/* Left Lens - Triangle */}
+            <path d="M15,45 L48,45 L30,65 Z" fill="#00FFFF" stroke="#FFFFFF" strokeWidth="2" />
+            {/* Right Lens - Triangle */}
+            <path d="M52,45 L85,45 L70,65 Z" fill="#00FFFF" stroke="#FFFFFF" strokeWidth="2" />
+            {/* Bridge */}
+            <line x1="48" y1="48" x2="52" y2="48" stroke="#FFFFFF" strokeWidth="2" />
+            {/* Reflection Lines (makes glasses look shiny) */}
+            <line x1="20" y1="50" x2="35" y2="50" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="65" y1="50" x2="80" y2="50" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" />
+            {/* Small reflection dots */}
+            <circle cx="25" cy="52" r="2" fill="white" opacity="0.8" />
+            <circle cx="75" cy="52" r="2" fill="white" opacity="0.8" />
+        </g>
+
+        {/* THE BRICK PHONE (Grey, Huge, Antenna - 80s Icon!) */}
+        <motion.g 
+          transform="translate(-15, 40) rotate(-15)"
+          animate={mood === 'listening' ? { rotate: [-15, -12, -15] } : {}}
           transition={{ duration: 1, repeat: Infinity }}
-        />
-        <motion.rect
-          x="30"
-          y="30"
-          width="3"
-          height="3"
-          fill="#38bdf8"
-          animate={{ y: [30, 70], rotate: [0, -360], opacity: [1, 0] }}
-          transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-        />
-      </>
-    )}
-    
-    {mood === 'listening' && (
-      <>
-        {/* Focused expression */}
-        <path d="M42,55 L58,55" stroke="white" strokeWidth="2" strokeLinecap="round" />
-        {/* Sound waves */}
-        <motion.path
-          d="M75,45 Q80,45 80,45"
-          stroke="#38bdf8"
-          strokeWidth="2"
-          fill="none"
-          animate={{ d: ["M75,45 Q80,45 80,45", "M75,45 Q85,45 90,45", "M75,45 Q80,45 80,45"] }}
-          transition={{ duration: 1, repeat: Infinity }}
-        />
-      </>
-    )}
-    
-    {mood === 'encouraging' && (
-      <>
-        {/* Gentle smile */}
-        <path d="M42,55 Q50,60 58,55" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        {/* Thumbs up */}
-        <motion.g
-          animate={{ y: [0, -3, 0] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
         >
-          <rect x="68" y="60" width="6" height="10" rx="2" fill="#fbbf24" />
-          <rect x="68" y="57" width="6" height="5" rx="2" fill="#fbbf24" transform="rotate(-30 71 57)" />
+            {/* Phone Body */}
+            <rect x="0" y="0" width="25" height="60" fill="#CCCCCC" stroke="#999999" strokeWidth="1.5" rx="2" />
+            {/* Screen Area */}
+            <rect x="5" y="10" width="15" height="15" fill="#003300" stroke="#00FF00" strokeWidth="0.5" />
+            {/* Green screen glow */}
+            <rect x="6" y="11" width="13" height="13" fill="#00FF00" opacity="0.2" />
+            {/* Keypad Area */}
+            <rect x="5" y="30" width="15" height="25" fill="#333333" />
+            {/* Keypad buttons (3x4 grid) */}
+            {[0, 1, 2].map(row => 
+              [0, 1, 2].map(col => (
+                <rect 
+                  key={`${row}-${col}`}
+                  x={7 + col * 4} 
+                  y={32 + row * 6} 
+                  width="3" 
+                  height="4" 
+                  fill="#666666" 
+                  rx="0.5"
+                />
+              ))
+            )}
+            {/* Antenna (iconic!) */}
+            <line x1="5" y1="0" x2="5" y2="-20" stroke="#666666" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="5" cy="-20" r="2" fill="#FF0000" /> {/* Red antenna tip */}
+            
+            {/* Hand/Paw Holding Phone */}
+            <ellipse cx="25" cy="40" rx="10" ry="8" fill="#FF44CC" />
+            {/* Paw pads */}
+            <circle cx="25" cy="38" r="2" fill="#FF77DD" />
+            <circle cx="22" cy="42" r="1.5" fill="#FF77DD" />
+            <circle cx="28" cy="42" r="1.5" fill="#FF77DD" />
         </motion.g>
-      </>
-    )}
-    
-    {mood === 'thinking' && (
-      <>
-        {/* Neutral expression */}
-        <line x1="42" y1="55" x2="58" y2="55" stroke="white" strokeWidth="2" strokeLinecap="round" />
-        {/* Thought bubble */}
-        <motion.circle
-          cx="72"
-          cy="30"
-          r="3"
-          fill="white"
-          opacity="0.8"
-          animate={{ scale: [0.8, 1, 0.8] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        <circle cx="68" cy="35" r="2" fill="white" opacity="0.6" />
-        <circle cx="65" cy="38" r="1.5" fill="white" opacity="0.4" />
-      </>
-    )}
-    
-    {/* Book in hand (signature element from video) */}
-    <g transform="translate(28, 75)">
-      <rect x="0" y="0" width="15" height="12" rx="1" fill="#a855f7" />
-      <rect x="1" y="1" width="13" height="10" rx="0.5" fill="#c084fc" />
-      <line x1="3" y1="4" x2="11" y2="4" stroke="white" strokeWidth="0.5" opacity="0.7" />
-      <line x1="3" y1="6" x2="11" y2="6" stroke="white" strokeWidth="0.5" opacity="0.7" />
-      <line x1="3" y1="8" x2="9" y2="8" stroke="white" strokeWidth="0.5" opacity="0.7" />
+
+        {/* Celebrating mode: Confetti particles */}
+        {mood === 'celebrating' && (
+          <>
+            {[...Array(8)].map((_, i) => (
+              <motion.rect
+                key={i}
+                x={20 + i * 10}
+                y={10}
+                width="3"
+                height="3"
+                fill={['#FF44CC', '#00FFFF', '#FFFF00', '#4444FF'][i % 4]}
+                animate={{
+                  y: [10, 100],
+                  x: [20 + i * 10, 20 + i * 10 + (Math.random() - 0.5) * 40],
+                  rotate: [0, 360],
+                  opacity: [1, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  delay: i * 0.1,
+                  repeat: Infinity,
+                }}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Thinking mode: Thought bubble */}
+        {mood === 'thinking' && (
+          <g>
+            <motion.circle
+              cx="85"
+              cy="35"
+              r="8"
+              fill="white"
+              stroke="#330033"
+              strokeWidth="1.5"
+              opacity="0.9"
+              animate={{ scale: [0.8, 1, 0.8] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <circle cx="78" cy="42" r="4" fill="white" stroke="#330033" strokeWidth="1" opacity="0.7" />
+            <circle cx="72" cy="46" r="2" fill="white" stroke="#330033" strokeWidth="0.5" opacity="0.5" />
+            {/* Question mark in thought bubble */}
+            <text x="82" y="40" fontSize="10" fill="#330033" fontWeight="bold">?</text>
+          </g>
+        )}
     </g>
   </svg>
 );
 
-// Particle effects for celebrations
+// Particle effects for celebrations (unchanged from V1)
 export const Confetti = () => {
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
-    color: ['#ec4899', '#38bdf8', '#fbbf24', '#a855f7'][i % 4],
+    color: ['#FF44CC', '#00FFFF', '#FFFF00', '#4444FF'][i % 4], // Match retro colors
     delay: i * 0.05,
   }));
 
@@ -249,7 +300,7 @@ export const Sparkles = () => {
           <svg width="20" height="20" viewBox="0 0 20 20">
             <path
               d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z"
-              fill="#fbbf24"
+              fill="#00FFFF" // Cyan sparkles to match sunglasses
             />
           </svg>
         </motion.div>

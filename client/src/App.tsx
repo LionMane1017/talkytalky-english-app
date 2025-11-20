@@ -13,12 +13,14 @@ import Leaderboard from "@/pages/Leaderboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AICoach from "@/pages/AICoach";
 import { Route, Switch, useLocation } from "wouter";
-import { useEffect } from "react";
+
 import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TalkyTalkyProvider } from "./contexts/TalkyTalkyContext";
 import { TalkyMascot } from "@/components/mascot/TalkyMascot";
+import LoadingScreen from "@/components/LoadingScreen";
+import { useState, useEffect } from "react";
 
 
 function Router() {
@@ -61,6 +63,17 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  const [showLoading, setShowLoading] = useState(() => {
+    // Only show loading screen on first visit
+    const hasSeenIntro = sessionStorage.getItem('hasSeenMascotIntro');
+    return !hasSeenIntro;
+  });
+
+  const handleLoadingComplete = () => {
+    sessionStorage.setItem('hasSeenMascotIntro', 'true');
+    setShowLoading(false);
+  };
+
   return (
     <ErrorBoundary>
       <TalkyTalkyProvider>
@@ -69,6 +82,7 @@ function App() {
           switchable
         >
           <TooltipProvider>
+            {showLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
             <Toaster />
             <Router />
             {/* TalkyTalky Mascot - Lives at app root level */}
