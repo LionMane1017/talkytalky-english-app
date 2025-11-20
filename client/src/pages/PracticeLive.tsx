@@ -211,6 +211,9 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             console.log('✅ Gemini Live session opened');
             setStatus(AppStatus.CONNECTED);
             
+            // Trigger mascot: Practice started
+            window.dispatchEvent(new CustomEvent('talky:practice-start'));
+            
             // Start streaming microphone audio
             mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaStreamSourceRef.current = inputAudioContextRef.current!.createMediaStreamSource(mediaStreamRef.current);

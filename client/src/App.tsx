@@ -18,6 +18,7 @@ import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TalkyTalkyProvider } from "./contexts/TalkyTalkyContext";
+import { TalkyMascot } from "@/components/mascot/TalkyMascot";
 
 
 function Router() {
@@ -70,6 +71,8 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+            {/* TalkyTalky Mascot - Lives at app root level */}
+            <TalkyMascot />
           </TooltipProvider>
         </ThemeProvider>
       </TalkyTalkyProvider>
