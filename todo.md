@@ -1130,3 +1130,10 @@
 
 - [x] Create Settings page with home page aesthetic
 - [x] Connect Profile settings button to Settings page
+
+## iOS PWA Support - Native App Experience
+- [x] Create web app manifest with app icons and metadata
+- [x] Add iOS-specific meta tags for home screen installation
+- [x] Configure apple-touch-icon for iOS home screen
+- [x] Add service worker for offline support
+- [x] Generate PWA app icons (192x192 and 512x512)
