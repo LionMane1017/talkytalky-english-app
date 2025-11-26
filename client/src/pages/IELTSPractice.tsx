@@ -50,6 +50,21 @@ export default function IELTSPractice() {
     return () => clearInterval(interval);
   }, [timeRemaining, phase]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const moduleId = params.get('module');
+    
+    if (moduleId && !mode) {
+      if (moduleId === 'ielts-part1') {
+        startPractice('part1');
+      } else if (moduleId === 'ielts-part2') {
+        startPractice('part2');
+      } else if (moduleId === 'ielts-part3') {
+        startPractice('part3');
+      }
+    }
+  }, []);
+
   const startPractice = (practiceMode: PracticeMode) => {
     setMode(practiceMode);
     

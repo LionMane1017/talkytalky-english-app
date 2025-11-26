@@ -95,7 +95,7 @@ export default function Modules() {
                     </div>
                     <Button 
                       className="w-full" 
-                      onClick={() => setLocation(module.route)}
+                      onClick={() => setLocation(`${module.route}?module=${module.id}`)}
                     >
                       Start Module
                     </Button>

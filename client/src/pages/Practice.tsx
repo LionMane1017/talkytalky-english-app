@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 export default function Practice() {
   const [currentWord, setCurrentWord] = useState<VocabularyWord | null>(null);
   const [difficulty, setDifficulty] = useState<"beginner" | "intermediate" | "advanced" | null>(null);
+  const [moduleInitialized, setModuleInitialized] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [sessionScore, setSessionScore] = useState<number[]>([]);
   const [attempts, setAttempts] = useState(0);
@@ -56,14 +57,27 @@ export default function Practice() {
     setUsedWordIds(new Set());
     const words = vocabularyData.filter(w => w.difficulty === level);
     if (words.length > 0) {
-      const randomWord = words[Math.floor(Math.random() * words.length)];
-      setCurrentWord(randomWord);
-      setUsedWordIds(new Set([randomWord.id]));
+      const sortedWords = words.sort((a, b) => a.word.localeCompare(b.word));
+      setCurrentWord(sortedWords[0]);
+      setUsedWordIds(new Set([sortedWords[0].id]));
     }
     setScore(null);
     setSessionScore([]);
     setAttempts(0);
   };
+
+  // Auto-detect module context from URL params
+  useEffect(() => {
+    if (!moduleInitialized) {
+      const params = new URLSearchParams(window.location.search);
+      const moduleId = params.get('module');
+      
+      if (moduleId === 'vocabulary-beginner') {
+        startPractice('beginner');
+        setModuleInitialized(true);
+      }
+    }
+  }, [moduleInitialized]);
 
   // Auto-play teacher audio when word changes
   useEffect(() => {
