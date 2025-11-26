@@ -381,33 +381,9 @@ export const vocabularyData: VocabularyWord[] = [
     category: "Adjectives"
   },
   // Additional Beginner Words (41-70)
-  {
-    id: "41",
-    word: "Happy",
-    phonetic: "/ˈhæpi/",
-    meaning: "Feeling or showing pleasure or contentment",
-    example: "She looks very happy today.",
-    difficulty: "beginner",
-    category: "Adjectives"
-  },
-  {
-    id: "42",
-    word: "Family",
-    phonetic: "/ˈfæməli/",
-    meaning: "A group of people related by blood or marriage",
-    example: "I love spending time with my family.",
-    difficulty: "beginner",
-    category: "Nouns"
-  },
-  {
-    id: "43",
-    word: "Friend",
-    phonetic: "/frɛnd/",
-    meaning: "A person you know well and like",
-    example: "She is my best friend.",
-    difficulty: "beginner",
-    category: "Nouns"
-  },
+  
+  
+  
   {
     id: "44",
     word: "School",
@@ -654,10 +630,10 @@ export const vocabularyData: VocabularyWord[] = [
   // Additional Intermediate Words (71-110)
   {
     id: "71",
-    word: "Achieve",
-    phonetic: "/əˈtʃiːv/",
-    meaning: "To successfully reach a goal",
-    example: "She achieved her dream of becoming a doctor.",
+    word: "Anticipate",
+    phonetic: "/ænˈtɪsəpeɪt/",
+    meaning: "To expect or predict something will happen",
+    example: "I anticipate the meeting will be productive.",
     difficulty: "intermediate",
     category: "Verbs"
   },
@@ -688,15 +664,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  {
-    id: "75",
-    word: "Environment",
-    phonetic: "/ɪnˈvaɪrənmənt/",
-    meaning: "The surroundings or conditions in which a person lives",
-    example: "We must protect the environment.",
-    difficulty: "intermediate",
-    category: "Nouns"
-  },
+  
   {
     id: "76",
     word: "Experience",
@@ -733,15 +701,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  {
-    id: "80",
-    word: "Opportunity",
-    phonetic: "/ˌɑːpərˈtuːnəti/",
-    meaning: "A favorable time or occasion",
-    example: "This job is a great opportunity.",
-    difficulty: "intermediate",
-    category: "Nouns"
-  },
+  
   {
     id: "81",
     word: "Participate",
@@ -850,24 +810,8 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  {
-    id: "93",
-    word: "Contribute",
-    phonetic: "/kənˈtrɪbjuːt/",
-    meaning: "To give something to help achieve a purpose",
-    example: "Everyone should contribute to the team effort.",
-    difficulty: "intermediate",
-    category: "Verbs"
-  },
-  {
-    id: "94",
-    word: "Demonstrate",
-    phonetic: "/ˈdemənstreɪt/",
-    meaning: "To clearly show something exists or is true",
-    example: "Let me demonstrate how it works.",
-    difficulty: "intermediate",
-    category: "Verbs"
-  },
+  
+  
   {
     id: "95",
     word: "Determine",
@@ -985,15 +929,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  {
-    id: "108",
-    word: "Significant",
-    phonetic: "/sɪɡˈnɪfɪkənt/",
-    meaning: "Sufficiently great or important to be worthy of attention",
-    example: "This is a significant achievement.",
-    difficulty: "intermediate",
-    category: "Adjectives"
-  },
+  
   {
     id: "109",
     word: "Similar",
@@ -1013,24 +949,8 @@ export const vocabularyData: VocabularyWord[] = [
     category: "Adjectives"
   },
   // Additional Advanced Words (111-150)
-  {
-    id: "111",
-    word: "Accommodate",
-    phonetic: "/əˈkɑːmədeɪt/",
-    meaning: "To provide lodging or sufficient space for",
-    example: "The hotel can accommodate 200 guests.",
-    difficulty: "advanced",
-    category: "Verbs"
-  },
-  {
-    id: "112",
-    word: "Ambiguous",
-    phonetic: "/æmˈbɪɡjuəs/",
-    meaning: "Open to more than one interpretation; unclear",
-    example: "The statement was deliberately ambiguous.",
-    difficulty: "advanced",
-    category: "Adjectives"
-  },
+  
+  
   {
     id: "113",
     word: "Arbitrary",
@@ -1049,15 +969,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  {
-    id: "115",
-    word: "Comprehensive",
-    phonetic: "/ˌkɑːmprɪˈhensɪv/",
-    meaning: "Complete and including everything necessary",
-    example: "We need a comprehensive solution.",
-    difficulty: "advanced",
-    category: "Adjectives"
-  },
+  
   {
     id: "116",
     word: "Constitute",
@@ -1139,33 +1051,9 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  {
-    id: "125",
-    word: "Facilitate",
-    phonetic: "/fəˈsɪlɪteɪt/",
-    meaning: "To make an action or process easier",
-    example: "Technology can facilitate learning.",
-    difficulty: "advanced",
-    category: "Verbs"
-  },
-  {
-    id: "126",
-    word: "Hypothesis",
-    phonetic: "/haɪˈpɑːθəsɪs/",
-    meaning: "A proposed explanation for a phenomenon",
-    example: "Scientists tested their hypothesis.",
-    difficulty: "advanced",
-    category: "Nouns"
-  },
-  {
-    id: "127",
-    word: "Inevitable",
-    phonetic: "/ɪnˈevɪtəbl/",
-    meaning: "Certain to happen; unavoidable",
-    example: "Change is inevitable.",
-    difficulty: "advanced",
-    category: "Adjectives"
-  },
+  
+  
+  
   {
     id: "128",
     word: "Inherent",
@@ -1247,15 +1135,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  {
-    id: "137",
-    word: "Phenomenon",
-    phonetic: "/fəˈnɑːmɪnɑːn/",
-    meaning: "A fact or situation that is observed to exist",
-    example: "This is a common phenomenon.",
-    difficulty: "advanced",
-    category: "Nouns"
-  },
+  
   {
     id: "138",
     word: "Preliminary",
@@ -1337,15 +1217,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  {
-    id: "147",
-    word: "Substantial",
-    phonetic: "/səbˈstænʃəl/",
-    meaning: "Of considerable importance, size, or worth",
-    example: "We made substantial progress.",
-    difficulty: "advanced",
-    category: "Adjectives"
-  },
+  
   {
     id: "148",
     word: "Suppress",
@@ -1372,6 +1244,468 @@ export const vocabularyData: VocabularyWord[] = [
     example: "This is an unprecedented situation.",
     difficulty: "advanced",
     category: "Adjectives"
+  },
+  // New Beginner Words (151-163)
+  {
+    id: "151",
+    word: "Absolute",
+    phonetic: "/ˈæbsəluːt/",
+    meaning: "Complete; total; not relative",
+    example: "The absolute truth is what matters most.",
+    difficulty: "beginner",
+    category: "Adjectives"
+  },
+  {
+    id: "152",
+    word: "Accurate",
+    phonetic: "/ˈækjərət/",
+    meaning: "Correct and precise",
+    example: "The weather forecast was very accurate.",
+    difficulty: "beginner",
+    category: "Adjectives"
+  },
+  {
+    id: "153",
+    word: "Achieve",
+    phonetic: "/əˈtʃiːv/",
+    meaning: "To successfully reach or accomplish",
+    example: "She achieved her goal of becoming a doctor.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "154",
+    word: "Address",
+    phonetic: "/əˈdres/",
+    meaning: "A place where someone lives; to speak to",
+    example: "What is your home address?",
+    difficulty: "beginner",
+    category: "Nouns"
+  },
+  {
+    id: "155",
+    word: "Admit",
+    phonetic: "/ədˈmɪt/",
+    meaning: "To allow entry; to confess or acknowledge",
+    example: "I must admit that I made a mistake.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "156",
+    word: "Adopt",
+    phonetic: "/əˈdɑːpt/",
+    meaning: "To legally take a child as one's own; to accept",
+    example: "They decided to adopt a child.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "157",
+    word: "Advance",
+    phonetic: "/ədˈvæns/",
+    meaning: "To move forward; progress",
+    example: "Technology continues to advance rapidly.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "158",
+    word: "Affect",
+    phonetic: "/əˈfekt/",
+    meaning: "To influence or have an effect on",
+    example: "The weather affects my mood.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "159",
+    word: "Afford",
+    phonetic: "/əˈfɔːrd/",
+    meaning: "To have enough money for; to be able to do",
+    example: "I cannot afford a new car right now.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "160",
+    word: "Agree",
+    phonetic: "/əˈɡriː/",
+    meaning: "To have the same opinion; to consent",
+    example: "We all agree that this is a good idea.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "161",
+    word: "Aim",
+    phonetic: "/eɪm/",
+    meaning: "A goal or purpose; to point or direct",
+    example: "My aim is to become fluent in English.",
+    difficulty: "beginner",
+    category: "Nouns"
+  },
+  {
+    id: "162",
+    word: "Allow",
+    phonetic: "/əˈlaʊ/",
+    meaning: "To permit or enable",
+    example: "The teacher allows students to ask questions.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  {
+    id: "163",
+    word: "Announce",
+    phonetic: "/əˈnaʊns/",
+    meaning: "To make known publicly",
+    example: "The president announced new policies today.",
+    difficulty: "beginner",
+    category: "Verbs"
+  },
+  // New Intermediate Words (164-178)
+  {
+    id: "164",
+    word: "Abandon",
+    phonetic: "/əˈbændən/",
+    meaning: "To leave someone or something behind",
+    example: "They abandoned their plans due to bad weather.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "165",
+    word: "Ability",
+    phonetic: "/əˈbɪləti/",
+    meaning: "The power or skill to do something",
+    example: "She has the ability to solve complex problems.",
+    difficulty: "intermediate",
+    category: "Nouns"
+  },
+  {
+    id: "166",
+    word: "Absence",
+    phonetic: "/ˈæbsəns/",
+    meaning: "The state of being away or not present",
+    example: "His absence from the meeting was noted.",
+    difficulty: "intermediate",
+    category: "Nouns"
+  },
+  {
+    id: "167",
+    word: "Abstract",
+    phonetic: "/ˈæbstrækt/",
+    meaning: "Existing in thought; not concrete",
+    example: "Abstract art requires interpretation.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "168",
+    word: "Academic",
+    phonetic: "/ˌækəˈdemɪk/",
+    meaning: "Related to education or learning",
+    example: "Her academic performance improved significantly.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "169",
+    word: "Accelerate",
+    phonetic: "/əkˈseləreɪt/",
+    meaning: "To increase speed; to speed up",
+    example: "The car accelerated down the highway.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "170",
+    word: "Accept",
+    phonetic: "/əkˈsept/",
+    meaning: "To receive or agree to take",
+    example: "She accepted the job offer.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "171",
+    word: "Acknowledge",
+    phonetic: "/əkˈnɑːlɪdʒ/",
+    meaning: "To recognize or admit the truth of",
+    example: "He acknowledged his mistake.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "172",
+    word: "Acquire",
+    phonetic: "/əˈkwaɪər/",
+    meaning: "To obtain or gain possession of",
+    example: "The company acquired a new subsidiary.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "173",
+    word: "Adapt",
+    phonetic: "/əˈdæpt/",
+    meaning: "To adjust to new conditions",
+    example: "Animals adapt to their environment.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "174",
+    word: "Adequate",
+    phonetic: "/ˈædɪkwət/",
+    meaning: "Sufficient or satisfactory",
+    example: "The funding was adequate for the project.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "175",
+    word: "Adjacent",
+    phonetic: "/əˈdʒeɪsənt/",
+    meaning: "Next to or adjoining something",
+    example: "The adjacent rooms share a wall.",
+    difficulty: "intermediate",
+    category: "Adjectives"
+  },
+  {
+    id: "176",
+    word: "Adjust",
+    phonetic: "/əˈdʒʌst/",
+    meaning: "To make small changes to something",
+    example: "Please adjust the volume on the speaker.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "177",
+    word: "Admire",
+    phonetic: "/ədˈmaɪər/",
+    meaning: "To regard with respect or approval",
+    example: "I admire her dedication to her work.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  {
+    id: "178",
+    word: "Advocate",
+    phonetic: "/ˈædvəkeɪt/",
+    meaning: "To publicly support or recommend",
+    example: "She advocates for environmental protection.",
+    difficulty: "intermediate",
+    category: "Verbs"
+  },
+  // New Advanced Words (179-201)
+  {
+    id: "179",
+    word: "Aberration",
+    phonetic: "/ˌæbəˈreɪʃən/",
+    meaning: "A deviation from the normal or expected",
+    example: "The unusual weather was an aberration.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "180",
+    word: "Abeyance",
+    phonetic: "/əˈbeɪəns/",
+    meaning: "A state of suspension or inactivity",
+    example: "The project is in abeyance pending review.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "181",
+    word: "Abscond",
+    phonetic: "/əbˈskɑːnd/",
+    meaning: "To leave secretly and hide",
+    example: "The suspect absconded with the evidence.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "182",
+    word: "Abstain",
+    phonetic: "/əbˈsteɪn/",
+    meaning: "To refrain from or avoid",
+    example: "He decided to abstain from voting.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "183",
+    word: "Abundance",
+    phonetic: "/əˈbʌndəns/",
+    meaning: "A very large quantity; plenty",
+    example: "The region has an abundance of natural resources.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "184",
+    word: "Abyss",
+    phonetic: "/əˈbɪs/",
+    meaning: "A deep chasm or void",
+    example: "The ocean's abyss remains largely unexplored.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "185",
+    word: "Accede",
+    phonetic: "/əkˈsiːd/",
+    meaning: "To agree or give consent",
+    example: "The government acceded to the demands.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "186",
+    word: "Accentuate",
+    phonetic: "/əkˈsentʃueɪt/",
+    meaning: "To emphasize or make more prominent",
+    example: "The lighting accentuates the building's features.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "187",
+    word: "Accessibility",
+    phonetic: "/ˌæksesəˈbɪləti/",
+    meaning: "The quality of being accessible",
+    example: "Website accessibility is important for all users.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "188",
+    word: "Accessory",
+    phonetic: "/əkˈsesəri/",
+    meaning: "A supplementary item; a person involved in a crime",
+    example: "She wore jewelry as an accessory.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "189",
+    word: "Acclaim",
+    phonetic: "/əˈkleɪm/",
+    meaning: "Enthusiastic approval or praise",
+    example: "The film received critical acclaim.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "190",
+    word: "Accolade",
+    phonetic: "/ˈækəleɪd/",
+    meaning: "An award or expression of praise",
+    example: "He received numerous accolades for his work.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "191",
+    word: "Accomplice",
+    phonetic: "/əˈkɑːmplɪs/",
+    meaning: "A partner in crime",
+    example: "The accomplice was also arrested.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "192",
+    word: "Accord",
+    phonetic: "/əˈkɔːrd/",
+    meaning: "An agreement; harmony",
+    example: "The two nations reached an accord.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "193",
+    word: "Accumulate",
+    phonetic: "/əˈkjuːmjuleɪt/",
+    meaning: "To gather or collect over time",
+    example: "Dust accumulates on unused surfaces.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "194",
+    word: "Acerbic",
+    phonetic: "/əˈsɜːrbɪk/",
+    meaning: "Sharp or harsh in tone or manner",
+    example: "His acerbic comments offended many people.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "195",
+    word: "Acidity",
+    phonetic: "/əˈsɪdəti/",
+    meaning: "The quality of being acidic",
+    example: "The acidity of the soil affects plant growth.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "196",
+    word: "Acquiesce",
+    phonetic: "/ˌækwiˈes/",
+    meaning: "To agree or accept without protest",
+    example: "She acquiesced to the decision.",
+    difficulty: "advanced",
+    category: "Verbs"
+  },
+  {
+    id: "197",
+    word: "Acquisition",
+    phonetic: "/ˌækwɪˈzɪʃən/",
+    meaning: "The act of acquiring something",
+    example: "The acquisition of new technology improved efficiency.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "198",
+    word: "Acrimony",
+    phonetic: "/ˈækrɪmoʊni/",
+    meaning: "Bitterness or harshness of tone",
+    example: "There was acrimony between the former partners.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "199",
+    word: "Acrobatic",
+    phonetic: "/ˌækrəˈbætɪk/",
+    meaning: "Involving skillful physical movements",
+    example: "The acrobatic performance was breathtaking.",
+    difficulty: "advanced",
+    category: "Adjectives"
+  },
+  {
+    id: "200",
+    word: "Acronym",
+    phonetic: "/ˈækrənɪm/",
+    meaning: "A word formed from initials",
+    example: "NASA is an acronym for National Aeronautics and Space Administration.",
+    difficulty: "advanced",
+    category: "Nouns"
+  },
+  {
+    id: "201",
+    word: "Acuity",
+    phonetic: "/əˈkjuːəti/",
+    meaning: "Sharpness of vision or thought",
+    example: "Her mental acuity impressed everyone.",
+    difficulty: "advanced",
+    category: "Nouns"
   }
 ];
 
