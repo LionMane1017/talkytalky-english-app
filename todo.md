@@ -1143,3 +1143,11 @@
 - [x] Make all lessons immediately accessible
 - [x] Update LearningPathDetail page to show all lessons as unlocked
 - [x] Test that users can access any lesson without completing previous ones
+
+## Phase 64: CRITICAL BUGS - Question Repetition & Gemini Word Awareness
+- [ ] Fix bug: All questions repeating regardless of module selection
+- [ ] Investigate why different modules show same questions
+- [ ] Implement word tagging system for Gemini awareness
+- [ ] Ensure Gemini receives current word context with each interaction
+- [ ] Maintain alphabetical word ordering across all practice modes
+- [ ] Create handoff document for Gemini 3.0 with technical specifications
