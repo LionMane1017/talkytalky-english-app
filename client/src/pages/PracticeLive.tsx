@@ -24,6 +24,8 @@ export default function PracticeLive() {
   const [attempts, setAttempts] = useState(0);
   const [usedWordIds, setUsedWordIds] = useState<Set<string>>(new Set());
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [lessonContext, setLessonContext] = useState<{pathId: string; lessonId: string; lessonTitle: string; wordIds: string[]} | null>(null);
+  const [lessonWords, setLessonWords] = useState<VocabularyWord[]>([]);
   
   // Gemini Live state
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -76,13 +78,40 @@ export default function PracticeLive() {
     },
   });
   
+  // Initialize lesson context from sessionStorage on mount
+  useEffect(() => {
+    const storedLesson = sessionStorage.getItem('currentLesson');
+    if (storedLesson) {
+      try {
+        const lesson = JSON.parse(storedLesson);
+        setLessonContext(lesson);
+        const words = lesson.wordIds
+          .map((id: string) => vocabularyData.find(w => w.id === id))
+          .filter((w: VocabularyWord | undefined): w is VocabularyWord => w !== undefined);
+        setLessonWords(words);
+        if (words.length > 0) {
+          setDifficulty(words[0].difficulty as "beginner" | "intermediate" | "advanced");
+          setCurrentWord(words[0]);
+          setCurrentWordIndex(0);
+          console.log(`Loaded lesson: ${lesson.lessonTitle} with ${words.length} words`);
+        }
+        sessionStorage.removeItem('currentLesson');
+      } catch (error) {
+        console.error('Failed to parse lesson context:', error);
+      }
+    }
+  }, []);
+  
   // Available words
   const availableWords = useMemo(() => {
+    if (lessonContext && lessonWords.length > 0) {
+      return lessonWords.filter(word => !usedWordIds.has(word.id));
+    }
     if (!difficulty) return [];
     return vocabularyData.filter(
       word => word.difficulty === difficulty && !usedWordIds.has(word.id)
     );
-  }, [difficulty, usedWordIds]);
+  }, [difficulty, usedWordIds, lessonContext, lessonWords]);
   
   const wordsRemaining = availableWords.length;
   const totalWords = vocabularyData.filter(w => w.difficulty === difficulty).length;
@@ -496,22 +525,30 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
   const nextWord = () => {
     if (!difficulty) return;
     
-    // Get all words for this difficulty sorted alphabetically
-    const allWords = vocabularyData
-      .filter(w => w.difficulty === difficulty)
-      .sort((a, b) => a.word.localeCompare(b.word));
+    let allWords: VocabularyWord[];
+    if (lessonContext && lessonWords.length > 0) {
+      allWords = [...lessonWords].sort((a, b) => a.word.localeCompare(b.word));
+    } else {
+      allWords = vocabularyData
+        .filter(w => w.difficulty === difficulty)
+        .sort((a, b) => a.word.localeCompare(b.word));
+    }
     
-    // Move to next index
     const nextIndex = currentWordIndex + 1;
     
     if (nextIndex >= allWords.length) {
-      toast.success("You've completed all words in this level!");
-      console.log(`✅ Completed all ${allWords.length} words in ${difficulty} level`);
+      if (lessonContext) {
+        toast.success(`Lesson complete! You practiced all ${allWords.length} words in "${lessonContext.lessonTitle}"`);
+        console.log(`Completed lesson: ${lessonContext.lessonTitle}`);
+      } else {
+        toast.success("You've completed all words in this level!");
+        console.log(`Completed all ${allWords.length} words in ${difficulty} level`);
+      }
       return;
     }
     
     const nextWordData = allWords[nextIndex];
-    console.log(`🎯 Moving to word ${nextIndex + 1}/${allWords.length}: "${nextWordData.word}"`);
+    console.log(`Moving to word ${nextIndex + 1}/${allWords.length}: "${nextWordData.word}"`);
     
     setCurrentWordIndex(nextIndex);
     setCurrentWord(nextWordData);
@@ -550,7 +587,7 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
   
-  if (!difficulty) {
+  if (!difficulty && !lessonContext) {
     return (
       <div className="min-h-screen relative overflow-hidden p-8">
         {/* Animated Background */}
@@ -622,10 +659,21 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-indigo-900/50 to-pink-900/50" />
       </div>
       <div className="max-w-4xl mx-auto">
+        {/* Lesson Header Badge */}
+        {lessonContext && (
+          <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg">📚</span>
+              <span className="font-semibold text-white">{lessonContext.lessonTitle}</span>
+              <span className="text-xs text-purple-200 ml-auto">Lesson Mode</span>
+            </div>
+          </div>
+        )}
+        
         {/* Compact Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-base sm:text-lg font-bold text-white capitalize">{difficulty} Level</h1>
-          <Button variant="outline" size="sm" onClick={() => { stopSession(); setDifficulty(null); }} className="text-xs h-7">
+          <Button variant="outline" size="sm" onClick={() => { stopSession(); setDifficulty(null); setLessonContext(null); }} className="text-xs h-7">
             Change
           </Button>
         </div>
