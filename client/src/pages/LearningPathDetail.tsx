@@ -47,20 +47,11 @@ export default function LearningPathDetail() {
   const completionPercentage = Math.round((completedLessons.size / path.totalLessons) * 100);
 
   const isLessonUnlocked = (lessonIndex: number) => {
-    // First lesson is always unlocked
-    if (lessonIndex === 0) return true;
-    
-    // Check if previous lesson is completed
-    const previousLesson = path.lessons[lessonIndex - 1];
-    return completedLessons.has(previousLesson.id);
+    // All lessons are now unlocked - no sequential requirement
+    return true;
   };
 
   const startLesson = (lessonId: string, lessonIndex: number) => {
-    if (!isLessonUnlocked(lessonIndex)) {
-      toast.error("Complete the previous lesson first!");
-      return;
-    }
-
     // Get the lesson vocabulary words
     const lesson = path.lessons[lessonIndex];
     
