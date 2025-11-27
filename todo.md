@@ -1199,4 +1199,31 @@
 - [x] Test shuffle toggle UI (working perfectly)
 - [x] Test JSON context protocol integration
 - [ ] Full end-to-end test with Gemini Live (requires microphone access)
-- [ ] Push to GitHub
+- [x] Push to GitHub
+
+## Phase 69: Live Microphone Testing (User Request)
+- [x] Verify Gemini API key is properly loaded
+- [x] Check browser microphone permissions (requires user device)
+- [x] Test Practice page loads with difficulty selection
+- [x] Test Gemini Live session connects successfully
+- [x] Create comprehensive testing guide (GEMINI_LIVE_TESTING_GUIDE.md)
+- [ ] USER TEST: Verify word introduction plays with audio
+- [ ] USER TEST: Test microphone recording captures audio
+- [ ] USER TEST: Verify JSON context updates when word changes
+- [ ] USER TEST: Test shuffle toggle functionality
+- [ ] USER TEST: Verify lesson context is injected correctly
+- [ ] USER TEST: Test rapid word skipping with debounce
+- [ ] USER TEST: Verify session persistence to database
+- [ ] Document any issues or bugs found
+
+
+## Phase 70: CRITICAL - Vocabulary Database Audit & Word Mismatch Fix
+- [x] Scan entire vocabulary database for all words (185 total, no duplicates)
+- [x] Check for duplicate words across difficulty levels (CLEAN)
+- [x] Verify spelling consistency (no typos or case mismatches) (VERIFIED)
+- [x] Audit JSON context protocol - verify word data sent to Gemini
+- [x] Check word progression logic for skipping or out-of-order issues (FOUND ROOT CAUSE)
+- [x] Identify root cause: startPractice() and nextWord() always sorted alphabetically
+- [x] Fix startPractice() to respect shuffle preference
+- [x] Fix nextWord() to use stored wordOrder instead of re-sorting
+- [ ] Test word tracking with microphone to confirm Gemini knows correct word

@@ -29,6 +29,8 @@ export default function PracticeLive() {
   const [lessonWords, setLessonWords] = useState<VocabularyWord[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [wantRandomization, setWantRandomization] = useState(false);
+  const [wordOrder, setWordOrder] = useState<VocabularyWord[]>([]);
+  const [isShuffled, setIsShuffled] = useState(false);
   
   // Gemini Live state
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -476,14 +478,27 @@ export default function PracticeLive() {
     setUsedWordIds(new Set());
     setCurrentWordIndex(0);
     
-    // Get words sorted alphabetically for deterministic order
-    const words = vocabularyData
-      .filter(w => w.difficulty === level)
-      .sort((a, b) => a.word.localeCompare(b.word));
+    // Get words - apply shuffle preference
+    let words = vocabularyData.filter(w => w.difficulty === level);
+    
+    if (wantRandomization) {
+      // Shuffle: randomize the order
+      words = [...words].sort(() => Math.random() - 0.5);
+      setIsShuffled(true);
+      console.log(`🎯 Starting ${level} practice (SHUFFLED) with ${words.length} words`);
+    } else {
+      // No shuffle: sort alphabetically
+      words = words.sort((a, b) => a.word.localeCompare(b.word));
+      setIsShuffled(false);
+      console.log(`🎯 Starting ${level} practice (ALPHABETICAL) with ${words.length} words`);
+    }
+    
+    // Store the word order for consistent access throughout session
+    setWordOrder(words);
     
     if (words.length > 0) {
       const firstWord = words[0];
-      console.log(`🎯 Starting ${level} practice with word 1/${words.length}: "${firstWord.word}"`);
+      console.log(`📝 First word: "${firstWord.word}"`);
       setCurrentWord(firstWord);
       setUsedWordIds(new Set([firstWord.id]));
     }
@@ -496,9 +511,12 @@ export default function PracticeLive() {
   const nextWord = () => {
     if (!difficulty) return;
     
+    // Use stored word order (respects shuffle preference)
     let allWords: VocabularyWord[];
-    if (lessonContext && lessonWords.length > 0) {
-      allWords = [...lessonWords].sort((a, b) => a.word.localeCompare(b.word));
+    if (wordOrder.length > 0) {
+      allWords = wordOrder;
+    } else if (lessonContext && lessonWords.length > 0) {
+      allWords = lessonWords;
     } else {
       allWords = vocabularyData
         .filter(w => w.difficulty === difficulty)

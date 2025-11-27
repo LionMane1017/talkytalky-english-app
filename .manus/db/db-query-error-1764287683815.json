@@ -1,0 +1,8 @@
+{
+  "query": "SELECT word, difficulty, COUNT(*) as count FROM vocabulary GROUP BY word, difficulty HAVING COUNT(*) > 1 ORDER BY count DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3znUVPnpg7c3YZC.8155b2cf6016 --database GMrrqid3mD3bEcKcU2S8Qr --execute SELECT word, difficulty, COUNT(*) as count FROM vocabulary GROUP BY word, difficulty HAVING COUNT(*) > 1 ORDER BY count DESC;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'gmrrqid3md3beckcu2s8qr.vocabulary' doesn't exist"
+  ]
+}
