@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS lesson_word_attempts (\n    id VARCHAR(255) PRIMARY KEY DEFAULT (UUID()),\n    lesson_session_id VARCHAR(255) NOT NULL,\n    word_id VARCHAR(255) NOT NULL,\n    attempt_number INT DEFAULT 1,\n    transcription TEXT,\n    pronunciation_score INT,\n    ai_feedback TEXT,\n    audio_url TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (lesson_session_id) REFERENCES lesson_sessions(id) ON DELETE CASCADE,\n    INDEX idx_word_attempts_word_score (word_id, pronunciation_score)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3znUVPnpg7c3YZC.8155b2cf6016 --database GMrrqid3mD3bEcKcU2S8Qr --execute CREATE TABLE IF NOT EXISTS lesson_word_attempts (\n    id VARCHAR(255) PRIMARY KEY DEFAULT (UUID()),\n    lesson_session_id VARCHAR(255) NOT NULL,\n    word_id VARCHAR(255) NOT NULL,\n    attempt_number INT DEFAULT 1,\n    transcription TEXT,\n    pronunciation_score INT,\n    ai_feedback TEXT,\n    audio_url TEXT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (lesson_session_id) REFERENCES lesson_sessions(id) ON DELETE CASCADE,\n    INDEX idx_word_attempts_word_score (word_id, pronunciation_score)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 267
+}

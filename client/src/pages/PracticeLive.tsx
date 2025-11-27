@@ -14,6 +14,7 @@ import { VoiceWaveform } from "@/components/VoiceWaveform";
 import { decode, encode, decodeAudioData } from '../utils/audio';
 import { AppStatus } from "@/types";
 import type { Message } from "@/types";
+import { GeminiProtocols } from "@/lib/gemini/prompts";
 
 export default function PracticeLive() {
   // Practice state
@@ -26,6 +27,8 @@ export default function PracticeLive() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [lessonContext, setLessonContext] = useState<{pathId: string; lessonId: string; lessonTitle: string; wordIds: string[]} | null>(null);
   const [lessonWords, setLessonWords] = useState<VocabularyWord[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [wantRandomization, setWantRandomization] = useState(false);
   
   // Gemini Live state
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -200,51 +203,17 @@ export default function PracticeLive() {
         .sort((a, b) => a.word.localeCompare(b.word));
       const vocabularyList = allWordsInLevel.map(w => `- ${w.word}: ${w.meaning}`).join('\n');
       
-      // Create system prompt with Gemini word awareness tags
-      const systemPrompt = `You are TalkyTalky, an enthusiastic IELTS pronunciation coach.
-
-🎯 WORD AWARENESS - CRITICAL:
-[CURRENT_WORD] "${currentWord.word}"
-[PHONETIC] "${currentWord.phonetic}"
-[DIFFICULTY] "${difficulty}"
-[WORD_POSITION] "${currentWordIndex + 1} of ${totalWords}"
-
-**Current Practice Session:**
-- Word/Phrase: "${currentWord.word}"
-- Phonetic: "${currentWord.phonetic}"
-- Difficulty Level: ${difficulty}
-- Meaning: ${currentWord.meaning}
-- Example: ${currentWord.example}
-- Position: ${currentWordIndex + 1}/${totalWords}
-
-**Available Vocabulary (${difficulty} level):**
-${vocabularyList}
-
-**Your Role:**
-1. When the session starts, introduce the word enthusiastically and explain how to pronounce it
-2. Give specific pronunciation tips (stress, sounds, common mistakes)
-3. When the user records, listen carefully to their pronunciation
-4. After they finish, congratulate them warmly and provide specific feedback
-5. Suggest what to improve and encourage them to try again or move to the next word
-
-**CRITICAL WORD AWARENESS RULES:**
-1. MUST acknowledge current word "${currentWord.word}" in first response
-2. STAY FOCUSED on THIS word only
-3. Words in ALPHABETICAL ORDER - respect sequence
-4. On [WORD_CHANGE], acknowledge new word immediately
-
-**Knowledge Base Context:**
-${smartContext || 'No additional context available'}
-
-**Guidelines:**
-- Be encouraging and positive
-- Give specific, actionable feedback
-- Reference IELTS pronunciation criteria when relevant
-- Keep responses concise (2-3 sentences)
-- Use a warm, friendly tone
-- ALWAYS reference current word by name
-
-Start by introducing the word "${currentWord.word}" and explaining how to pronounce it!`;
+      // Create system prompt using Gemini Protocols
+      const lessonTitle = lessonContext?.lessonTitle || `${difficulty} Level Practice`;
+      const lessonImportance = `Master pronunciation for IELTS ${difficulty} level vocabulary`;
+      const lessonTopicContext = smartContext || `Practice session for ${difficulty} level words. Focus on clear pronunciation, proper stress, and natural intonation.`;
+      
+      const systemPrompt = GeminiProtocols.buildSystemPrompt(
+        lessonTitle,
+        lessonImportance,
+        lessonTopicContext,
+        totalWords
+      );
       
       // CRITICAL FIX: Await connection instead of storing promise
 
@@ -293,16 +262,18 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
             mediaStreamSourceRef.current.connect(audioProcessorNodeRef.current);
             audioProcessorNodeRef.current.connect(inputAudioContextRef.current!.destination);
             
-            // 4. TRIGGER GREETING (Explicitly send a message to force AI to speak)
+            // 4. SEND INITIAL WORD CONTEXT (JSON Protocol)
             // We await a small delay to ensure socket is ready for data frames
             setTimeout(() => {
-              console.log("📨 Sending Greeting Trigger");
+              console.log("📡 Sending Initial Word Context");
+              const payload = GeminiProtocols.createWordPayload(currentWord, currentWordIndex, totalWords);
               sessionPromiseRef.current!.then((sess) => {
                 sess.send({ 
-                  text: `Please introduce the word "${currentWord.word}" now.`,
+                  text: JSON.stringify(payload),
                   endOfTurn: true 
                 });
               });
+              console.log('📡 Sent initial JSON context:', payload);
             }, 500);
           },
           onmessage: async (message: LiveServerMessage) => {
@@ -555,20 +526,15 @@ Start by introducing the word "${currentWord.word}" and explaining how to pronou
     setUsedWordIds(prev => new Set(Array.from(prev).concat(nextWordData.id)));
     setScore(null);
     
-    // Send new word context to existing session (FIX: avoid race condition)
+    // Send new word context to existing session using JSON protocol
     if (status === AppStatus.CONNECTED && sessionPromiseRef.current) {
-      const newWordContext = `
-**NEW WORD SELECTED:**
-- Word/Phrase: "${nextWordData.word}"
-- Difficulty: ${difficulty}
-- Meaning: ${nextWordData.meaning}
-- Example: ${nextWordData.example}
-
-Please introduce this new word enthusiastically and explain how to pronounce it. Focus on pronunciation tips and encourage the user to practice it!`;
+      const payload = GeminiProtocols.createWordPayload(nextWordData, nextIndex, allWords.length);
       
       sessionPromiseRef.current.then(session => {
-        session.send({ text: newWordContext, endOfTurn: true });
+        session.send({ text: JSON.stringify(payload), endOfTurn: true });
       });
+      
+      console.log('📡 Sent JSON context update to Gemini:', payload);
     }
   };
   
@@ -614,6 +580,20 @@ Please introduce this new word enthusiastically and explain how to pronounce it.
               <h1 className="text-4xl font-bold text-white">Practice Speaking</h1>
               <p className="text-purple-200">Choose a difficulty level to start practicing pronunciation</p>
             </div>
+          </div>
+          
+          {/* Shuffle Toggle */}
+          <div className="mb-6 flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-lg border border-white/20">
+            <input 
+              type="checkbox" 
+              id="shuffle-toggle" 
+              checked={wantRandomization}
+              onChange={(e) => setWantRandomization(e.target.checked)}
+              className="w-5 h-5 rounded border-white/30 bg-white/10 checked:bg-purple-600 focus:ring-2 focus:ring-purple-500"
+            />
+            <label htmlFor="shuffle-toggle" className="text-white font-medium cursor-pointer">
+              🔀 Randomize word order (words will be shuffled instead of alphabetical)
+            </label>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">

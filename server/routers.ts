@@ -12,6 +12,7 @@ import { TRPCError } from "@trpc/server";
 import { aiCoachRouter } from "./routers/aiCoach";
 import { configRouter } from "./routers/config";
 import { ragRouter } from "./ragRouter";
+import { lessonRouter } from "./routes/lesson";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -241,6 +242,7 @@ export const appRouter = router({
   aiCoach: aiCoachRouter,
   config: configRouter,
   rag: ragRouter,
+  lesson: lessonRouter,
 
   achievements: router({
     getAll: publicProcedure
