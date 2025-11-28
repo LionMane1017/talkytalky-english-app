@@ -200,11 +200,17 @@ export default function PracticeLive() {
       }
       
       // Create system prompt with full context
-      // Get all words for this difficulty level (sorted alphabetically)
-      const allWordsInLevel = vocabularyData
-        .filter(w => w.difficulty === difficulty)
-        .sort((a, b) => a.word.localeCompare(b.word));
-      const vocabularyList = allWordsInLevel.map(w => `- ${w.word}: ${w.meaning}`).join('\n');
+      // CRITICAL FIX: Use lesson words if in lesson mode, otherwise use all difficulty words
+      const wordsForContext = lessonContext && lessonWords.length > 0 
+        ? lessonWords.sort((a, b) => a.word.localeCompare(b.word))
+        : vocabularyData
+          .filter(w => w.difficulty === difficulty)
+          .sort((a, b) => a.word.localeCompare(b.word));
+      const vocabularyList = wordsForContext.map(w => `- ${w.word}: ${w.meaning}`).join('\n');
+      
+      console.log(`📚 Lesson Mode: ${lessonContext ? 'YES - ' + lessonContext.lessonTitle : 'NO - General Practice'}`);
+      console.log(`📚 Words for Gemini context: ${wordsForContext.length} words (${lessonContext ? 'lesson-specific' : 'all ' + difficulty})`);
+      console.log(`📚 Word list: ${wordsForContext.map(w => w.word).join(', ')}`);
       
       // Create system prompt using Gemini Protocols
       const lessonTitle = lessonContext?.lessonTitle || `${difficulty} Level Practice`;

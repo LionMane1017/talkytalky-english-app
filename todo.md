@@ -1251,11 +1251,9 @@
 - [ ] Test to verify personality is back with microphone
 
 
-## Phase 73: CRITICAL BUG - Lesson Mode Word Mismatch
-- [x] URGENT: User reports word 55 "Anticipate" in Office Basics lesson but Gemini has different word
-- [x] Check lesson loading logic - verify correct words are loaded for lesson
-- [x] Verify wordOrder is populated correctly for lesson mode (FIXED: added setWordOrder in lesson load)
-- [x] Check if lesson words are being sorted alphabetically when they shouldn't be
-- [x] Verify JSON context sent to Gemini matches displayed word (added detailed logging)
-- [x] Added comprehensive console logging to track word flow
+## Phase 73: CRITICAL BUG - ROOT CAUSE FOUND & FIXED
+- [x] URGENT: User reports Anticipate on screen but Gemini says Schedule
+- [x] ROOT CAUSE FOUND: startSession() used ALL 60 intermediate words instead of 5 lesson words
+- [x] CRITICAL FIX: Changed lines 204-208 to use lessonWords when in lesson mode
+- [x] Added detailed logging to show which words Gemini receives
 - [ ] Test with Office Basics lesson to verify fix works
