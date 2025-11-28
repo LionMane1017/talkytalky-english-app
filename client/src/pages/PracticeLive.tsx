@@ -92,11 +92,14 @@ export default function PracticeLive() {
           .map((id: string) => vocabularyData.find(w => w.id === id))
           .filter((w: VocabularyWord | undefined): w is VocabularyWord => w !== undefined);
         setLessonWords(words);
+        setWordOrder(words);
+        sessionStorage.setItem('wordOrder', JSON.stringify(words.map(w => w.id)));
         if (words.length > 0) {
           setDifficulty(words[0].difficulty as "beginner" | "intermediate" | "advanced");
           setCurrentWord(words[0]);
           setCurrentWordIndex(0);
           console.log(`Loaded lesson: ${lesson.lessonTitle} with ${words.length} words`);
+          console.log(`Set wordOrder to lesson words`);
         }
         sessionStorage.removeItem('currentLesson');
       } catch (error) {
@@ -536,7 +539,8 @@ export default function PracticeLive() {
     }
     
     const nextWordData = allWords[nextIndex];
-    console.log(`Moving to word ${nextIndex + 1}/${allWords.length}: "${nextWordData.word}"`);
+    console.log(`📍 Moving to word ${nextIndex + 1}/${allWords.length}: "${nextWordData.word}"`);
+    console.log(`📝 Word details: ID=${nextWordData.id}, Difficulty=${nextWordData.difficulty}`);
     
     setCurrentWordIndex(nextIndex);
     setCurrentWord(nextWordData);
@@ -546,12 +550,12 @@ export default function PracticeLive() {
     // Send new word context to existing session using JSON protocol
     if (status === AppStatus.CONNECTED && sessionPromiseRef.current) {
       const payload = GeminiProtocols.createWordPayload(nextWordData, nextIndex, allWords.length);
+      console.log(`📡 Sending JSON context to Gemini:`, payload);
       
       sessionPromiseRef.current.then(session => {
         session.send({ text: JSON.stringify(payload), endOfTurn: true });
+        console.log(`✅ JSON context sent successfully`);
       });
-      
-      console.log('📡 Sent JSON context update to Gemini:', payload);
     }
   };
   

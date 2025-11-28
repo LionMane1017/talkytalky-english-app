@@ -1249,3 +1249,13 @@
 - [x] Ensure Gemini provides feedback after user speaks
 - [x] Restore conversational, warm tone
 - [ ] Test to verify personality is back with microphone
+
+
+## Phase 73: CRITICAL BUG - Lesson Mode Word Mismatch
+- [x] URGENT: User reports word 55 "Anticipate" in Office Basics lesson but Gemini has different word
+- [x] Check lesson loading logic - verify correct words are loaded for lesson
+- [x] Verify wordOrder is populated correctly for lesson mode (FIXED: added setWordOrder in lesson load)
+- [x] Check if lesson words are being sorted alphabetically when they shouldn't be
+- [x] Verify JSON context sent to Gemini matches displayed word (added detailed logging)
+- [x] Added comprehensive console logging to track word flow
+- [ ] Test with Office Basics lesson to verify fix works
