@@ -274,9 +274,9 @@ export default function PracticeLive() {
               console.log("📡 Sending Initial Word Context");
               const payload = GeminiProtocols.createWordPayload(currentWord, currentWordIndex, totalWords);
               sessionPromiseRef.current!.then((sess) => {
-                sess.send({ 
-                  text: JSON.stringify(payload),
-                  endOfTurn: true 
+                sess.sendRealtimeInput({ 
+                  mimeType: 'application/json',
+                  data: JSON.stringify(payload)
                 });
               });
               console.log('📡 Sent initial JSON context:', payload);
@@ -772,7 +772,7 @@ export default function PracticeLive() {
               <MicrophoneIcon className="h-6 w-6 text-purple-600" />
               Welcome to TalkyTalky!
             </DialogTitle>
-            <DialogDescription className="text-base text-gray-700 space-y-3 pt-2">
+            <div className="text-base text-gray-700 space-y-3 pt-2">
               <div className="font-semibold text-purple-800">
                 👋 Say "Hello" to start your pronunciation practice!
               </div>
@@ -782,7 +782,7 @@ export default function PracticeLive() {
               <div className="text-sm text-gray-600 italic">
                 Tip: You can say "next word" anytime to move forward, or practice the same word multiple times.
               </div>
-            </DialogDescription>
+            </div>
           </DialogHeader>
           <Button onClick={() => setShowInstructions(false)} className="w-full bg-purple-600 hover:bg-purple-700">
             Got it! Let's Practice

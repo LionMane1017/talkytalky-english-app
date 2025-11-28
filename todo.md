@@ -1260,8 +1260,11 @@
 - [ ] Test all-words system for stability
 - [ ] Once stable, re-add lesson filtering on top
 
-## Phase 74: Fix HTML Validation Error
-- [x] Fix: <p> cannot contain a nested <div> error on /practice page
-- [x] ROOT CAUSE: previousScore prop passed to GeminiVoiceRecorder but not defined
-- [x] FIXED: Removed undefined previousScore prop from component call
-- [x] Verified: Error should now be resolved
+## Phase 74: Fix HTML Validation Error & Gemini Session Issues
+- [x] Fix: <p> cannot contain a nested <div> error on /practice page (line 362)
+- [x] FIXED: Removed undefined previousScore prop from GeminiVoiceRecorder
+- [x] Fix: <p> cannot contain nested <div> in DialogDescription (line 775-776)
+- [x] FIXED: Changed DialogDescription to div to allow nested divs
+- [x] Fix: Gemini session error - sess.send is not a function (line 277)
+- [x] FIXED: Changed sess.send() to sess.sendRealtimeInput() with proper format
+- [ ] Test all-words system again with these fixes
