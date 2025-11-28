@@ -1239,3 +1239,13 @@
 - [x] Persist wordOrder to sessionStorage for robustness
 - [ ] Test with microphone to confirm Gemini knows correct word
 - [ ] Verify no word mismatches occur
+
+
+## Phase 72: RESTORE GEMINI WARMTH & PERSONALITY
+- [x] Restore encouragement phrases (Great, Well done, Excellent, etc.)
+- [x] Auto-introduce word immediately (don't wait for user input)
+- [x] Add interactive follow-up questions (practice again or next word?)
+- [x] Keep amazing introduction style
+- [x] Ensure Gemini provides feedback after user speaks
+- [x] Restore conversational, warm tone
+- [ ] Test to verify personality is back with microphone
