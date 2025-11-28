@@ -1259,3 +1259,9 @@
 - [x] Console logs show word count and lesson context
 - [ ] Test all-words system for stability
 - [ ] Once stable, re-add lesson filtering on top
+
+## Phase 74: Fix HTML Validation Error
+- [x] Fix: <p> cannot contain a nested <div> error on /practice page
+- [x] ROOT CAUSE: previousScore prop passed to GeminiVoiceRecorder but not defined
+- [x] FIXED: Removed undefined previousScore prop from component call
+- [x] Verified: Error should now be resolved

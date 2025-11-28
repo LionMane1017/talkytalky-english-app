@@ -359,7 +359,6 @@ export default function Practice() {
               });
             }
           }}
-          previousScore={sessionScore[sessionScore.length - 1]}
         />
 
         {/* Score Display */}
