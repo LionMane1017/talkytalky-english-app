@@ -1251,9 +1251,11 @@
 - [ ] Test to verify personality is back with microphone
 
 
-## Phase 73: CRITICAL BUG - ROOT CAUSE FOUND & FIXED
+## Phase 73: CRITICAL BUG - REVERTED TO SIMPLER SYSTEM
 - [x] URGENT: User reports Anticipate on screen but Gemini says Schedule
-- [x] ROOT CAUSE FOUND: startSession() used ALL 60 intermediate words instead of 5 lesson words
-- [x] CRITICAL FIX: Changed lines 204-208 to use lessonWords when in lesson mode
-- [x] Added detailed logging to show which words Gemini receives
-- [ ] Test with Office Basics lesson to verify fix works
+- [x] ROOT CAUSE FOUND: Lesson filtering was causing issues
+- [x] DECISION: Revert to simpler all-words-alphabetical system (was working well)
+- [x] Commented out lesson word filtering - now uses ALL vocabulary words
+- [x] Console logs show word count and lesson context
+- [ ] Test all-words system for stability
+- [ ] Once stable, re-add lesson filtering on top
