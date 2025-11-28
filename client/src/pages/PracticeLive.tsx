@@ -28,9 +28,7 @@ export default function PracticeLive() {
   const [lessonContext, setLessonContext] = useState<{pathId: string; lessonId: string; lessonTitle: string; wordIds: string[]} | null>(null);
   const [lessonWords, setLessonWords] = useState<VocabularyWord[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [wantRandomization, setWantRandomization] = useState(false);
   const [wordOrder, setWordOrder] = useState<VocabularyWord[]>([]);
-  const [isShuffled, setIsShuffled] = useState(false);
   
   // Gemini Live state
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -478,23 +476,19 @@ export default function PracticeLive() {
     setUsedWordIds(new Set());
     setCurrentWordIndex(0);
     
-    // Get words - apply shuffle preference
-    let words = vocabularyData.filter(w => w.difficulty === level);
+    // Get words - ALWAYS sort alphabetically for robustness
+    const words = vocabularyData
+      .filter(w => w.difficulty === level)
+      .sort((a, b) => a.word.localeCompare(b.word));
     
-    if (wantRandomization) {
-      // Shuffle: randomize the order
-      words = [...words].sort(() => Math.random() - 0.5);
-      setIsShuffled(true);
-      console.log(`🎯 Starting ${level} practice (SHUFFLED) with ${words.length} words`);
-    } else {
-      // No shuffle: sort alphabetically
-      words = words.sort((a, b) => a.word.localeCompare(b.word));
-      setIsShuffled(false);
-      console.log(`🎯 Starting ${level} practice (ALPHABETICAL) with ${words.length} words`);
-    }
+    console.log(`🎯 Starting ${level} practice with ${words.length} words (ALPHABETICAL ORDER)`);
     
     // Store the word order for consistent access throughout session
     setWordOrder(words);
+    
+    // Persist to sessionStorage for robustness
+    sessionStorage.setItem('wordOrder', JSON.stringify(words.map(w => w.id)));
+    sessionStorage.setItem('difficulty', level);
     
     if (words.length > 0) {
       const firstWord = words[0];
@@ -511,16 +505,21 @@ export default function PracticeLive() {
   const nextWord = () => {
     if (!difficulty) return;
     
-    // Use stored word order (respects shuffle preference)
+    // Use stored word order - ALWAYS alphabetical for robustness
     let allWords: VocabularyWord[];
     if (wordOrder.length > 0) {
       allWords = wordOrder;
+      console.log(`Using stored wordOrder (${allWords.length} words)`);
     } else if (lessonContext && lessonWords.length > 0) {
       allWords = lessonWords;
+      console.log(`Using lesson words (${allWords.length} words)`);
     } else {
+      // Fallback: rebuild from scratch
       allWords = vocabularyData
         .filter(w => w.difficulty === difficulty)
         .sort((a, b) => a.word.localeCompare(b.word));
+      console.warn(`WARNING: wordOrder was empty! Rebuilt from scratch (${allWords.length} words)`);
+      setWordOrder(allWords);
     }
     
     const nextIndex = currentWordIndex + 1;
@@ -600,20 +599,7 @@ export default function PracticeLive() {
             </div>
           </div>
           
-          {/* Shuffle Toggle */}
-          <div className="mb-6 flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-lg border border-white/20">
-            <input 
-              type="checkbox" 
-              id="shuffle-toggle" 
-              checked={wantRandomization}
-              onChange={(e) => setWantRandomization(e.target.checked)}
-              className="w-5 h-5 rounded border-white/30 bg-white/10 checked:bg-purple-600 focus:ring-2 focus:ring-purple-500"
-            />
-            <label htmlFor="shuffle-toggle" className="text-white font-medium cursor-pointer">
-              🔀 Randomize word order (words will be shuffled instead of alphabetical)
-            </label>
-          </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { level: "beginner" as const, title: "Beginner", subtitle: "Basic Words", description: "Start with simple, everyday vocabulary" },

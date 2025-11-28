@@ -1226,4 +1226,16 @@
 - [x] Identify root cause: startPractice() and nextWord() always sorted alphabetically
 - [x] Fix startPractice() to respect shuffle preference
 - [x] Fix nextWord() to use stored wordOrder instead of re-sorting
-- [ ] Test word tracking with microphone to confirm Gemini knows correct word
+- [x] Identified 3 remaining issues with shuffle logic
+
+## Phase 71: SIMPLIFY TO BULLETPROOF SYSTEM (Remove Shuffle)
+- [x] Remove wantRandomization state variable
+- [x] Remove shuffle toggle from UI
+- [x] Remove isShuffled state variable
+- [x] Simplify startPractice() to ALWAYS sort alphabetically
+- [x] Ensure wordOrder is always initialized in startPractice()
+- [x] Add safety check in nextWord() to validate wordOrder exists
+- [x] Add console logging to track word progression
+- [x] Persist wordOrder to sessionStorage for robustness
+- [ ] Test with microphone to confirm Gemini knows correct word
+- [ ] Verify no word mismatches occur
