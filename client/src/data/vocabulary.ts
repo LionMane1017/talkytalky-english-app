@@ -1,3 +1,5 @@
+import { generatedVocabulary } from './vocabulary-generated';
+
 export interface VocabularyWord {
   id: string;
   word: string;
@@ -55,7 +57,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "beginner",
     category: "Nouns"
   },
-  
+
   // Intermediate Level
   {
     id: "6",
@@ -102,7 +104,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Nouns"
   },
-  
+
   // Advanced Level
   {
     id: "11",
@@ -194,7 +196,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  
+
   // Additional Beginner Words
   {
     id: "21",
@@ -241,7 +243,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "beginner",
     category: "Adjectives"
   },
-  
+
   // Additional Intermediate Words (IELTS Common)
   {
     id: "26",
@@ -288,7 +290,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Adjectives"
   },
-  
+
   // Additional Advanced Words (IELTS Academic)
   {
     id: "31",
@@ -381,9 +383,9 @@ export const vocabularyData: VocabularyWord[] = [
     category: "Adjectives"
   },
   // Additional Beginner Words (41-70)
-  
-  
-  
+
+
+
   {
     id: "44",
     word: "School",
@@ -664,7 +666,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  
+
   {
     id: "76",
     word: "Experience",
@@ -701,7 +703,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  
+
   {
     id: "81",
     word: "Participate",
@@ -810,8 +812,8 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  
-  
+
+
   {
     id: "95",
     word: "Determine",
@@ -929,7 +931,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "intermediate",
     category: "Verbs"
   },
-  
+
   {
     id: "109",
     word: "Similar",
@@ -949,8 +951,8 @@ export const vocabularyData: VocabularyWord[] = [
     category: "Adjectives"
   },
   // Additional Advanced Words (111-150)
-  
-  
+
+
   {
     id: "113",
     word: "Arbitrary",
@@ -969,7 +971,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  
+
   {
     id: "116",
     word: "Constitute",
@@ -1051,9 +1053,9 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  
-  
-  
+
+
+
   {
     id: "128",
     word: "Inherent",
@@ -1135,7 +1137,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  
+
   {
     id: "138",
     word: "Preliminary",
@@ -1217,7 +1219,7 @@ export const vocabularyData: VocabularyWord[] = [
     difficulty: "advanced",
     category: "Adjectives"
   },
-  
+
   {
     id: "148",
     word: "Suppress",
@@ -1706,7 +1708,12 @@ export const vocabularyData: VocabularyWord[] = [
     example: "Her mental acuity impressed everyone.",
     difficulty: "advanced",
     category: "Nouns"
-  }
+  },
+
+  // AUTO-GENERATED VOCABULARY (IDs 202-1961)
+  // Generated on: 2025-11-29T09:05:38.634Z
+  // Total: 1,760 words
+  ...generatedVocabulary
 ];
 
 export function getWordsByDifficulty(difficulty: "beginner" | "intermediate" | "advanced") {
@@ -1718,10 +1725,10 @@ export function getWordById(id: string) {
 }
 
 export function getRandomWords(count: number, difficulty?: "beginner" | "intermediate" | "advanced") {
-  const filtered = difficulty 
+  const filtered = difficulty
     ? vocabularyData.filter(word => word.difficulty === difficulty)
     : vocabularyData;
-  
+
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }

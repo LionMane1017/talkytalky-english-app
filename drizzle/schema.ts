@@ -183,3 +183,93 @@ export const systemKnowledge = mysqlTable("systemKnowledge", {
 
 export type SystemKnowledge = typeof systemKnowledge.$inferSelect;
 export type InsertSystemKnowledge = typeof systemKnowledge.$inferInsert;
+
+/**
+ * Lesson Sessions table - tracks lesson practice sessions with randomization state
+ * Solves: Word state tracking, session persistence, randomization support
+ */
+export const lessonSessions = mysqlTable("lessonSessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+
+  // Lesson metadata
+  lessonId: varchar("lessonId", { length: 64 }),
+  pathId: varchar("pathId", { length: 64 }),
+  lessonTitle: varchar("lessonTitle", { length: 200 }),
+  lessonImportance: text("lessonImportance"), // Why this lesson matters
+  lessonContext: text("lessonContext"), // Real-world application context
+
+  // Word progression state - SINGLE SOURCE OF TRUTH
+  wordOrder: text("wordOrder"), // JSON array of word IDs (randomized if shuffled)
+  currentWordIndex: int("currentWordIndex").default(0).notNull(),
+  isRandomized: mysqlEnum("isRandomized", ["yes", "no"]).default("no").notNull(),
+
+  // Session lifecycle
+  status: mysqlEnum("status", ["active", "paused", "completed", "abandoned"]).default("active").notNull(),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+  lastActiveAt: timestamp("lastActiveAt").defaultNow().onUpdateNow().notNull(),
+
+  // Metrics
+  wordsCompleted: int("wordsCompleted").default(0).notNull(),
+  totalWords: int("totalWords"),
+  averageScore: int("averageScore"), // 0-100
+
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type LessonSession = typeof lessonSessions.$inferSelect;
+export type InsertLessonSession = typeof lessonSessions.$inferInsert;
+
+/**
+ * Lesson Word Attempts table - tracks individual word practice attempts
+ * Enables: Attempt history, pronunciation scoring, feedback tracking
+ */
+export const lessonWordAttempts = mysqlTable("lessonWordAttempts", {
+  id: int("id").autoincrement().primaryKey(),
+  lessonSessionId: int("lessonSessionId").notNull(),
+  wordId: varchar("wordId", { length: 64 }).notNull(),
+
+  // Attempt metadata
+  attemptNumber: int("attemptNumber").default(1).notNull(),
+  wordPosition: int("wordPosition"), // 1-based position in lesson
+
+  // Assessment results
+  pronunciationScore: int("pronunciationScore"), // 0-100
+  userTranscription: text("userTranscription"), // What user said (from Gemini)
+  aiFeedback: text("aiFeedback"), // Feedback given by AI coach
+
+  // Context at time of attempt
+  contextUsed: text("contextUsed"), // RAG context that was active
+
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type LessonWordAttempt = typeof lessonWordAttempts.$inferSelect;
+export type InsertLessonWordAttempt = typeof lessonWordAttempts.$inferInsert;
+
+/**
+ * Lesson Metadata Cache table - pre-computed lesson context and introduction variations
+ * Solves: Lesson introduction, delivery variety, fast session startup
+ */
+export const lessonMetadataCache = mysqlTable("lessonMetadataCache", {
+  id: int("id").autoincrement().primaryKey(),
+  lessonId: varchar("lessonId", { length: 64 }).notNull().unique(),
+  pathId: varchar("pathId", { length: 64 }),
+
+  // Cached lesson metadata
+  lessonTitle: varchar("lessonTitle", { length: 200 }).notNull(),
+  lessonImportance: text("lessonImportance"), // Why this lesson matters for IELTS
+  topicContext: text("topicContext"), // Real-world scenarios and applications
+  vocabularySummary: text("vocabularySummary"), // Overview of words covered
+
+  // Introduction variations to prevent repetition
+  introductionVariations: text("introductionVariations"), // JSON array of intro templates
+
+  // Auto-generated timestamps
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LessonMetadataCache = typeof lessonMetadataCache.$inferSelect;
+export type InsertLessonMetadataCache = typeof lessonMetadataCache.$inferInsert;

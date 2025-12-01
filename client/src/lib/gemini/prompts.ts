@@ -1,9 +1,75 @@
 /**
- * Gemini 3 Master Architecture: AI Coach Prompts & Protocols
+ * Gemini Protocols - AI Coach Enhanced (Claude's Architecture)
  * 
- * This module handles all Gemini Live system prompts and context injection.
- * It ensures the AI always knows the current lesson context and word state.
+ * Versioned JSON protocols for robust Gemini Live integration.
+ * Includes lesson-aware prompts and structured word state payloads.
  */
+
+// ========== Protocol V2.0 Types ==========
+
+export interface WordStatePayload {
+  protocol: "TALKY_WORD_STATE_V2";
+  timestamp: number;
+
+  // Current word context
+  currentWord: {
+    id: string;
+    word: string;
+    phonetic: string;
+    meaning: string;
+    example: string;
+    difficulty: "beginner" | "intermediate" | "advanced";
+  };
+
+  // Lesson context
+  lesson: {
+    id: string;
+    title: string;
+    importance: string;
+    topicContext: string;
+  };
+
+  // Progress tracking
+  progress: {
+    currentIndex: number; // 0-based
+    totalWords: number;
+    completedWords: number;
+    isRandomized: boolean;
+  };
+
+  // Session metadata
+  session: {
+    sessionId: number;
+    startedAt: number; // Unix timestamp
+  };
+
+  // Instruction for AI
+  instruction: string;
+}
+
+export interface LessonIntroPayload {
+  protocol: "TALKY_LESSON_START_V2";
+  timestamp: number;
+
+  lesson: {
+    id: string;
+    title: string;
+    importance: string;
+    topicContext: string;
+    totalWords: number;
+    vocabularyPreview: string[]; // First 3-5 words
+  };
+
+  sessionConfig: {
+    sessionId: number;
+    isRandomized: boolean;
+    difficulty: "beginner" | "intermediate" | "advanced";
+  };
+
+  instruction: string;
+}
+
+// ========== Legacy Protocol (for backward compatibility) ==========
 
 export interface WordPayload {
   type: "CONTEXT_UPDATE";
@@ -19,10 +85,151 @@ export interface WordPayload {
   instruction: string;
 }
 
+// ========== Protocol Functions ==========
+
 export const GeminiProtocols = {
   /**
-   * Constructs the initial "Persona" prompt.
-   * Injects the lesson context immediately so AI is never lost.
+   * Build lesson-aware system prompt with delivery variations
+   */
+  buildLessonAwarePrompt: (
+    lessonTitle: string,
+    importance: string,
+    context: string,
+    totalWords: number,
+    variation: number = 0
+  ): string => {
+    const openings = [
+      "Welcome to your lesson on",
+      "Let's dive into",
+      "Today we're mastering",
+      "Get ready to explore",
+      "Time to practice"
+    ];
+
+    const opener = openings[variation % openings.length];
+
+    return `You are **TalkyTalky**, an expert IELTS pronunciation coach with a warm, encouraging personality.
+
+### 🎓 CURRENT LESSON CONTEXT
+${opener} **"${lessonTitle}"**!
+
+**Why This Matters**: ${importance}
+
+**Real-World Application**: ${context}
+
+**Lesson Structure**: You'll guide the user through ${totalWords} essential words for this topic.
+
+### ⚡ YOUR COACHING PROTOCOL
+
+1. **STATE SYNCHRONIZATION (CRITICAL)**
+   - You receive structured JSON payloads with protocol identifiers ("TALKY_WORD_STATE_V2" and "TALKY_LESSON_START_V2")
+   - ALWAYS use the word from the most recent "TALKY_WORD_STATE_V2" payload
+   - The "currentWord" field is your SINGLE SOURCE OF TRUTH
+   - If you receive a new word while speaking, ABANDON previous word immediately
+
+2. **LESSON INTRODUCTION (First Interaction)**
+   - Greet the user warmly and introduce the lesson topic
+   - Explain why "${lessonTitle}" matters for IELTS/real-world communication
+   - Preview what they'll learn (keep it brief, 2-3 sentences)
+   - Then introduce the first word enthusiastically
+
+3. **WORD COACHING FLOW**
+   - **Introduce**: Present each word with context related to "${lessonTitle}"
+   - **Demonstrate**: Say the word clearly (your audio will play)
+   - **Listen**: Wait for user to practice pronunciation
+   - **Feedback**: Give specific, actionable tip + score (0-100)
+   - **Encourage**: Ask playfully: "Ready for the next word, or want to practice again?"
+
+4. **DELIVERY VARIATION (CRITICAL FOR ENGAGEMENT)**
+   - **NEVER** use the same introduction opening twice in a row
+   - Rotate these patterns:
+     * "Next up: [word]..."
+     * "Let's try [word]..."
+     * "Here's an important one: [word]..."
+     * "Moving on to [word]..."
+     * "Now practice [word]..."
+   - Keep introductions to 1-2 sentences max
+   
+5. **PERSONALITY TRAITS**
+   - Warm and encouraging (like a supportive friend)
+   - Enthusiastic about progress ("Great job!", "Well done!", "Excellent!")
+   - Patient and positive even when pronunciation needs work
+   - Contextual (always relate words to "${lessonTitle}")
+
+### 📋 OPERATIONAL RULES
+- **BE BRIEF**: Max 3 sentences per response unless explaining complex concept
+- **STAY FOCUSED**: Only discuss the current word from the JSON payload
+- **BE INTERACTIVE**: Always end with a question or prompt for next action
+- **NEVER REPEAT**: Vary your delivery style constantly
+
+Ready to start coaching? Wait for the lesson introduction payload!`;
+  },
+
+  /**
+   * Create lesson introduction payload (sent once at session start)
+   */
+  createLessonIntroPayload: (
+    lesson: {
+      id: string;
+      title: string;
+      importance: string;
+      topicContext: string;
+      totalWords: number;
+      vocabularyPreview: string[];
+    },
+    sessionId: number,
+    isRandomized: boolean,
+    difficulty: "beginner" | "intermediate" | "advanced"
+  ): LessonIntroPayload => ({
+    protocol: "TALKY_LESSON_START_V2",
+    timestamp: Date.now(),
+    lesson,
+    sessionConfig: {
+      sessionId,
+      isRandomized,
+      difficulty,
+    },
+    instruction: "Introduce this lesson warmly. Explain its importance and preview the vocabulary we'll practice. Then wait for the first word payload.",
+  }),
+
+  /**
+   * Create enhanced word payload with full lesson context (V2.0)
+   */
+  createEnhancedWordPayload: (
+    word: any,
+    index: number,
+    total: number,
+    lesson: { id: string; title: string; importance: string; topicContext: string },
+    sessionId: number,
+    completedWords: number,
+    isRandomized: boolean
+  ): WordStatePayload => ({
+    protocol: "TALKY_WORD_STATE_V2",
+    timestamp: Date.now(),
+    currentWord: {
+      id: word.id,
+      word: word.word,
+      phonetic: word.phonetic,
+      meaning: word.meaning,
+      example: word.example,
+      difficulty: word.difficulty,
+    },
+    lesson,
+    progress: {
+      currentIndex: index,
+      totalWords: total,
+      completedWords,
+      isRandomized,
+    },
+    session: {
+      sessionId,
+      startedAt: Date.now(),
+    },
+    instruction: `Focus on "${word.word}" in the context of ${lesson.title}. Introduce it with a fresh delivery style. Be enthusiastic and encouraging!`,
+  }),
+
+  /**
+   * Legacy: Original simplified system prompt (for backward compatibility)
    */
   buildSystemPrompt: (lessonTitle: string, importance: string, context: string, totalWords: number) => `
 You are **TalkyTalky**, an expert IELTS pronunciation coach with a warm, encouraging personality.
@@ -68,8 +275,7 @@ Start by introducing the lesson topic and the first word! Be enthusiastic and wa
 `,
 
   /**
-   * Creates the rigid JSON payload for word changes.
-   * This replaces "Chatting" with "State Injection".
+   * Legacy: Original simple word payload (for backward compatibility)
    */
   createWordPayload: (word: any, index: number, total: number): WordPayload => ({
     type: "CONTEXT_UPDATE",
