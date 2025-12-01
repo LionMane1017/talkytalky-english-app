@@ -11,7 +11,7 @@
 
 import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { db } from "../db";
+import { getDb } from "../db";
 import { lessonSessions, lessonWordAttempts, lessonMetadataCache } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -30,6 +30,9 @@ export const lessonRouter = router({
       isRandomized: z.boolean().default(false),
     }))
     .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const result = await db.insert(lessonSessions).values({
         userId: ctx.user.id,
         lessonId: input.lessonId,
@@ -61,6 +64,9 @@ export const lessonRouter = router({
       averageScore: z.number().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const updateData: any = {};
 
       if (input.currentWordIndex !== undefined) {
@@ -102,6 +108,9 @@ export const lessonRouter = router({
       contextUsed: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       // Get current attempt count for this word in this session
       const existingAttempts = await db.query.lessonWordAttempts.findMany({
         where: and(
@@ -143,6 +152,9 @@ export const lessonRouter = router({
       sessionId: z.number(),
     }))
     .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const session = await db.query.lessonSessions.findFirst({
         where: and(
           eq(lessonSessions.id, input.sessionId),
@@ -166,16 +178,19 @@ export const lessonRouter = router({
    */
   getActiveSessions: protectedProcedure
     .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const sessions = await db.query.lessonSessions.findMany({
         where: and(
           eq(lessonSessions.userId, ctx.user.id),
           eq(lessonSessions.status, "active")
         ),
-        orderBy: (sessions, { desc }) => [desc(sessions.lastActiveAt)],
+        orderBy: (sessions: any, { desc }: any) => [desc(sessions.lastActiveAt)],
         limit: 10,
       });
 
-      return sessions.map(s => ({
+      return sessions.map((s: any) => ({
         ...s,
         wordOrder: JSON.parse(s.wordOrder as string),
         isRandomized: s.isRandomized === "yes",
@@ -190,6 +205,9 @@ export const lessonRouter = router({
       lessonId: z.string(),
     }))
     .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const metadata = await db.query.lessonMetadataCache.findFirst({
         where: eq(lessonMetadataCache.lessonId, input.lessonId),
       });
@@ -220,6 +238,9 @@ export const lessonRouter = router({
       introductionVariations: z.array(z.string()).optional(),
     }))
     .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       // Upsert: insert or update if exists
       const existing = await db.query.lessonMetadataCache.findFirst({
         where: eq(lessonMetadataCache.lessonId, input.lessonId),
@@ -262,6 +283,9 @@ export const lessonRouter = router({
       sessionId: z.number(),
     }))
     .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
       const session = await db.query.lessonSessions.findFirst({
         where: and(
           eq(lessonSessions.id, input.sessionId),
@@ -275,15 +299,15 @@ export const lessonRouter = router({
 
       const attempts = await db.query.lessonWordAttempts.findMany({
         where: eq(lessonWordAttempts.lessonSessionId, input.sessionId),
-        orderBy: (attempts, { asc }) => [asc(attempts.createdAt)],
+        orderBy: (attempts: any, { asc }: any) => [asc(attempts.createdAt)],
       });
 
       const scores = attempts
-        .map(a => a.pronunciationScore)
-        .filter((s): s is number => s !== null);
+        .map((a: any) => a.pronunciationScore)
+        .filter((s: any): s is number => s !== null);
 
       const averageScore = scores.length > 0
-        ? Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length)
+        ? Math.round(scores.reduce((sum: number, s: number) => sum + s, 0) / scores.length)
         : null;
 
       return {
@@ -295,7 +319,7 @@ export const lessonRouter = router({
         attempts,
         stats: {
           totalAttempts: attempts.length,
-          uniqueWordsAttempted: new Set(attempts.map(a => a.wordId)).size,
+          uniqueWordsAttempted: new Set(attempts.map((a: any) => a.wordId)).size,
           averageScore,
           completionRate: session.totalWords
             ? (session.wordsCompleted / session.totalWords) * 100
