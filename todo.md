@@ -1268,3 +1268,10 @@
 - [x] Fix: Gemini session error - sess.send is not a function (line 277)
 - [x] FIXED: Changed sess.send() to sess.sendRealtimeInput() with proper format
 - [ ] Test all-words system again with these fixes
+
+## CRITICAL BUG - Word Context Mismatch
+- [ ] Fix Gemini Live API word context synchronization - screen shows "Anticipate" but Gemini introduces "Folder" or "Secretary"
+- [ ] Debug why JSON protocol word context is not being received correctly by Gemini
+- [ ] Verify sendRealtimeInput vs send method for context updates
+- [ ] Check for race conditions between greeting and word context payload
+- [ ] Ensure lesson-specific words are used instead of all 187 words when in lesson mode
